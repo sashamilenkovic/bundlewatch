@@ -1,0 +1,23 @@
+{
+  "name": "bundlewatch",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @bundlewatch/core dev",
+    "build": "pnpm -r build",
+    "test": "vitest",
+    "test:ci": "vitest run --coverage",
+    "example:vite": "pnpm --filter example-vite dev"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^6.0.3",
+    "@types/node": "^24.0.0",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8"
+  }
+}
