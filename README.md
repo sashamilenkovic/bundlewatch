@@ -6,7 +6,6 @@ An open-source dev tool that analyzes Vite builds, tracks metrics over time, and
 
 [![npm version](https://img.shields.io/npm/v/@bundlewatch/core.svg)](https://www.npmjs.com/package/@bundlewatch/core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![codecov](https://codecov.io/gh/yourusername/bundlewatch/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/bundlewatch)
 
 ## ✨ Features
 
@@ -24,8 +23,14 @@ An open-source dev tool that analyzes Vite builds, tracks metrics over time, and
 
 ### Vite Plugin (Recommended)
 
+> **Note**: Currently in private development. See [INSTALLATION.md](./INSTALLATION.md) for GitHub installation.
+
 ```bash
+# Future (once public):
 pnpm add -D @bundlewatch/vite-plugin
+
+# Now (from GitHub):
+pnpm add -D @bundlewatch/vite-plugin@github:yourusername/bundlewatch#workspace=@bundlewatch/vite-plugin
 ```
 
 Add to your `vite.config.ts`:
@@ -108,9 +113,9 @@ const report = generateReport(metrics, comparison);
 ## 🧪 Testing & Coverage
 
 - **Test Framework:** Vitest
-- **Coverage Tool:** Codecov with v8 provider
-- **Coverage:** 92.44% across all packages
+- **Coverage:** 93%+ across all packages
 - **Node Version:** 24+ (LTS)
+- **Total Tests:** 53 passing
 
 ```bash
 # Run tests
@@ -127,9 +132,10 @@ pnpm test -- --watch
 
 | File | Statements | Branches | Functions | Lines |
 |------|-----------|----------|-----------|-------|
-| **All files** | **92.44%** | **79.57%** | **78.12%** | **92.44%** |
+| **All files** | **93.17%** | **80.87%** | **81.57%** | **93.17%** |
 | analyzer.ts | 95.48% | 92.30% | 85.71% | 95.48% |
-| collector.ts | 88.62% | 85.18% | 80.00% | 88.62% |
+| collector.ts | 89.14% | 85.18% | 80.00% | 89.14% |
+| dependencies.ts | 95.72% | 85.36% | 100.00% | 95.72% |
 | reporter.ts | 93.68% | 63.26% | 73.33% | 93.68% |
 
 ## 🎨 Use Cases

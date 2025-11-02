@@ -9,12 +9,15 @@ import { join, extname, relative } from 'path';
 import { gzipSize } from 'gzip-size';
 import brotliSize from 'brotli-size';
 import type { BuildMetrics, Bundle, AssetBreakdown } from './types.js';
+import { analyzeDependencies, generateDependencyInsights } from './dependencies.js';
 
 export interface CollectorOptions {
   outputDir: string;
   branch?: string;
   commit?: string;
   buildStartTime?: number;
+  projectRoot?: string;
+  analyzeDeps?: boolean;
 }
 
 /**
@@ -225,7 +228,18 @@ export async function collectMetrics(options: CollectorOptions): Promise<BuildMe
   
   const byType = calculateAssetBreakdown(bundles);
   const warnings = generateWarnings(bundles, totalSize);
-  const recommendations = generateRecommendations(bundles, byType);
+  let recommendations = generateRecommendations(bundles, byType);
+
+  // Analyze dependencies if requested
+  let dependencies;
+  if (options.analyzeDeps !== false) {
+    const projectRoot = options.projectRoot || process.cwd();
+    dependencies = await analyzeDependencies(bundles, projectRoot);
+    
+    // Add dependency-specific insights to recommendations
+    const depInsights = generateDependencyInsights(dependencies, totalSize);
+    recommendations = [...recommendations, ...depInsights];
+  }
 
   return {
     timestamp: new Date().toISOString(),
@@ -238,6 +252,7 @@ export async function collectMetrics(options: CollectorOptions): Promise<BuildMe
     totalBrotliSize,
     chunkCount: bundles.length,
     byType,
+    dependencies,
     warnings,
     recommendations,
   };

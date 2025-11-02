@@ -221,6 +221,20 @@ export function generateConsoleOutput(metrics: BuildMetrics, comparison?: Compar
   lines.push(`  Other:       ${formatSize(metrics.byType.other)}`);
   lines.push('');
 
+  // Dependency breakdown (if available)
+  if (metrics.dependencies && metrics.dependencies.length > 0) {
+    lines.push('📦 Dependencies:');
+    const topDeps = metrics.dependencies.slice(0, 5);
+    for (const dep of topDeps) {
+      const percent = ((dep.size / metrics.totalSize) * 100).toFixed(1);
+      lines.push(`  ${dep.name.padEnd(20)} ${formatSize(dep.size).padStart(10)} (${percent}%)`);
+    }
+    if (metrics.dependencies.length > 5) {
+      lines.push(`  ... and ${metrics.dependencies.length - 5} more`);
+    }
+    lines.push('');
+  }
+
   // Comparison
   if (comparison) {
     lines.push('─'.repeat(50));

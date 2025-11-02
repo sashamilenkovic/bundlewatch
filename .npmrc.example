@@ -1,0 +1,17 @@
+# Bundle Watch - Private GitHub Installation
+# 
+# Copy this file to .npmrc and set your GITHUB_TOKEN environment variable
+# 
+# Usage:
+#   1. Copy: cp .npmrc.example .npmrc
+#   2. Set token: export GITHUB_TOKEN=ghp_yourtoken
+#   3. Install: pnpm install
+#
+# ⚠️ NEVER commit .npmrc with tokens to git!
+
+# GitHub Package Registry authentication
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+
+# Optional: Force registry for @bundlewatch scope
+@bundlewatch:registry=https://npm.pkg.github.com
+
