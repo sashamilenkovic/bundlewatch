@@ -2,10 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: true, // Run tests in parallel for speed
+  fullyParallel: false, // Disabled - parallel builds cause race conditions
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 4 : undefined,
+  retries: process.env.CI ? 1 : 0,
+  workers: 1, // Single worker to avoid shared directory conflicts
   reporter: 'html',
   
   use: {
