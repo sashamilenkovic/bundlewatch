@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "webpack --mode production",
-    "dev": "webpack serve --mode development"
+    "build": "rm -rf dist && webpack --mode production",
+    "dev": "webpack serve --mode development",
+    "clean": "rm -rf dist node_modules/.cache"
   },
   "dependencies": {
     "react": "^19.0.0",
