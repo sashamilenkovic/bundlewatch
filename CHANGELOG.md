@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/sashamilenkovic/bundlewatch/compare/v1.1.4...v1.1.5) (2025-11-03)
+
+
+### Bug Fixes
+
+* rebuild vite plugin with Vite 6 types for compatibility ([3015832](https://github.com/sashamilenkovic/bundlewatch/commit/301583289047393615c54874b35e891d51631189))
+
 ## [1.1.4](https://github.com/sashamilenkovic/bundlewatch/compare/v1.1.3...v1.1.4) (2025-11-03)
 
 
