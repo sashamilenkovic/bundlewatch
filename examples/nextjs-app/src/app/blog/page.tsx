@@ -6,25 +6,31 @@ export default function Blog() {
   ];
 
   return (
-    <main className="min-h-screen bg-green-50 py-12">
-      <div className="max-w-4xl mx-auto px-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Blog</h1>
-        <div className="space-y-6">
+    <main style={{ background: '#f0fdf4', padding: '3rem 0' }}>
+      <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '0 2rem' }}>
+        <h1 style={{ marginBottom: '2rem' }}>Blog</h1>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {posts.map((post) => (
             <article
               key={post.id}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition"
+              style={{
+                background: 'white',
+                padding: '1.5rem',
+                borderRadius: '0.5rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              }}
             >
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '0.5rem' }}>
                 {post.title}
               </h2>
-              <p className="text-gray-600 text-sm">{post.date}</p>
+              <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>{post.date}</p>
             </article>
           ))}
         </div>
         <a
           href="/"
-          className="inline-block mt-8 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+          className="button button-green"
+          style={{ marginTop: '2rem' }}
         >
           ← Back Home
         </a>

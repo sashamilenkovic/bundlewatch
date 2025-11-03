@@ -1,22 +1,22 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50">
-    <div class="text-center">
-      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+  <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f9fafb;">
+    <div style="text-align: center; padding: 2rem;">
+      <h1 style="font-size: 2.5rem; font-weight: bold; color: #111827; margin-bottom: 1rem;">
         📦 Bundle Watch
       </h1>
-      <p class="text-lg text-gray-600 mb-8">
+      <p style="font-size: 1.125rem; color: #6b7280; margin-bottom: 2rem;">
         Nuxt 3 + Bundle Watch Example
       </p>
-      <div class="flex gap-4 justify-center">
+      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
         <NuxtLink
           to="/about"
-          class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+          style="padding: 0.75rem 1.5rem; background: #10b981; color: white; border-radius: 0.5rem; text-decoration: none; transition: all 0.2s;"
         >
           About Page
         </NuxtLink>
         <NuxtLink
           to="/blog"
-          class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border-radius: 0.5rem; text-decoration: none; transition: all 0.2s;"
         >
           Blog
         </NuxtLink>
@@ -33,8 +33,3 @@ useHead({
   ],
 });
 </script>
-
-<style scoped>
-/* Tailwind classes work via Nuxt's built-in Tailwind support */
-</style>
-

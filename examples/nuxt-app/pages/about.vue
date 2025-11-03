@@ -1,13 +1,13 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-green-50">
-    <div class="max-w-2xl p-8">
-      <h1 class="text-4xl font-bold text-gray-900 mb-4">
+  <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f0fdf4;">
+    <div style="max-width: 42rem; padding: 2rem;">
+      <h1 style="font-size: 2.5rem; font-weight: bold; color: #111827; margin-bottom: 1rem;">
         About Bundle Watch
       </h1>
-      <p class="text-lg text-gray-700 mb-4">
+      <p style="font-size: 1.125rem; color: #374151; margin-bottom: 1rem;">
         Bundle Watch tracks your build metrics over time, helping you:
       </p>
-      <ul class="list-disc list-inside space-y-2 text-gray-700">
+      <ul style="list-style: disc; padding-left: 2rem; margin-bottom: 2rem; color: #374151;">
         <li>Monitor bundle sizes</li>
         <li>Track performance trends</li>
         <li>Detect regressions early</li>
@@ -15,7 +15,7 @@
       </ul>
       <NuxtLink
         to="/"
-        class="inline-block mt-8 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+        style="display: inline-block; margin-top: 2rem; padding: 0.75rem 1.5rem; background: #10b981; color: white; border-radius: 0.5rem; text-decoration: none; transition: all 0.2s;"
       >
         ← Back Home
       </NuxtLink>
@@ -28,4 +28,3 @@ useHead({
   title: 'About - Bundle Watch',
 });
 </script>
-
