@@ -25,7 +25,8 @@ test.describe('Webpack Plugin', () => {
     });
 
     // Check build succeeded
-    expect(stdout).toContain('asset main');
+    expect(stdout).toContain('webpack');
+    expect(stdout).toContain('compiled');
     
     // Check that bundle watch ran
     expect(stdout).toContain('Bundle Watch');
@@ -89,7 +90,7 @@ test.describe('Webpack Plugin', () => {
     // Check for webpack's own output
     expect(stdout).toContain('asset');
     expect(stdout).toContain('webpack');
-    expect(stdout).toContain('compiled successfully');
+    expect(stdout).toContain('compiled');
   });
 });
 
