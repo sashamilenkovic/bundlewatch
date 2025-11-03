@@ -14,6 +14,8 @@ export default {
     [
       "@semantic-release/exec",
       {
+        // Update all workspace package versions to match root
+        prepareCmd: "pnpm -r exec npm version ${nextRelease.version} --no-git-tag-version --allow-same-version",
         // Publish all workspace packages
         publishCmd: "pnpm -r publish --access public --no-git-checks",
       },
