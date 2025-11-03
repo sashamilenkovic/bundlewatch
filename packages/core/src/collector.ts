@@ -40,7 +40,8 @@ async function analyzeFile(filePath: string, basePath: string): Promise<Bundle |
       brotli = await brotliSize(content);
     } catch (error) {
       // Brotli compression failed, use estimate as fallback
-      brotli = Math.round(stats.size * 0.8);
+      // Brotli is typically 15-20% smaller than gzip
+      brotli = Math.round(gzip * 0.85);
     }
 
     return {

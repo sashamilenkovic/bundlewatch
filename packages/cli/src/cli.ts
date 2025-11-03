@@ -8,6 +8,8 @@ import { Command } from 'commander';
 import { analyzeCommand } from './commands/analyze.js';
 import { compareCommand } from './commands/compare.js';
 import { reportCommand } from './commands/report.js';
+import { serveCommand } from './commands/serve.js';
+import { exportCommand } from './commands/export.js';
 
 const program = new Command();
 
@@ -42,5 +44,32 @@ program
   .option('-f, --format <format>', 'Output format (console, markdown, json)', 'console')
   .option('-o, --output <file>', 'Output file path')
   .action(reportCommand);
+
+// Serve command
+program
+  .command('serve')
+  .description('Start local dashboard server')
+  .option('-p, --port <port>', 'Port to run server on', '3333')
+  .option('-h, --host <host>', 'Host to bind to', 'localhost')
+  .option('--no-open', 'Don\'t open browser automatically')
+  .option('--data-source <source>', 'Data source (git or file)', 'git')
+  .option('--git-branch <branch>', 'Git branch to read data from', 'bundlewatch-data')
+  .action((options) => {
+    serveCommand({
+      port: parseInt(options.port),
+      host: options.host,
+      open: options.open,
+      dataSource: options.dataSource,
+      gitBranch: options.gitBranch,
+    });
+  });
+
+// Export command
+program
+  .command('export')
+  .description('Generate static HTML dashboard')
+  .argument('[build-dir]', 'Build output directory to analyze', 'dist')
+  .option('-o, --output <dir>', 'Output directory for dashboard', './bundle-report')
+  .action(exportCommand);
 
 program.parse();

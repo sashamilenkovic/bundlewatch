@@ -1,31 +1,35 @@
 {
-  "name": "@bundlewatch/cli",
+  "name": "@bundlewatch/dashboard",
   "version": "0.1.0",
   "type": "module",
-  "bin": {
-    "bundlewatch": "./dist/cli.js"
-  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "bundlewatch-dashboard": "./dist/cli.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "vitest"
   },
   "dependencies": {
     "@bundlewatch/core": "workspace:*",
-    "@bundlewatch/dashboard": "workspace:*",
-    "commander": "^12.0.0",
-    "chalk": "^5.3.0",
-    "ora": "^8.0.1"
+    "h3": "^1.12.0",
+    "open": "^10.0.3"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
-    "@types/node": "^24.0.0"
+    "@types/node": "^24.0.0",
+    "vitest": "^2.1.8"
   }
 }
+
