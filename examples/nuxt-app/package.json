@@ -14,7 +14,7 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@bundlewatch/vite-plugin": "workspace:*",
+    "@milencode/bundlewatch-vite-plugin": "workspace:*",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@types/node": "^24.0.0",
     "typescript": "~5.9.3"

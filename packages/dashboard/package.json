@@ -1,5 +1,5 @@
 {
-  "name": "@bundlewatch/dashboard",
+  "name": "@milencode/bundlewatch-dashboard",
   "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@bundlewatch/core": "workspace:*",
+    "@milencode/bundlewatch-core": "workspace:*",
     "h3": "^1.12.0",
     "open": "^10.0.3"
   },

@@ -22,6 +22,31 @@ Bundle Watch has comprehensive E2E tests using Playwright that validate the enti
 - ✅ Chart.js is included
 - ✅ Server command exists
 
+### Next.js Plugin Tests (7/7 passing)
+- ✅ Build succeeds with Next.js 15
+- ✅ Metrics are collected during build
+- ✅ Per-route analysis works
+- ✅ Bundle breakdown is displayed
+- ✅ Route budgets are checked
+- ✅ Route table is shown
+- ✅ .next directory is generated
+
+### Nuxt Integration Tests (6/6 passing)
+- ✅ Nuxt app builds successfully
+- ✅ .output directory is generated
+- ✅ Metrics are collected during build
+- ✅ Bundle breakdown is displayed
+- ✅ Bundle Watch runs for client build
+- ✅ Brotli compression is correct
+
+### Webpack Plugin Tests (6/6 passing)
+- ✅ Webpack app builds successfully
+- ✅ dist directory is generated
+- ✅ Metrics are collected during build
+- ✅ Bundle breakdown is displayed
+- ✅ Brotli compression is correct
+- ✅ Webpack output info is shown
+
 ## 🚀 Running Tests
 
 ### Quick Start
@@ -33,10 +58,12 @@ pnpm test
 
 ### Run Specific Tests
 ```bash
-pnpm test:vite        # Vite plugin tests (5 tests)
-pnpm test:dashboard   # Dashboard generation tests (7 tests)
-pnpm test:next        # Next.js plugin tests (coming soon)
-pnpm test:webpack     # Webpack plugin tests (coming soon)
+cd e2e
+npx playwright test tests/vite.spec.ts        # Vite plugin (5 tests)
+npx playwright test tests/dashboard.spec.ts   # Dashboard (7 tests)
+npx playwright test tests/nextjs.spec.ts      # Next.js plugin (7 tests)
+npx playwright test tests/nuxt.spec.ts        # Nuxt integration (6 tests)
+npx playwright test tests/webpack.spec.ts     # Webpack plugin (6 tests)
 ```
 
 ### Debug Mode
@@ -48,11 +75,12 @@ pnpm test:ui          # Run with Playwright UI Mode
 ## 📊 Test Results
 
 ```
-✓ 12/12 tests passing
+✓ 31/31 tests passing
 ✓ Vite Plugin: 5/5 passing
 ✓ Dashboard: 7/7 passing
-✓ Next.js Plugin: Ready for tests
-✓ Webpack Plugin: Ready for tests
+✓ Next.js Plugin: 7/7 passing
+✓ Nuxt Integration: 6/6 passing
+✓ Webpack Plugin: 6/6 passing
 ```
 
 ## 🎯 What We Test
@@ -82,26 +110,16 @@ pnpm test:ui          # Run with Playwright UI Mode
 - `bundlewatch serve` command exists
 - Help text is correct
 
-## 🔮 Coming Soon
+## 🔮 Future Tests
 
-### Next.js Plugin Tests
-- [ ] App Router builds successfully
-- [ ] Pages Router builds successfully
-- [ ] Per-route analysis works
-- [ ] Route budgets are enforced
-- [ ] Build manifest is parsed
-
-### Webpack Plugin Tests
-- [ ] Basic webpack integration
-- [ ] Metrics collection
-- [ ] Report generation
-- [ ] Custom output paths
-
-### Advanced Tests
-- [ ] Git storage functionality
-- [ ] Historical comparisons
+### Advanced Features
+- [ ] Git storage save/load functionality
+- [ ] Historical comparisons with baseline
 - [ ] PR comment integration
 - [ ] Multi-repo support
+- [ ] Rollup plugin integration
+- [ ] Parcel plugin integration
+- [ ] esbuild plugin integration
 
 ## 📁 Test Structure
 
@@ -110,8 +128,9 @@ e2e/
 ├── tests/
 │   ├── vite.spec.ts        ✅ 5/5 passing
 │   ├── dashboard.spec.ts   ✅ 7/7 passing
-│   ├── nextjs.spec.ts      🔄 Ready for implementation
-│   └── webpack.spec.ts     🔄 Ready for implementation
+│   ├── nextjs.spec.ts      ✅ 7/7 passing
+│   ├── nuxt.spec.ts        ✅ 6/6 passing
+│   └── webpack.spec.ts     ✅ 6/6 passing
 ├── playwright.config.ts
 ├── package.json
 └── README.md
@@ -182,10 +201,11 @@ See `.github/workflows/e2e.yml` for configuration.
 
 ## 📊 Coverage Goals
 
-- ✅ Vite Plugin: 100%
-- ✅ Dashboard: 100%
-- 🔄 Next.js Plugin: 0% (tests ready)
-- 🔄 Webpack Plugin: 0% (tests ready)
+- ✅ Vite Plugin: 100% (5/5 tests)
+- ✅ Dashboard: 100% (7/7 tests)
+- ✅ Next.js Plugin: 100% (7/7 tests)
+- ✅ Nuxt Integration: 100% (6/6 tests)
+- ✅ Webpack Plugin: 100% (6/6 tests)
 - 🔄 CLI: Partial
 - 🔄 Git Storage: Not yet
 - 🔄 Comparisons: Not yet

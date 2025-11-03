@@ -1,11 +1,11 @@
 /**
- * @bundlewatch/vite-plugin
+ * @milencode/bundlewatch-vite-plugin
  * Vite plugin for automatic bundle analysis
  */
 
 import type { Plugin, ResolvedConfig } from 'vite';
-import { MetricsCollector, GitStorage, ComparisonEngine, ReportGenerator } from '@bundlewatch/core';
-import type { BundleWatchConfig } from '@bundlewatch/core';
+import { MetricsCollector, GitStorage, ComparisonEngine, ReportGenerator } from '@milencode/bundlewatch-core';
+import type { BundleWatchConfig } from '@milencode/bundlewatch-core';
 import { resolve } from 'path';
 
 export interface ViteBundleWatchOptions extends Partial<BundleWatchConfig> {

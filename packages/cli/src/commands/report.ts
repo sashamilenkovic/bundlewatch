@@ -4,7 +4,7 @@
 
 import { writeFile } from 'fs/promises';
 import { resolve } from 'path';
-import { GitStorage, ReportGenerator } from '@bundlewatch/core';
+import { GitStorage, ReportGenerator } from '@milencode/bundlewatch-core';
 
 interface ReportOptions {
   branch: string;

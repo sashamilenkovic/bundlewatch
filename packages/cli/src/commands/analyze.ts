@@ -3,7 +3,7 @@
  */
 
 import { resolve } from 'path';
-import { MetricsCollector, GitStorage, ComparisonEngine, ReportGenerator } from '@bundlewatch/core';
+import { MetricsCollector, GitStorage, ComparisonEngine, ReportGenerator } from '@milencode/bundlewatch-core';
 
 interface AnalyzeOptions {
   output: string;

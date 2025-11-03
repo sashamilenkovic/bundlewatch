@@ -1,5 +1,5 @@
 {
-  "name": "@bundlewatch/lighthouse-plugin",
+  "name": "@milencode/bundlewatch-lighthouse-plugin",
   "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -15,7 +15,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@bundlewatch/core": "workspace:*",
+    "@milencode/bundlewatch-core": "workspace:*",
     "lighthouse": "^12.0.0",
     "chrome-launcher": "^1.1.0"
   },

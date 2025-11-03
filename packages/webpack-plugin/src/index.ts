@@ -1,9 +1,9 @@
 /**
- * @bundlewatch/webpack-plugin
+ * @milencode/bundlewatch-webpack-plugin
  * Bundle Watch plugin for Webpack
  */
 
-import { collectMetrics, compareMetrics, GitStorage, ReportGenerator, type BundleWatchConfig } from '@bundlewatch/core';
+import { collectMetrics, compareMetrics, GitStorage, ReportGenerator, type BundleWatchConfig } from '@milencode/bundlewatch-core';
 import { resolve } from 'path';
 import type { Compiler } from 'webpack';
 

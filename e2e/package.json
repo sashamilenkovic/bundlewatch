@@ -1,5 +1,5 @@
 {
-  "name": "@bundlewatch/e2e",
+  "name": "@milencode/bundlewatch-e2e",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,11 +13,11 @@
     "test:dashboard": "playwright test dashboard.spec.ts"
   },
   "dependencies": {
-    "@bundlewatch/core": "workspace:*",
-    "@bundlewatch/vite-plugin": "workspace:*",
-    "@bundlewatch/next-plugin": "workspace:*",
-    "@bundlewatch/dashboard": "workspace:*",
-    "@bundlewatch/cli": "workspace:*"
+    "@milencode/bundlewatch-core": "workspace:*",
+    "@milencode/bundlewatch-vite-plugin": "workspace:*",
+    "@milencode/bundlewatch-next-plugin": "workspace:*",
+    "@milencode/bundlewatch-dashboard": "workspace:*",
+    "@milencode/bundlewatch-cli": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",

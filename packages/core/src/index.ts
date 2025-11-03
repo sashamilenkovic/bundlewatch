@@ -1,5 +1,5 @@
 /**
- * @bundlewatch/core
+ * @milencode/bundlewatch-core
  * Framework-agnostic build analytics core
  */
 

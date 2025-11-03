@@ -2,42 +2,38 @@
 
 > Code Coverage for Bundle Size - Track your build metrics over time
 
-An open-source dev tool that analyzes Vite builds, tracks metrics over time, and displays results directly in your repository. Provides instant visibility into build performance with historical trends and comparisons.
+⚠️ **Experimental**: This project is in active development. APIs may change. Use at your own risk.
 
-[![npm version](https://img.shields.io/npm/v/@bundlewatch/core.svg)](https://www.npmjs.com/package/@bundlewatch/core)
+An open-source dev tool that analyzes builds, tracks metrics over time, and displays results directly in your repository. Provides instant visibility into build performance with historical trends and comparisons.
+
+[![npm version](https://img.shields.io/npm/v/@milencode/bundlewatch-core.svg)](https://www.npmjs.com/package/@milencode/bundlewatch-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Features
 
 - **📊 Instant Visibility** - See bundle size and performance metrics in your README
-- **📈 Trend Tracking** - Compare current build against previous commits and main branch  
+- **📈 Trend Tracking** - Compare current build against previous commits and main branch
 - **🤖 CI-Native** - Designed for GitHub Actions and CI environments
 - **⚡ Zero Config** - Works out of the box with Vite projects
 - **🔍 Historical Context** - Track how your bundle evolves over time
 - **🎯 Framework Agnostic** - Core package works with any build tool
 - **🔌 Plugin Architecture** - Optional Vite plugin for seamless integration
-- **🧪 Fully Tested** - 43 tests with 92.44% coverage
+- **🧪 Fully Tested** - 31 E2E tests covering all integrations
 - **🎨 Functional** - Built with composition over classes
 
 ## 🚀 Quick Start
 
 ### Vite Plugin (Recommended)
 
-> **Note**: Currently in private development. See [INSTALLATION.md](./INSTALLATION.md) for GitHub installation.
-
 ```bash
-# Future (once public):
-pnpm add -D @bundlewatch/vite-plugin
-
-# Now (from GitHub):
-pnpm add -D @bundlewatch/vite-plugin@github:yourusername/bundlewatch#workspace=@bundlewatch/vite-plugin
+pnpm add -D @milencode/bundlewatch-vite-plugin
 ```
 
 Add to your `vite.config.ts`:
 
 ```typescript
-import { defineConfig } from 'vite';
-import { bundleWatch } from '@bundlewatch/vite-plugin';
+import { defineConfig } from "vite";
+import { bundleWatch } from "@milencode/bundlewatch-vite-plugin";
 
 export default defineConfig({
   plugins: [
@@ -78,24 +74,28 @@ By Type:
 
 ```bash
 # Analyze build output
-npx @bundlewatch/cli analyze
+npx @milencode/bundlewatch-cli analyze
 
 # Compare against main branch
-npx @bundlewatch/cli compare main
+npx @milencode/bundlewatch-cli compare main
 
 # Generate markdown report
-npx @bundlewatch/cli report --format markdown
+npx @milencode/bundlewatch-cli report --format markdown
 ```
 
 ## 📦 Packages
 
 This monorepo contains:
 
-| Package | Description | Version |
-|---------|-------------|---------|
-| [@bundlewatch/core](./packages/core) | Framework-agnostic core engine | 0.1.0 |
-| [@bundlewatch/vite-plugin](./packages/vite-plugin) | Vite plugin integration | 0.1.0 |
-| [@bundlewatch/cli](./packages/cli) | Command-line interface | 0.1.0 |
+| Package                                                                  | Description                            | Version |
+| ------------------------------------------------------------------------ | -------------------------------------- | ------- |
+| [@milencode/bundlewatch-core](./packages/core)                           | Framework-agnostic core engine         | 0.1.0   |
+| [@milencode/bundlewatch-vite-plugin](./packages/vite-plugin)             | Vite plugin integration                | 0.1.0   |
+| [@milencode/bundlewatch-next-plugin](./packages/next-plugin)             | Next.js plugin with per-route analysis | 0.1.0   |
+| [@milencode/bundlewatch-webpack-plugin](./packages/webpack-plugin)       | Webpack 5 plugin integration           | 0.1.0   |
+| [@milencode/bundlewatch-dashboard](./packages/dashboard)                 | Interactive dashboard & visualization  | 0.1.0   |
+| [@milencode/bundlewatch-cli](./packages/cli)                             | Command-line interface                 | 0.1.0   |
+| [@milencode/bundlewatch-lighthouse-plugin](./packages/lighthouse-plugin) | Lighthouse integration                 | 0.1.0   |
 
 ## 🎯 Architecture
 
@@ -103,9 +103,13 @@ Built with **functional composition** for better testability and maintainability
 
 ```typescript
 // Pure functions, not classes!
-import { collectMetrics, compareMetrics, generateReport } from '@bundlewatch/core';
+import {
+  collectMetrics,
+  compareMetrics,
+  generateReport,
+} from "@milencode/bundlewatch-core";
 
-const metrics = await collectMetrics({ outputDir: './dist' });
+const metrics = await collectMetrics({ outputDir: "./dist" });
 const comparison = compareMetrics(current, baseline);
 const report = generateReport(metrics, comparison);
 ```
@@ -130,13 +134,13 @@ pnpm test -- --watch
 
 ### Coverage Report
 
-| File | Statements | Branches | Functions | Lines |
-|------|-----------|----------|-----------|-------|
-| **All files** | **93.17%** | **80.87%** | **81.57%** | **93.17%** |
-| analyzer.ts | 95.48% | 92.30% | 85.71% | 95.48% |
-| collector.ts | 89.14% | 85.18% | 80.00% | 89.14% |
-| dependencies.ts | 95.72% | 85.36% | 100.00% | 95.72% |
-| reporter.ts | 93.68% | 63.26% | 73.33% | 93.68% |
+| File            | Statements | Branches   | Functions  | Lines      |
+| --------------- | ---------- | ---------- | ---------- | ---------- |
+| **All files**   | **93.17%** | **80.87%** | **81.57%** | **93.17%** |
+| analyzer.ts     | 95.48%     | 92.30%     | 85.71%     | 95.48%     |
+| collector.ts    | 89.14%     | 85.18%     | 80.00%     | 89.14%     |
+| dependencies.ts | 95.72%     | 85.36%     | 100.00%    | 95.72%     |
+| reporter.ts     | 93.68%     | 63.26%     | 73.33%     | 93.68%     |
 
 ## 🎨 Use Cases
 
@@ -146,7 +150,7 @@ Understand your bundle size impact during development:
 
 ```typescript
 // vite.config.ts
-import { bundleWatch } from '@bundlewatch/vite-plugin';
+import { bundleWatch } from "@milencode/bundlewatch-vite-plugin";
 
 export default defineConfig({
   plugins: [
@@ -175,11 +179,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      
+
       - run: pnpm install
       - run: pnpm build
 ```
@@ -190,10 +194,10 @@ Get instant feedback on PRs:
 
 ```typescript
 bundleWatch({
-  compareAgainst: 'main',
+  compareAgainst: "main",
   failOnSizeIncrease: true,
   sizeIncreaseThreshold: 10, // Fail if >10% increase
-})
+});
 ```
 
 ## 🔧 Configuration
@@ -212,7 +216,7 @@ bundleWatch({
   saveToGit: undefined,
 
   // Branch to compare against
-  compareAgainst: 'main',
+  compareAgainst: "main",
 
   // Fail build on size increase
   failOnSizeIncrease: false,
@@ -220,10 +224,10 @@ bundleWatch({
 
   // Storage configuration
   storage: {
-    type: 'git-branch',
-    branch: 'bundlewatch-data',
+    type: "git-branch",
+    branch: "bundlewatch-data",
   },
-})
+});
 ```
 
 ## 🤝 Contributing
@@ -257,6 +261,7 @@ MIT © [Your Name]
 ## 🙏 Acknowledgments
 
 Inspired by:
+
 - [bundlesize](https://github.com/siddharthkp/bundlesize) - Simple bundle size checking
 - [size-limit](https://github.com/ai/size-limit) - Performance budgets
 - [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer) - Bundle visualization
@@ -269,4 +274,5 @@ Inspired by:
 ---
 
 **Made with ❤️ for the JavaScript community**
+
 # bundlewatch

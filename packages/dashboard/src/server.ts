@@ -8,7 +8,7 @@ import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 import open from 'open';
 import { generateDashboardHTML, type DashboardData } from './template.js';
-import type { BuildMetrics } from '@bundlewatch/core';
+import type { BuildMetrics } from '@milencode/bundlewatch-core';
 
 export interface ServerOptions {
   port?: number;

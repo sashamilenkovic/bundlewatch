@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import { bundleWatch } from "@bundlewatch/vite-plugin";
+import { bundleWatch } from "@milencode/bundlewatch-vite-plugin";
 
 export default defineConfig({
   plugins: [

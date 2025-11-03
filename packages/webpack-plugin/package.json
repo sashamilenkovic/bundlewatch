@@ -1,5 +1,5 @@
 {
-  "name": "@bundlewatch/webpack-plugin",
+  "name": "@milencode/bundlewatch-webpack-plugin",
   "version": "0.1.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -21,7 +21,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@bundlewatch/core": "workspace:*"
+    "@milencode/bundlewatch-core": "workspace:*"
   },
   "peerDependencies": {
     "webpack": "^5.0.0"

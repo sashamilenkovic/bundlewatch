@@ -1,6 +1,6 @@
 import lighthouse from 'lighthouse';
 import * as chromeLauncher from 'chrome-launcher';
-import type { BuildMetrics } from '@bundlewatch/core';
+import type { BuildMetrics } from '@milencode/bundlewatch-core';
 
 export interface LighthouseOptions {
   /** URL to test (defaults to http://localhost:4173 - Vite preview server) */

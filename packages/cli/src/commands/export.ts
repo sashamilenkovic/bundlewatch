@@ -2,8 +2,8 @@
  * Export command - Generate static HTML dashboard
  */
 
-import { exportStatic } from '@bundlewatch/dashboard';
-import { collectMetrics } from '@bundlewatch/core';
+import { exportStatic } from '@milencode/bundlewatch-dashboard';
+import { collectMetrics } from '@milencode/bundlewatch-core';
 import { resolve } from 'path';
 
 export interface ExportCommandOptions {

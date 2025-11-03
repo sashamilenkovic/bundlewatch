@@ -1,9 +1,9 @@
 /**
- * @bundlewatch/next-plugin
+ * @milencode/bundlewatch-next-plugin
  * Bundle Watch plugin for Next.js with per-route analysis
  */
 
-import { collectMetrics, compareMetrics, GitStorage, ReportGenerator, type BundleWatchConfig } from '@bundlewatch/core';
+import { collectMetrics, compareMetrics, GitStorage, ReportGenerator, type BundleWatchConfig } from '@milencode/bundlewatch-core';
 import { resolve, join } from 'path';
 import { readFile, readdir } from 'fs/promises';
 import type { NextConfig } from 'next';

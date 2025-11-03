@@ -1,4 +1,4 @@
-import { bundleWatch } from '@bundlewatch/vite-plugin';
+import { bundleWatch } from '@milencode/bundlewatch-vite-plugin';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({

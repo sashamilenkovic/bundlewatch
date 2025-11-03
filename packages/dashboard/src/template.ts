@@ -3,7 +3,7 @@
  * Self-contained with embedded CSS and JS for portability
  */
 
-import type { BuildMetrics } from '@bundlewatch/core';
+import type { BuildMetrics } from '@milencode/bundlewatch-core';
 
 export interface DashboardData {
   current: BuildMetrics;

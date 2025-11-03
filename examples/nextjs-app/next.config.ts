@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next';
-import { withBundleWatch } from '@bundlewatch/next-plugin';
+import { withBundleWatch } from '@milencode/bundlewatch-next-plugin';
 
 const nextConfig: NextConfig = {
   /* config options here */

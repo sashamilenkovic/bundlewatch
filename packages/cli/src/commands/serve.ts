@@ -2,7 +2,7 @@
  * Serve command - Start local dashboard server
  */
 
-import { createDashboard } from '@bundlewatch/dashboard';
+import { createDashboard } from '@milencode/bundlewatch-dashboard';
 
 export interface ServeCommandOptions {
   port?: number;

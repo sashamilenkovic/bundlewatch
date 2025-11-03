@@ -1,5 +1,5 @@
 /**
- * @bundlewatch/dashboard
+ * @milencode/bundlewatch-dashboard
  * Interactive visualization and reporting for bundle metrics
  */
 

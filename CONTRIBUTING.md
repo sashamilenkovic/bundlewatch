@@ -87,6 +87,31 @@ git checkout -b feature/your-feature-name
 - Add JSDoc comments for public APIs
 - Keep functions small and focused
 
+## Commit Messages
+
+We use [Conventional Commits](https://www.conventionalcommits.org/) for automated versioning and changelog generation.
+
+**Format:** `<type>(<scope>): <subject>`
+
+**Examples:**
+```bash
+feat(dashboard): add search functionality
+fix(core): correct brotli compression
+docs: update installation guide
+```
+
+**Types:**
+- `feat:` - New feature (minor version bump)
+- `fix:` - Bug fix (patch version bump)
+- `docs:` - Documentation changes
+- `chore:` - Maintenance tasks
+- `test:` - Test additions/updates
+- `refactor:` - Code refactoring
+
+**Breaking changes:** Add `!` or `BREAKING CHANGE:` footer for major version bumps.
+
+See [`.releaserc.md`](./.releaserc.md) for detailed release documentation.
+
 ## Testing
 
 Currently, we're building out the test infrastructure. For now:

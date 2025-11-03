@@ -5,7 +5,7 @@
 import { writeFile, mkdir } from 'fs/promises';
 import { resolve, join } from 'path';
 import { generateDashboardHTML, type DashboardData } from './template.js';
-import type { BuildMetrics } from '@bundlewatch/core';
+import type { BuildMetrics } from '@milencode/bundlewatch-core';
 
 export interface ExportOptions {
   /**

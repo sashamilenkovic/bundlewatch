@@ -14,7 +14,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@bundlewatch/next-plugin": "workspace:*",
+    "@milencode/bundlewatch-next-plugin": "workspace:*",
     "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
