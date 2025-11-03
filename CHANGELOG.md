@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/sashamilenkovic/bundlewatch/compare/v1.1.3...v1.1.4) (2025-11-03)
+
+
+### Bug Fixes
+
+* use pnpm publish to correctly resolve workspace dependencies ([861958a](https://github.com/sashamilenkovic/bundlewatch/commit/861958a4d2cf924b19c26c8d9dded66bf95423ed))
+
 ## [1.1.3](https://github.com/sashamilenkovic/bundlewatch/compare/v1.1.2...v1.1.3) (2025-11-03)
 
 
