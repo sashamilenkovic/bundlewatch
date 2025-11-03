@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/sashamilenkovic/bundlewatch/compare/v1.1.0...v1.1.1) (2025-11-03)
+
+
+### Bug Fixes
+
+* enable npm publishing with corrected authentication ([174b36d](https://github.com/sashamilenkovic/bundlewatch/commit/174b36d5b4253513d457e28f89fc264bfda76ab6))
+
 # [1.1.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.0.0...v1.1.0) (2025-11-03)
 
 
