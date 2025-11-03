@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/sashamilenkovic/bundlewatch/compare/v1.1.2...v1.1.3) (2025-11-03)
+
+
+### Bug Fixes
+
+* use correct npm token for publishing ([b876705](https://github.com/sashamilenkovic/bundlewatch/commit/b876705a5365621fa4e84374c26b75612fa749c7))
+
 ## [1.1.2](https://github.com/sashamilenkovic/bundlewatch/compare/v1.1.1...v1.1.2) (2025-11-03)
 
 
