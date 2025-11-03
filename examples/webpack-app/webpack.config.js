@@ -1,6 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { BundleWatchPlugin } = require('@bundlewatch/webpack-plugin');
+const { BundleWatchPlugin } = require('@milencode/bundlewatch-webpack-plugin');
 
 module.exports = {
   entry: './src/index.tsx',
