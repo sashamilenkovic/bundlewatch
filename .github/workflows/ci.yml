@@ -40,7 +40,7 @@ jobs:
         run: cd e2e && pnpm install && npx playwright install --with-deps
 
       - name: Run E2E tests
-        run: cd e2e && pnpm test -- --workers=4
+        run: cd e2e && pnpm test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
