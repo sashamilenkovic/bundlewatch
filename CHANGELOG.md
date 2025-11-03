@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.0.0...v1.1.0) (2025-11-03)
+
+
+### Features
+
+* configure semantic-release to publish all workspace packages ([368d1d5](https://github.com/sashamilenkovic/bundlewatch/commit/368d1d54a26bad46084b77500445c807fe321748))
+
 # 1.0.0 (2025-11-03)
 
 
