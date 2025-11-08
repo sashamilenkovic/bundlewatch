@@ -1,4 +1,4 @@
-import { BundleWatchPlugin } from '@milencode/bundlewatch-webpack-plugin';
+import { bundleWatchPlugin } from '@milencode/bundlewatch-webpack-plugin';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -6,7 +6,7 @@ const nextConfig = {
     // Only run on client bundle
     if (!isServer) {
       config.plugins.push(
-        BundleWatchPlugin({
+        bundleWatchPlugin({
           enabled: true,
           printReport: true,
           saveToGit: false,

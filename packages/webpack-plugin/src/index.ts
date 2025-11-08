@@ -104,7 +104,7 @@ const defaultOptions: WebpackBundleWatchOptions = {
 /**
  * Webpack plugin for Bundle Watch (functional composition)
  */
-export function BundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
+export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
   const options = { ...defaultOptions, ...userOptions };
   const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
   let buildStartTime = 0;
@@ -224,5 +224,5 @@ export function BundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
   };
 }
 
-export default BundleWatchPlugin;
+export default bundleWatchPlugin;
 
