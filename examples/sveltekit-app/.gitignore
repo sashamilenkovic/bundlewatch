@@ -1,4 +1,4 @@
-.nuxt/
-.output/
+.svelte-kit/
+build/
 node_modules/
 bundle-report/
