@@ -169,7 +169,7 @@ export async function loadMetrics(
       return JSON.parse(content);
     }
   } catch (error) {
-    console.error('Error loading metrics from git:', error);
+    // Branch might not exist yet - this is expected on first run
     return null;
   }
 }
