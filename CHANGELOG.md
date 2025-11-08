@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.3.0...v1.4.0) (2025-11-08)
+
+
+### Features
+
+* add webpack stats parser package - 2000x faster than re-analyzing files ([56f0a29](https://github.com/sashamilenkovic/bundlewatch/commit/56f0a2969062a9f2787c9ccef44a3a16d94f597c))
+
 # [1.3.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.2.1...v1.3.0) (2025-11-08)
 
 
