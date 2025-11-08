@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.1.5...v1.2.0) (2025-11-08)
+
+
+### Features
+
+* add Vite 7 support to vite plugin ([f0dd87d](https://github.com/sashamilenkovic/bundlewatch/commit/f0dd87d420b6a254ce2961271333330bf222dd9f))
+
 ## [1.1.5](https://github.com/sashamilenkovic/bundlewatch/compare/v1.1.4...v1.1.5) (2025-11-03)
 
 
