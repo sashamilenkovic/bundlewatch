@@ -15,9 +15,8 @@
   "dependencies": {
     "@milencode/bundlewatch-core": "workspace:*",
     "@milencode/bundlewatch-vite-plugin": "workspace:*",
-    "@milencode/bundlewatch-next-plugin": "workspace:*",
-    "@milencode/bundlewatch-dashboard": "workspace:*",
-    "@milencode/bundlewatch-cli": "workspace:*"
+    "@milencode/bundlewatch-webpack-plugin": "workspace:*",
+    "@milencode/bundlewatch-dashboard": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",

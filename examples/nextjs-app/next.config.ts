@@ -1,20 +1,26 @@
 import type { NextConfig } from 'next';
-import { withBundleWatch } from '@milencode/bundlewatch-next-plugin';
+import { bundleWatchPlugin } from '@milencode/bundlewatch-webpack-plugin';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  webpack: (config, { isServer }) => {
+    // Only run on client bundle
+    if (!isServer) {
+      config.plugins.push(
+        bundleWatchPlugin({
+          enabled: true,
+          printReport: true,
+          saveToGit: false,
+          extractModules: true,
+          buildDependencyGraph: true,
+          generateRecommendations: true,
+          generateDashboard: true,
+          dashboardPath: './bundle-report',
+        })
+      );
+    }
+    return config;
+  },
 };
 
-export default withBundleWatch(nextConfig, {
-  enabled: true,
-  printReport: true,
-  saveToGit: false,
-  perRoute: true,
-  budgets: {
-    '/': {
-      maxSize: 500 * 1024, // 500 KB
-      maxGzipSize: 200 * 1024, // 200 KB
-    },
-  },
-});
+export default nextConfig;
 
