@@ -6,7 +6,7 @@ const nextConfig = {
     // Only run on client bundle
     if (!isServer) {
       config.plugins.push(
-        new BundleWatchPlugin({
+        BundleWatchPlugin({
           enabled: true,
           printReport: true,
           saveToGit: false,

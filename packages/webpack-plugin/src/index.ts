@@ -102,129 +102,126 @@ const defaultOptions: WebpackBundleWatchOptions = {
 };
 
 /**
- * Webpack plugin for Bundle Watch
+ * Webpack plugin for Bundle Watch (functional composition)
  */
-export class BundleWatchPlugin {
-  private options: WebpackBundleWatchOptions;
-  private buildStartTime: number = 0;
-  private isCI: boolean;
+export function BundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
+  const options = { ...defaultOptions, ...userOptions };
+  const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+  let buildStartTime = 0;
 
-  constructor(userOptions: WebpackBundleWatchOptions = {}) {
-    this.options = { ...defaultOptions, ...userOptions };
-    this.isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-
-    // Default saveToGit based on CI environment
-    if (this.options.saveToGit === undefined) {
-      this.options.saveToGit = this.isCI;
-    }
+  // Default saveToGit based on CI environment
+  if (options.saveToGit === undefined) {
+    options.saveToGit = isCI;
   }
 
-  apply(compiler: Compiler) {
-    if (!this.options.enabled) return;
+  return {
+    apply(compiler: Compiler) {
+      if (!options.enabled) return;
 
-    const pluginName = 'BundleWatchPlugin';
+      const pluginName = 'BundleWatchPlugin';
 
-    // Track build start time
-    compiler.hooks.compile.tap(pluginName, () => {
-      this.buildStartTime = Date.now();
-      console.log('📊 Bundle Watch: Starting analysis...');
-    });
+      // Track build start time
+      compiler.hooks.compile.tap(pluginName, () => {
+        buildStartTime = Date.now();
+        console.log('📊 Bundle Watch: Starting analysis...');
+      });
 
-    // Analyze after build completes
-    compiler.hooks.done.tapPromise(pluginName, async (stats) => {
-      try {
-        const workingDir = compiler.context || process.cwd();
+      // Analyze after build completes
+      compiler.hooks.done.tapPromise(pluginName, async (stats) => {
+        try {
+          const workingDir = compiler.context || process.cwd();
 
-        // Get git info
-        const commit = await GitStorage.getCurrentCommit(workingDir).catch(() => 'unknown');
-        const branch = await GitStorage.getCurrentBranch(workingDir).catch(() => 'unknown');
+          // Get git info
+          const commit = await GitStorage.getCurrentCommit(workingDir).catch(() => 'unknown');
+          const branch = await GitStorage.getCurrentBranch(workingDir).catch(() => 'unknown');
 
-        // Parse webpack stats (fast - no disk I/O!)
-        const webpackStats = stats.toJson({
-          all: false,
-          assets: true,
-          cachedAssets: true, // Include cached assets
-          chunks: true,
-          modules: this.options.extractModules, // Extract module-level detail
-          performance: true,
-          timings: true,
-        }) as WebpackStats;
+          // Parse webpack stats (fast - no disk I/O!)
+          const webpackStats = stats.toJson({
+            all: false,
+            assets: true,
+            cachedAssets: true, // Include cached assets
+            chunks: true,
+            modules: options.extractModules, // Extract module-level detail
+            performance: true,
+            timings: true,
+          }) as WebpackStats;
 
-        const metrics = parseWebpackStats(webpackStats, {
-          branch,
-          commit,
-          estimateCompression: true,
-          extractModules: this.options.extractModules,
-          buildDependencyGraph: this.options.buildDependencyGraph,
-          generateRecommendations: this.options.generateRecommendations,
-        });
+          const metrics = parseWebpackStats(webpackStats, {
+            branch,
+            commit,
+            estimateCompression: true,
+            extractModules: options.extractModules,
+            buildDependencyGraph: options.buildDependencyGraph,
+            generateRecommendations: options.generateRecommendations,
+          });
 
-        // Initialize storage and reporter
-        const storage = new GitStorage({
-          branch: this.options.storage?.branch || 'bundlewatch-data',
-          workingDir,
-        });
-        const reporter = new ReportGenerator();
+          // Initialize storage and reporter
+          const storage = new GitStorage({
+            branch: options.storage?.branch || 'bundlewatch-data',
+            workingDir,
+          });
+          const reporter = new ReportGenerator();
 
-        let comparison;
+          let comparison;
 
-        // Load baseline for comparison
-        if (this.options.compareAgainst) {
-          const baseline = await storage.load(this.options.compareAgainst);
-          if (baseline) {
-            comparison = compareMetrics(metrics, baseline, this.options.compareAgainst);
+          // Load baseline for comparison
+          if (options.compareAgainst) {
+            const baseline = await storage.load(options.compareAgainst);
+            if (baseline) {
+              comparison = compareMetrics(metrics, baseline, options.compareAgainst);
+            }
+          }
+
+          // Print report
+          if (options.printReport) {
+            console.log(reporter.generateConsoleOutput(metrics, comparison));
+          }
+
+          // Generate enhanced dashboard
+          if (options.generateDashboard) {
+            const dashboardDir = resolve(workingDir, options.dashboardPath || './bundle-report');
+            console.log(`📊 Generating enhanced dashboard at ${dashboardDir}...`);
+
+            try {
+              mkdirSync(dashboardDir, { recursive: true });
+
+              const dashboardHTML = generateEnhancedDashboard(metrics, comparison);
+              writeFileSync(resolve(dashboardDir, 'index.html'), dashboardHTML);
+
+              console.log(`✅ Dashboard generated: ${resolve(dashboardDir, 'index.html')}`);
+              console.log(`   Open with: open ${resolve(dashboardDir, 'index.html')}`);
+            } catch (dashboardError) {
+              console.error('Failed to generate dashboard:', dashboardError);
+            }
+          }
+
+          // Save to git storage
+          if (options.saveToGit) {
+            console.log('💾 Saving metrics to git...');
+            await storage.save(metrics);
+            console.log('✅ Metrics saved successfully');
+          }
+
+          // Check thresholds
+          if (options.failOnSizeIncrease && comparison) {
+            const threshold = options.sizeIncreaseThreshold || 10;
+            if (comparison.changes.totalSize.diffPercent > threshold) {
+              throw new Error(
+                `Bundle size increased by ${comparison.changes.totalSize.diffPercent.toFixed(1)}% ` +
+                `(threshold: ${threshold}%). Build failed.`
+              );
+            }
+          }
+
+        } catch (error) {
+          console.error('❌ Bundle Watch error:', error);
+          if (options.failOnSizeIncrease) {
+            throw error;
           }
         }
-
-        // Print report
-        if (this.options.printReport) {
-          console.log(reporter.generateConsoleOutput(metrics, comparison));
-        }
-
-        // Generate enhanced dashboard
-        if (this.options.generateDashboard) {
-          const dashboardDir = resolve(workingDir, this.options.dashboardPath || './bundle-report');
-          console.log(`📊 Generating enhanced dashboard at ${dashboardDir}...`);
-
-          try {
-            mkdirSync(dashboardDir, { recursive: true });
-
-            const dashboardHTML = generateEnhancedDashboard(metrics, comparison);
-            writeFileSync(resolve(dashboardDir, 'index.html'), dashboardHTML);
-
-            console.log(`✅ Dashboard generated: ${resolve(dashboardDir, 'index.html')}`);
-            console.log(`   Open with: open ${resolve(dashboardDir, 'index.html')}`);
-          } catch (dashboardError) {
-            console.error('Failed to generate dashboard:', dashboardError);
-          }
-        }
-
-        // Save to git storage
-        if (this.options.saveToGit) {
-          console.log('💾 Saving metrics to git...');
-          await storage.save(metrics);
-          console.log('✅ Metrics saved successfully');
-        }
-
-        // Check thresholds
-        if (this.options.failOnSizeIncrease && comparison) {
-          const threshold = this.options.sizeIncreaseThreshold || 10;
-          if (comparison.changes.totalSize.diffPercent > threshold) {
-            throw new Error(
-              `Bundle size increased by ${comparison.changes.totalSize.diffPercent.toFixed(1)}% ` +
-              `(threshold: ${threshold}%). Build failed.`
-            );
-          }
-        }
-
-      } catch (error) {
-        console.error('❌ Bundle Watch error:', error);
-        if (this.options.failOnSizeIncrease) {
-          throw error;
-        }
-      }
-    });
-  }
+      });
+    },
+  };
 }
 
 export default BundleWatchPlugin;

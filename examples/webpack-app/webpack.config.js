@@ -25,7 +25,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html',
     }),
-    new BundleWatchPlugin({
+    BundleWatchPlugin({
       enabled: true,
       printReport: true,
       saveToGit: false,
