@@ -229,8 +229,62 @@ bundleWatch({
     type: "git-branch",
     branch: "bundlewatch-data",
   },
+
+  // Dashboard generation
+  generateDashboard: true,
+  dashboardPath: "./bundle-report",
 });
 ```
+
+## 💾 Git Storage
+
+Bundle Watch stores historical metrics in a **separate Git branch** (`bundlewatch-data`) for free, version-controlled tracking.
+
+### How It Works
+
+- Metrics are saved to an orphaned git branch (no shared history with your code)
+- Each build creates a JSON file: `main/abc123.json`
+- Compare current builds against historical baselines
+
+### Enable in CI
+
+By default, git storage is disabled locally and enabled in CI. To use it in GitHub Actions:
+
+```yaml
+# .github/workflows/ci.yml
+permissions:
+  contents: write  # Required for bundlewatch to push metrics
+
+jobs:
+  build:
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history
+      
+      - run: pnpm build  # Bundle Watch auto-saves to git
+```
+
+### Security
+
+- ✅ **Isolated**: Only touches `bundlewatch-data` branch, never your code
+- ✅ **Opt-in**: Disabled by default (`saveToGit: false`)
+- ✅ **Auditable**: All changes are version controlled
+- ✅ **No secrets**: Uses standard git credentials
+
+### Disable Git Storage
+
+If you don't want git-based tracking:
+
+```typescript
+bundleWatch({
+  saveToGit: false,        // Disable git storage
+  printReport: true,       // Still get console output
+  generateDashboard: true, // Still get visualization
+})
+```
+
+You'll lose historical comparison but keep all analysis features.
 
 ## 🤝 Contributing
 
