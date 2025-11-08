@@ -15,10 +15,12 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@milencode/bundlewatch-core": "workspace:*"
+    "@milencode/bundlewatch-core": "workspace:*",
+    "source-map": "^0.7.4"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
-    "@types/node": "^24.0.0"
+    "@types/node": "^24.0.0",
+    "rollup": "^4.0.0"
   }
 }

@@ -28,7 +28,7 @@ interface StorageContext {
  */
 function createStorageContext(config: GitStorageConfig = {}): StorageContext {
   return {
-    branch: config.branch || 'bundle-watch-data',
+    branch: config.branch || 'bundlewatch-data',
     remote: config.remote || 'origin',
     workingDir: config.workingDir || process.cwd(),
   };

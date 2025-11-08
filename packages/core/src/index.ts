@@ -4,7 +4,7 @@
  */
 
 export * from './types.js';
-export * from './collector.js';
+// export * from './collector.js'; // DELETED - Use parsers instead (vite.ts, webpack.ts)
 export * from './analyzer.js';
-export { GitStorage } from './storage.js';
+export { GitStorage, getCurrentCommit, getCurrentBranch, saveMetrics, loadMetrics, listMetrics } from './storage.js';
 export { ReportGenerator } from './reporter.js';

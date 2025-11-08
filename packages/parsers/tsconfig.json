@@ -6,7 +6,8 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "types": ["node"]
   },
   "include": ["src/**/*"]
 }

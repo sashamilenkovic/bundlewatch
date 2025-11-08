@@ -3,8 +3,20 @@
  * Bundle Watch plugin for Webpack
  */
 
-import { collectMetrics, compareMetrics, GitStorage, ReportGenerator, type BundleWatchConfig } from '@milencode/bundlewatch-core';
+import {
+  compareMetrics,
+  GitStorage,
+  ReportGenerator,
+  ComparisonEngine,
+  type BundleWatchConfig,
+} from '@milencode/bundlewatch-core';
+import {
+  parseWebpackStats,
+  generateEnhancedDashboard,
+  type WebpackStats,
+} from '@milencode/bundlewatch-parsers';
 import { resolve } from 'path';
+import { writeFileSync, mkdirSync } from 'fs';
 import type { Compiler } from 'webpack';
 
 export interface WebpackBundleWatchOptions extends Partial<BundleWatchConfig> {
@@ -43,6 +55,36 @@ export interface WebpackBundleWatchOptions extends Partial<BundleWatchConfig> {
    * @default 10
    */
   sizeIncreaseThreshold?: number;
+
+  /**
+   * Extract module-level metrics from webpack stats
+   * @default true
+   */
+  extractModules?: boolean;
+
+  /**
+   * Build dependency graph
+   * @default true
+   */
+  buildDependencyGraph?: boolean;
+
+  /**
+   * Generate optimization recommendations
+   * @default true
+   */
+  generateRecommendations?: boolean;
+
+  /**
+   * Generate interactive HTML dashboard
+   * @default false
+   */
+  generateDashboard?: boolean;
+
+  /**
+   * Path to save the dashboard
+   * @default './bundle-report'
+   */
+  dashboardPath?: string;
 }
 
 const defaultOptions: WebpackBundleWatchOptions = {
@@ -52,6 +94,11 @@ const defaultOptions: WebpackBundleWatchOptions = {
   compareAgainst: 'main',
   failOnSizeIncrease: false,
   sizeIncreaseThreshold: 10,
+  extractModules: true,
+  buildDependencyGraph: true,
+  generateRecommendations: true,
+  generateDashboard: false,
+  dashboardPath: './bundle-report',
 };
 
 /**
@@ -86,25 +133,30 @@ export class BundleWatchPlugin {
     // Analyze after build completes
     compiler.hooks.done.tapPromise(pluginName, async (stats) => {
       try {
-        const outputPath = stats.compilation.outputOptions.path;
-        if (!outputPath) {
-          console.warn('⚠️  Bundle Watch: No output path found');
-          return;
-        }
-
         const workingDir = compiler.context || process.cwd();
 
         // Get git info
         const commit = await GitStorage.getCurrentCommit(workingDir).catch(() => 'unknown');
         const branch = await GitStorage.getCurrentBranch(workingDir).catch(() => 'unknown');
 
-        // Collect metrics
-        const metrics = await collectMetrics({
-          outputDir: outputPath,
+        // Parse webpack stats (fast - no disk I/O!)
+        const webpackStats = stats.toJson({
+          all: false,
+          assets: true,
+          cachedAssets: true, // Include cached assets
+          chunks: true,
+          modules: this.options.extractModules, // Extract module-level detail
+          performance: true,
+          timings: true,
+        }) as WebpackStats;
+
+        const metrics = parseWebpackStats(webpackStats, {
           branch,
           commit,
-          buildStartTime: this.buildStartTime,
-          projectRoot: workingDir,
+          estimateCompression: true,
+          extractModules: this.options.extractModules,
+          buildDependencyGraph: this.options.buildDependencyGraph,
+          generateRecommendations: this.options.generateRecommendations,
         });
 
         // Initialize storage and reporter
@@ -127,6 +179,24 @@ export class BundleWatchPlugin {
         // Print report
         if (this.options.printReport) {
           console.log(reporter.generateConsoleOutput(metrics, comparison));
+        }
+
+        // Generate enhanced dashboard
+        if (this.options.generateDashboard) {
+          const dashboardDir = resolve(workingDir, this.options.dashboardPath || './bundle-report');
+          console.log(`📊 Generating enhanced dashboard at ${dashboardDir}...`);
+
+          try {
+            mkdirSync(dashboardDir, { recursive: true });
+
+            const dashboardHTML = generateEnhancedDashboard(metrics, comparison);
+            writeFileSync(resolve(dashboardDir, 'index.html'), dashboardHTML);
+
+            console.log(`✅ Dashboard generated: ${resolve(dashboardDir, 'index.html')}`);
+            console.log(`   Open with: open ${resolve(dashboardDir, 'index.html')}`);
+          } catch (dashboardError) {
+            console.error('Failed to generate dashboard:', dashboardError);
+          }
         }
 
         // Save to git storage

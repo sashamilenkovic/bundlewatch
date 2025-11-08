@@ -3,38 +3,15 @@
  * Converts webpack stats output to BundleWatch BuildMetrics format
  */
 
-// Local type definitions (for POC - will import from core later)
-interface Bundle {
-  name: string;
-  size: number;
-  gzipSize: number;
-  brotliSize: number;
-  type: 'js' | 'css' | 'html' | 'asset' | 'other';
-  path: string;
-}
-
-interface AssetBreakdown {
-  javascript: number;
-  css: number;
-  images: number;
-  fonts: number;
-  other: number;
-}
-
-export interface BuildMetrics {
-  timestamp: string;
-  commit: string;
-  branch: string;
-  buildDuration: number;
-  bundles: Bundle[];
-  totalSize: number;
-  totalGzipSize: number;
-  totalBrotliSize: number;
-  chunkCount: number;
-  byType: AssetBreakdown;
-  warnings: string[];
-  recommendations: string[];
-}
+import type { BuildMetrics, ModuleMetrics, Bundle } from '@milencode/bundlewatch-core';
+import { compressBoth } from './compression.js';
+import {
+  extractPackageName,
+  getModuleType,
+  buildDependencyGraph,
+  aggregateDependencyMetrics,
+  generateOptimizationRecommendations,
+} from './analysis-utils.js';
 
 /**
  * Webpack stats.json format (simplified)
@@ -52,7 +29,41 @@ export interface WebpackStats {
     id: number | string;
     size: number;
     files: string[];
+    modules?: Array<{
+      id?: string | number;
+      identifier?: string;
+      name?: string;
+      nameForCondition?: string;
+      size: number;
+      reasons?: Array<{
+        moduleIdentifier?: string;
+        moduleName?: string;
+      }>;
+    }>;
   }>;
+  modules?: Array<{
+    id?: string | number;
+    identifier?: string;
+    name?: string;
+    nameForCondition?: string;
+    size: number;
+    chunks?: Array<number | string>;
+    reasons?: Array<{
+      moduleIdentifier?: string;
+      moduleName?: string;
+    }>;
+  }>;
+}
+
+export interface WebpackParseOptions {
+  branch?: string;
+  commit?: string;
+  estimateCompression?: boolean;
+  realCompression?: boolean;
+  extractModules?: boolean;
+  buildDependencyGraph?: boolean;
+  generateRecommendations?: boolean;
+  bundleContent?: Map<string, string>; // Map of filename -> content for real compression
 }
 
 /**
@@ -61,38 +72,71 @@ export interface WebpackStats {
  */
 export function parseWebpackStats(
   stats: WebpackStats,
-  options: {
-    branch?: string;
-    commit?: string;
-    estimateCompression?: boolean;
-  } = {}
+  options: WebpackParseOptions = {}
 ): BuildMetrics {
   const bundles: Bundle[] = [];
+  const modules: ModuleMetrics[] = [];
 
-  // Process webpack assets
+  // Process webpack assets (bundles)
   if (stats.assets) {
     for (const asset of stats.assets) {
+      // Skip if asset has no name or size
+      if (!asset.name || typeof asset.size !== 'number') {
+        continue;
+      }
+
       // Skip source maps and other metadata
       if (asset.name.endsWith('.map') || asset.name.endsWith('.LICENSE.txt')) {
         continue;
       }
 
-      // Estimate compression sizes (webpack doesn't provide these by default)
-      // gzip is typically 30% of original, brotli is 85% of gzip
-      const gzipEstimate = options.estimateCompression !== false
-        ? Math.round(asset.size * 0.3)
-        : 0;
-      const brotliEstimate = options.estimateCompression !== false
-        ? Math.round(gzipEstimate * 0.85)
-        : 0;
+      let gzipSize = 0;
+      let brotliSize = 0;
+
+      // Use real compression if content is available
+      if (options.realCompression && options.bundleContent?.has(asset.name)) {
+        const content = options.bundleContent.get(asset.name)!;
+        const compressed = compressBoth(content);
+        gzipSize = compressed.gzip;
+        brotliSize = compressed.brotli;
+      } else if (options.estimateCompression !== false) {
+        // Fall back to estimates
+        gzipSize = Math.round(asset.size * 0.3);
+        brotliSize = Math.round(gzipSize * 0.85);
+      }
 
       bundles.push({
         name: asset.name,
         size: asset.size,
-        gzipSize: gzipEstimate,
-        brotliSize: brotliEstimate,
+        gzipSize,
+        brotliSize,
         type: getFileType(asset.name),
         path: asset.name,
+      });
+    }
+  }
+
+  // Extract module-level metrics if requested
+  if (options.extractModules && stats.modules) {
+    for (const module of stats.modules) {
+      if (!module.name || typeof module.size !== 'number') {
+        continue;
+      }
+
+      const moduleId = module.identifier || module.name;
+      const packageName = extractPackageName(module.name);
+
+      modules.push({
+        id: moduleId,
+        package: packageName,
+        size: module.size,
+        chunks: (module.chunks || []).map(String),
+        importedBy: (module.reasons || [])
+          .map(r => r.moduleIdentifier || r.moduleName)
+          .filter((id): id is string => !!id),
+        imports: [], // Webpack doesn't provide forward deps easily
+        type: getModuleType(module.name),
+        treeshakeable: module.name.includes('esm') || module.name.includes('.mjs'),
       });
     }
   }
@@ -105,9 +149,29 @@ export function parseWebpackStats(
   // Calculate breakdown by type
   const byType = calculateAssetBreakdown(bundles);
 
-  // Generate warnings and recommendations
-  const warnings = generateWarnings(bundles, totalSize);
-  const recommendations = generateRecommendations(bundles, byType);
+  // Build detailed analysis if modules were extracted
+  let detailedDependencies;
+  let dependencyGraph;
+  let optimizations;
+
+  if (modules.length > 0) {
+    // Build dependency graph
+    if (options.buildDependencyGraph) {
+      dependencyGraph = buildDependencyGraph(modules);
+    }
+
+    // Aggregate into dependency metrics
+    detailedDependencies = aggregateDependencyMetrics(modules, totalSize);
+
+    // Generate optimization recommendations
+    if (options.generateRecommendations && dependencyGraph) {
+      optimizations = generateOptimizationRecommendations(
+        detailedDependencies,
+        dependencyGraph,
+        totalSize,
+      );
+    }
+  }
 
   return {
     timestamp: new Date().toISOString(),
@@ -120,8 +184,13 @@ export function parseWebpackStats(
     totalBrotliSize,
     chunkCount: bundles.length,
     byType,
-    warnings,
-    recommendations,
+    warnings: [], // Legacy field - use optimizations instead
+    recommendations: [], // Legacy field - use optimizations instead
+    // Enhanced fields
+    modules: modules.length > 0 ? modules : undefined,
+    detailedDependencies,
+    dependencyGraph,
+    optimizations,
   };
 }
 
@@ -178,65 +247,4 @@ function calculateAssetBreakdown(bundles: Bundle[]): BuildMetrics['byType'] {
   return breakdown;
 }
 
-/**
- * Format bytes to human-readable size
- */
-function formatSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
-}
-
-/**
- * Generate warnings based on bundle analysis
- */
-function generateWarnings(bundles: Bundle[], totalSize: number): string[] {
-  const warnings: string[] = [];
-
-  // Large total bundle warning
-  if (totalSize > 500 * 1024) {
-    warnings.push(`Total bundle size (${formatSize(totalSize)}) exceeds 500 KB`);
-  }
-
-  // Large individual bundles
-  for (const bundle of bundles) {
-    if (bundle.type === 'js' && bundle.size > 250 * 1024) {
-      warnings.push(`${bundle.name} is large (${formatSize(bundle.size)})`);
-    }
-  }
-
-  return warnings;
-}
-
-/**
- * Generate recommendations based on analysis
- */
-function generateRecommendations(bundles: Bundle[], byType: BuildMetrics['byType']): string[] {
-  const recommendations: string[] = [];
-
-  // JavaScript optimization suggestions
-  if (byType.javascript > 300 * 1024) {
-    recommendations.push('Consider code splitting to reduce JavaScript bundle size');
-  }
-
-  // Large JS bundles that could benefit from splitting
-  const largeJsBundles = bundles.filter(b => b.type === 'js' && b.size > 200 * 1024);
-  if (largeJsBundles.length > 0) {
-    recommendations.push('Large JavaScript bundles detected - consider lazy loading or dynamic imports');
-  }
-
-  // CSS optimization
-  if (byType.css > 100 * 1024) {
-    recommendations.push('Consider optimizing CSS bundle size with purging or critical CSS extraction');
-  }
-
-  // Image optimization
-  if (byType.images > 500 * 1024) {
-    recommendations.push('Large image assets detected - consider optimization or lazy loading');
-  }
-
-  return recommendations;
-}
 

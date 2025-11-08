@@ -13,16 +13,21 @@ interface AnalyzeOptions {
 }
 
 export async function analyzeCommand(options: AnalyzeOptions) {
-  console.log('📊 Analyzing build output...\n');
+  console.warn('\n⚠️  DEPRECATED: The CLI analyze command is deprecated.');
+  console.warn('   Please use the Vite or Webpack plugins instead for better analysis:');
+  console.warn('   - @milencode/bundlewatch-vite-plugin');
+  console.warn('   - @milencode/bundlewatch-webpack-plugin\n');
+
+  console.log('📊 Analyzing build output (legacy mode)...\n');
 
   try {
     const outputDir = resolve(process.cwd(), options.output);
-    
+
     // Get git info
     const commit = await GitStorage.getCurrentCommit();
     const branch = await GitStorage.getCurrentBranch();
 
-    // Collect metrics
+    // Collect metrics (deprecated)
     const collector = new MetricsCollector({
       outputDir,
       branch,

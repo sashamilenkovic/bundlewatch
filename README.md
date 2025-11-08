@@ -310,6 +310,17 @@ pnpm --filter example-vite build
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for more details.
 
+## 📚 Documentation Site
+
+There's a Nuxt 4 + Nuxt Content docs workspace under `docs/` for longer-form guides.
+
+```bash
+pnpm --filter @bundlewatch/docs dev        # local docs server
+pnpm --filter @bundlewatch/docs generate   # static site output (.output/public)
+```
+
+The sidebar and routes are powered by Markdown in `docs/content`. Frontmatter `title`/`description` controls navigation labels.
+
 ## 📝 License
 
 MIT © [Your Name]

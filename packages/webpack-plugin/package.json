@@ -21,7 +21,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@milencode/bundlewatch-core": "workspace:*"
+    "@milencode/bundlewatch-core": "workspace:*",
+    "@milencode/bundlewatch-parsers": "workspace:*"
   },
   "peerDependencies": {
     "webpack": "^5.0.0"

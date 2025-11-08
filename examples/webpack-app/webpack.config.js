@@ -29,6 +29,10 @@ module.exports = {
       enabled: true,
       printReport: true,
       saveToGit: false,
+      extractModules: true,
+      buildDependencyGraph: true,
+      generateRecommendations: true,
+      generateDashboard: true,
     }),
   ],
 };

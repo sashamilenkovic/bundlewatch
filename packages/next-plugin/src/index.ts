@@ -90,7 +90,12 @@ async function analyzeNextBuild(buildDir: string, options: NextBundleWatchOption
   const nextDir = resolve(workingDir, options.outputDir || '.next');
   const staticDir = join(nextDir, 'static');
   
-  console.log('\n📊 Bundle Watch: Analyzing Next.js build...');
+  console.warn('\n⚠️  DEPRECATED: @milencode/bundlewatch-next-plugin is deprecated.');
+  console.warn('   Next.js has built-in bundle analysis. Consider using:');
+  console.warn('   - next.config.js with webpack bundle analyzer');
+  console.warn('   - @next/bundle-analyzer\n');
+
+  console.log('📊 Bundle Watch: Analyzing Next.js build (legacy mode)...');
 
   try {
     // Collect metrics from static directory
