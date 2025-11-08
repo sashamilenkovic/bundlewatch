@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.2.1...v1.3.0) (2025-11-08)
+
+
+### Features
+
+* add interactive dashboard generation with D3.js treemap visualization ([dd6458b](https://github.com/sashamilenkovic/bundlewatch/commit/dd6458b817f9dac160f7ae4e66ea4fbdb9fcf8d3))
+
 ## [1.2.1](https://github.com/sashamilenkovic/bundlewatch/compare/v1.2.0...v1.2.1) (2025-11-08)
 
 
