@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { writeFile, mkdir, rm } from 'fs/promises';
 import { join } from 'path';
-import { collectMetrics } from './collector';
+import { collectMetrics } from '../src/collector';
 
 describe('collectMetrics', () => {
   const testDir = join(process.cwd(), 'test-output');

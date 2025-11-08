@@ -8,8 +8,8 @@ import {
   generateReadmeSection,
   generatePRComment,
   generateConsoleOutput,
-} from './reporter';
-import type { BuildMetrics, Comparison } from './types';
+} from '../src/reporter';
+import type { BuildMetrics, Comparison } from '../src/types';
 
 describe('reporter functions', () => {
   const mockMetrics: BuildMetrics = {

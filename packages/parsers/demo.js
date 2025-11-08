@@ -4,7 +4,7 @@
  * Shows the speed difference!
  */
 
-import { parseWebpackStats } from '../dist/index.js';
+import { parseWebpackStats } from './dist/index.js';
 import { performance } from 'perf_hooks';
 
 // Simulated webpack stats.json (from webpack-app example)

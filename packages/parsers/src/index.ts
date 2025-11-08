@@ -3,9 +3,9 @@
  * Parse existing analyzer tool outputs instead of re-analyzing
  */
 
-export { parseWebpackStats, type WebpackStats } from './webpack.js';
+export { parseWebpackStats, type WebpackStats } from './webpack';
 
 // Future parsers:
-// export { parseRollupVisualizer } from './rollup.js';
-// export { parseViteManifest } from './vite.js';
+// export { parseRollupVisualizer } from './rollup';
+// export { parseViteManifest } from './vite';
 

@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { compareMetrics } from './analyzer';
-import type { BuildMetrics } from './types';
+import { compareMetrics } from '../src/analyzer';
+import type { BuildMetrics } from '../src/types';
 
 describe('compareMetrics', () => {
   const createMockMetrics = (overrides: Partial<BuildMetrics> = {}): BuildMetrics => ({

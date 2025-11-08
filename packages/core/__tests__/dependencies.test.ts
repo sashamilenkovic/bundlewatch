@@ -5,8 +5,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { writeFile, mkdir, rm } from 'fs/promises';
 import { join } from 'path';
-import { analyzeDependencies, generateDependencyInsights } from './dependencies';
-import type { Bundle } from './types';
+import { analyzeDependencies, generateDependencyInsights } from '../src/dependencies';
+import type { Bundle } from '../src/types';
 
 describe('analyzeDependencies', () => {
   const testDir = join(process.cwd(), 'test-deps');
