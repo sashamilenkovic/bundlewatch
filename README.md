@@ -7,6 +7,8 @@
 An open-source dev tool that analyzes builds, tracks metrics over time, and displays results directly in your repository. Provides instant visibility into build performance with historical trends and comparisons.
 
 [![npm version](https://img.shields.io/npm/v/@milencode/bundlewatch-core.svg)](https://www.npmjs.com/package/@milencode/bundlewatch-core)
+[![codecov](https://codecov.io/gh/sashamilenkovic/bundlewatch/branch/main/graph/badge.svg)](https://codecov.io/gh/sashamilenkovic/bundlewatch)
+[![CI](https://github.com/sashamilenkovic/bundlewatch/workflows/CI/badge.svg)](https://github.com/sashamilenkovic/bundlewatch/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## ✨ Features
