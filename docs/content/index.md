@@ -6,32 +6,49 @@ _path: /
 
 # 👋 Welcome to BundleWatch Docs
 
-BundleWatch tracks your bundle sizes over time, compares builds, and publishes visual dashboards directly inside your repository. These docs explain how the system fits together, how to plug it into different bundlers, and how to work with the Git-backed storage layer.
+BundleWatch tracks your bundle sizes over time, compares builds, and publishes visual dashboards directly inside your repository. Use these docs to understand the architecture, wire up the framework plugins, and operate the Git-backed storage branch.
 
-## What's inside
+## Quick links
 
-- **Getting Started** covers installing the CLI or framework plugins and wiring BundleWatch into CI/CD.
-- **Git Storage** explains how metrics are written to an orphan branch so you can diff trends without provisioning a database.
-- Deep-dives for the Vite, Webpack, and Next.js plugins will land soon. Each section maps to the packages that live in this monorepo (`packages/*`).
+| Guide | What you’ll find |
+| ----- | ---------------- |
+| [Getting Started](/getting-started) | Install the CLI or framework plugins, run first analyses, and generate static docs. |
+| [Git Storage](/storage) | How metrics are written to the `bundlewatch-data` branch, GitHub permissions, and CI tips. |
+| [Architecture](/architecture) | Deep dive into parsers, storage, comparison engine, and dashboard generation. |
+| [Examples](/examples) | How to run the sample Vite, Nuxt, Next, Webpack, SvelteKit, and SolidStart apps in `/examples`. |
+| [Framework Recipes](/framework-recipes) | Drop-in snippets for Nuxt, SvelteKit, SolidStart, Astro, Remix, and more. |
+
+> 💡 Planning to visualize metrics? Enable `generateDashboard` in the Vite/Webpack plugins and inspect the HTML report saved under `bundle-report/`.
+
+## Choose your path
+
+1. **Front-end builds** → Start with [Vite](/vite) or [Webpack](/webpack) depending on your bundler.
+2. **React meta-frameworks** → Jump to [Next.js](/next) or the recipes for Nuxt/SvelteKit/SolidStart.
+3. **Operational work** → Read [Deployment](/deployment) (Cloudflare Worker + GitHub Actions) and [Examples](/examples) to replicate CI flows locally.
 
 ## Why a docs site?
 
-The README grew unwieldy while the architecture evolved. A Nuxt Content site lets us:
+The README grew unwieldy as BundleWatch evolved. Nuxt Content gives us:
 
-1. Ship focused guides per integration.
-2. Keep long-form explanations versioned with the rest of the repo.
-3. Statically generate the entire site (SSG) so it can deploy anywhere (GitHub Pages, Netlify, Vercel, etc.).
+1. Focused guides per integration instead of one mega README.
+2. Versioned, long-form explanations that live with the code.
+3. Static generation so the entire site deploys as pure assets (Workers, GitHub Pages, Netlify, etc.).
 
-## Contributing to the docs
+## Help improve the docs
 
-1. Run `pnpm install` at the repo root (this also installs the docs workspace).
-2. Start the docs dev server:
+1. Install dependencies once at the repo root (this also installs the docs workspace):
 
-```bash
-pnpm --filter @bundlewatch/docs dev
-```
+   ```bash
+   pnpm install
+   ```
 
-3. Edit or create Markdown files in `docs/content`. The sidebar automatically reflects frontmatter titles and descriptions.
-4. Commit Markdown + any component/layout tweaks.
+2. Start the docs dev server for instant hot reload:
+
+   ```bash
+   pnpm --filter @bundlewatch/docs dev
+   ```
+
+3. Edit or add Markdown in `docs/content`. Frontmatter `title` + `description` drive the sidebar automatically.
+4. Run `pnpm docs:generate` to ensure the static output builds before sending a PR.
 
 Happy shipping! 🚀
