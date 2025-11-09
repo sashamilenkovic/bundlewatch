@@ -254,6 +254,270 @@ describe('reporter functions', () => {
 
       expect(output).toContain('3.24s'); // 3240ms = 3.24s
     });
+
+    it('should format short build duration in ms', () => {
+      const quickMetrics = { ...mockMetrics, buildDuration: 850 };
+      const output = generateConsoleOutput(quickMetrics);
+
+      expect(output).toContain('850ms');
+    });
+
+    it('should display dependencies when present', () => {
+      const metricsWithDeps = {
+        ...mockMetrics,
+        dependencies: [
+          { name: 'react', size: 50000, modules: 10 },
+          { name: 'lodash', size: 30000, modules: 5 },
+          { name: 'axios', size: 20000, modules: 3 },
+        ],
+      };
+      const output = generateConsoleOutput(metricsWithDeps);
+
+      expect(output).toContain('📦 Dependencies:');
+      expect(output).toContain('react');
+      expect(output).toContain('lodash');
+    });
+
+    it('should show "and X more" when > 5 dependencies', () => {
+      const metricsWithManyDeps = {
+        ...mockMetrics,
+        dependencies: [
+          { name: 'dep1', size: 10000, modules: 1 },
+          { name: 'dep2', size: 10000, modules: 1 },
+          { name: 'dep3', size: 10000, modules: 1 },
+          { name: 'dep4', size: 10000, modules: 1 },
+          { name: 'dep5', size: 10000, modules: 1 },
+          { name: 'dep6', size: 10000, modules: 1 },
+          { name: 'dep7', size: 10000, modules: 1 },
+        ],
+      };
+      const output = generateConsoleOutput(metricsWithManyDeps);
+
+      expect(output).toContain('... and 2 more');
+    });
+
+    it('should handle zero-size bundles', () => {
+      const emptyMetrics = {
+        ...mockMetrics,
+        totalSize: 0,
+        byType: {
+          javascript: 0,
+          css: 0,
+          images: 0,
+          fonts: 0,
+          other: 0,
+        },
+      };
+      const output = generateConsoleOutput(emptyMetrics);
+
+      expect(output).toContain('0 B');
+    });
+  });
+
+  describe('edge cases and branch coverage', () => {
+    it('should handle bundle status: added', () => {
+      const comparisonWithAdded: Comparison = {
+        ...mockComparison,
+        changes: {
+          ...mockComparison.changes,
+          byBundle: [
+            {
+              name: 'new-bundle.js',
+              current: 50000,
+              previous: 0,
+              diff: 50000,
+              diffPercent: 100,
+              status: 'added',
+            },
+          ],
+        },
+      };
+      const comment = generatePRComment(mockMetrics, comparisonWithAdded);
+
+      expect(comment).toContain('🆕 Added');
+      expect(comment).toContain('➕');
+      expect(comment).toContain('(new)');
+    });
+
+    it('should handle bundle status: removed', () => {
+      const comparisonWithRemoved: Comparison = {
+        ...mockComparison,
+        changes: {
+          ...mockComparison.changes,
+          byBundle: [
+            {
+              name: 'old-bundle.js',
+              current: 0,
+              previous: 50000,
+              diff: -50000,
+              diffPercent: -100,
+              status: 'removed',
+            },
+          ],
+        },
+      };
+      const comment = generatePRComment(mockMetrics, comparisonWithRemoved);
+
+      expect(comment).toContain('🗑️ Removed');
+      expect(comment).toContain('➖');
+      expect(comment).toContain('(removed)');
+    });
+
+    it('should filter out unchanged bundles from PR comment', () => {
+      const comparisonWithUnchanged: Comparison = {
+        ...mockComparison,
+        changes: {
+          ...mockComparison.changes,
+          byBundle: [
+            {
+              name: 'stable.js',
+              current: 10000,
+              previous: 10000,
+              diff: 0,
+              diffPercent: 0,
+              status: 'unchanged',
+            },
+          ],
+        },
+      };
+      const comment = generatePRComment(mockMetrics, comparisonWithUnchanged);
+
+      // Unchanged bundles should be filtered out from significant changes
+      expect(comment).not.toContain('stable.js');
+      expect(comment).not.toContain('✓ Unchanged');
+    });
+
+    it('should filter out minimal changes (< 1%) from PR comment', () => {
+      const comparisonWithMinimal: Comparison = {
+        ...mockComparison,
+        changes: {
+          ...mockComparison.changes,
+          byBundle: [
+            {
+              name: 'minimal.js',
+              current: 100100,
+              previous: 100000,
+              diff: 100,
+              diffPercent: 0.1,
+              status: 'changed',
+            },
+          ],
+        },
+      };
+      const comment = generatePRComment(mockMetrics, comparisonWithMinimal);
+
+      // Minimal changes should be filtered out from significant changes
+      expect(comment).not.toContain('minimal.js');
+    });
+
+    it('should use 🔼 emoji for size increases', () => {
+      const comparisonWithIncrease: Comparison = {
+        ...mockComparison,
+        changes: {
+          ...mockComparison.changes,
+          byBundle: [
+            {
+              name: 'bigger.js',
+              current: 200000,
+              previous: 100000,
+              diff: 100000,
+              diffPercent: 100,
+              status: 'changed',
+            },
+          ],
+        },
+      };
+      const comment = generatePRComment(mockMetrics, comparisonWithIncrease);
+
+      expect(comment).toContain('🔼');
+    });
+
+    it('should handle different badge colors', () => {
+      const tinyMetrics = { ...mockMetrics, totalSize: 50 * 1024 }; // 50 KB
+      const smallMetrics = { ...mockMetrics, totalSize: 150 * 1024 }; // 150 KB
+      const mediumMetrics = { ...mockMetrics, totalSize: 350 * 1024 }; // 350 KB
+      const largeMetrics = { ...mockMetrics, totalSize: 750 * 1024 }; // 750 KB
+      const hugeMetrics = { ...mockMetrics, totalSize: 1500 * 1024 }; // 1.5 MB
+
+      expect(generateBadge(tinyMetrics)).toContain('brightgreen');
+      expect(generateBadge(smallMetrics)).toContain('green');
+      expect(generateBadge(mediumMetrics)).toContain('yellow');
+      expect(generateBadge(largeMetrics)).toContain('orange');
+      expect(generateBadge(hugeMetrics)).toContain('red');
+    });
+
+    it('should filter out unchanged bundles in README', () => {
+      const comparisonWithUnchanged: Comparison = {
+        ...mockComparison,
+        changes: {
+          ...mockComparison.changes,
+          byBundle: [
+            {
+              name: 'unchanged.js',
+              current: 10000,
+              previous: 10000,
+              diff: 0,
+              diffPercent: 0,
+              status: 'unchanged',
+            },
+            {
+              name: 'changed.js',
+              current: 20000,
+              previous: 15000,
+              diff: 5000,
+              diffPercent: 33.33,
+              status: 'changed',
+            },
+          ],
+        },
+      };
+      const readme = generateReadmeSection(mockMetrics, comparisonWithUnchanged);
+
+      expect(readme).toContain('changed.js');
+      expect(readme).not.toContain('unchanged.js');
+    });
+
+    it('should handle zero change with ➡️ emoji in PR comment', () => {
+      const comparisonWithZero: Comparison = {
+        ...mockComparison,
+        changes: {
+          ...mockComparison.changes,
+          totalSize: {
+            current: 100000,
+            previous: 100000,
+            diff: 0,
+            diffPercent: 0,
+          },
+        },
+      };
+      const comment = generatePRComment(mockMetrics, comparisonWithZero);
+
+      expect(comment).toContain('➡️');
+    });
+
+    it('should show ➡️ emoji for minimal changes in README', () => {
+      const comparisonWithMinimal: Comparison = {
+        ...mockComparison,
+        changes: {
+          ...mockComparison.changes,
+          byBundle: [
+            {
+              name: 'minimal.js',
+              current: 100100,
+              previous: 100000,
+              diff: 100,
+              diffPercent: 0.1,
+              status: 'changed',
+            },
+          ],
+        },
+      };
+      const readme = generateReadmeSection(mockMetrics, comparisonWithMinimal);
+
+      // README shows minimal changes with ➡️ emoji
+      expect(readme).toContain('minimal.js');
+      expect(readme).toContain('➡️');
+    });
   });
 });
 
