@@ -1,5 +1,11 @@
 # @milencode/bundlewatch-cli
 
+> **⚠️ EXPERIMENTAL - DO NOT USE IN PRODUCTION**
+>
+> This package is currently in active development and is not ready for production use. The API is unstable and may change without notice. Features may be incomplete, buggy, or break unexpectedly.
+>
+> **Use at your own risk.** This is published for testing purposes only.
+
 CLI utilities for BundleWatch - analyze bundle size history across your git commits.
 
 ## Installation
