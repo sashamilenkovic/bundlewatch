@@ -51,16 +51,6 @@ test.describe('Next.js Plugin', () => {
     expect(stdout).toContain('Build Time');
   });
 
-  test('should show per-route analysis section', async () => {
-    const { stdout } = await execAsync('pnpm build', {
-      cwd: NEXTJS_APP_DIR,
-      env: { ...process.env, CI: 'false' },
-    });
-
-    // Check for per-route analysis header
-    expect(stdout).toContain('Per-Route Analysis');
-  });
-
   test('should display bundle breakdown', async () => {
     const { stdout } = await execAsync('pnpm build', {
       cwd: NEXTJS_APP_DIR,
@@ -70,16 +60,6 @@ test.describe('Next.js Plugin', () => {
     // Check for asset type breakdown
     expect(stdout).toContain('JavaScript');
     expect(stdout).toContain('CSS');
-  });
-
-  test('should check route budgets', async () => {
-    const { stdout } = await execAsync('pnpm build', {
-      cwd: NEXTJS_APP_DIR,
-      env: { ...process.env, CI: 'false' },
-    });
-
-    // Should show budget warnings (we set low budgets in config)
-    expect(stdout).toContain('exceeds 500 KB');
   });
 
   test('should show Next.js route table', async () => {

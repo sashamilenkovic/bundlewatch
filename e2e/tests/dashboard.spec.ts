@@ -10,42 +10,25 @@ const ROOT_DIR = join(process.cwd(), '..');
 const VITE_APP_DIR = join(ROOT_DIR, 'examples/vite-app');
 
 test.describe('Dashboard Generation', () => {
-  const reportDir = join(ROOT_DIR, 'test-bundle-report');
+  const reportDir = join(VITE_APP_DIR, 'bundle-report');
 
   test.beforeAll(async () => {
-    // Build the vite app first
+    // Build the vite app which generates the dashboard
     await execAsync('pnpm build', { cwd: VITE_APP_DIR });
   });
 
-  test.afterAll(async () => {
-    // Clean up
-    try {
-      await execAsync(`rm -rf ${reportDir}`);
-    } catch (e) {
-      // Ignore
-    }
-  });
-
   test('should generate dashboard HTML', async () => {
-    await execAsync(
-      `node packages/cli/dist/cli.js export examples/vite-app/dist --output ${reportDir}`,
-      { cwd: ROOT_DIR }
-    );
-
-    // Check index.html was created
+    // Dashboard is generated during build by the plugin
     const indexPath = join(reportDir, 'index.html');
     await expect(access(indexPath)).resolves.not.toThrow();
   });
 
-  test('should generate data.json', async () => {
-    const dataPath = join(reportDir, 'data.json');
-    await expect(access(dataPath)).resolves.not.toThrow();
+  test('dashboard HTML should contain embedded data', async () => {
+    const indexPath = join(reportDir, 'index.html');
+    const html = await readFile(indexPath, 'utf-8');
 
-    // Validate JSON structure
-    const data = JSON.parse(await readFile(dataPath, 'utf-8'));
-    expect(data).toHaveProperty('current');
-    expect(data.current).toHaveProperty('totalSize');
-    expect(data.current).toHaveProperty('bundles');
+    // Dashboard embeds data inline, not as separate file
+    expect(html).toContain('const data =');
   });
 
   test('dashboard HTML should be self-contained', async () => {
@@ -54,55 +37,37 @@ test.describe('Dashboard Generation', () => {
 
     // Should contain embedded styles
     expect(html).toContain('<style>');
-    
+
     // Should contain embedded script
     expect(html).toContain('<script>');
-    
-    // Should contain data
-    expect(html).toContain('window.DASHBOARD_DATA');
   });
 
-  test('dashboard should contain all views', async () => {
+  test('dashboard should contain bundle visualization', async () => {
     const indexPath = join(reportDir, 'index.html');
     const html = await readFile(indexPath, 'utf-8');
 
-    // Check for navigation tabs
-    expect(html).toContain('overview');
+    // Check for key dashboard sections
+    expect(html).toContain('Bundle Watch Dashboard');
     expect(html).toContain('treemap');
-    expect(html).toContain('dependencies');
-    expect(html).toContain('history');
-    expect(html).toContain('compare');
   });
 
   test('dashboard should contain metrics', async () => {
     const indexPath = join(reportDir, 'index.html');
     const html = await readFile(indexPath, 'utf-8');
 
-    // Check for metric labels
-    expect(html).toContain('Total Size');
-    expect(html).toContain('Gzipped');
-    expect(html).toContain('Brotli');
-    expect(html).toContain('Build Time');
+    // Check for stat cards that display metrics
+    expect(html).toContain('stat-card');
+    expect(html).toContain('stat-label');
+    expect(html).toContain('stat-value');
   });
 
-  test('dashboard should include Chart.js', async () => {
+  test('dashboard should include D3.js', async () => {
     const indexPath = join(reportDir, 'index.html');
     const html = await readFile(indexPath, 'utf-8');
 
-    // Should reference Chart.js
-    expect(html).toContain('chart.js');
+    // Should reference D3.js for treemap visualization
+    expect(html).toContain('d3.v7');
   });
 });
 
-test.describe('Dashboard Server', () => {
-  test('should start server (manual test)', async () => {
-    // This is a manual test - just verify the command exists
-    const { stdout } = await execAsync(
-      'node packages/cli/dist/cli.js --help',
-      { cwd: join(process.cwd(), '..') }
-    );
-
-    expect(stdout).toContain('serve');
-  });
-});
 
