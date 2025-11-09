@@ -1,3 +1,18 @@
+# [1.5.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.4.0...v1.5.0) (2025-11-09)
+
+
+### Bug Fixes
+
+* add missing SolidStart entry files ([1757937](https://github.com/sashamilenkovic/bundlewatch/commit/17579379c832468d56086e05410ec9e3f1d9314a))
+* add missing SvelteKit app.html template ([71d0b5c](https://github.com/sashamilenkovic/bundlewatch/commit/71d0b5c5b0f74e8f2835da5bd41cf41c6575e15f))
+* update remaining examples and e2e dependencies ([39d2403](https://github.com/sashamilenkovic/bundlewatch/commit/39d240337005b4d9000cd91c80f2de4498635312))
+
+
+### Features
+
+* add CLI backfill command for historical bundle analysis ([08ab1ba](https://github.com/sashamilenkovic/bundlewatch/commit/08ab1baaba4463d840dee3fb8b819c0abc6f4165))
+* add framework examples for Next.js, Nuxt, SvelteKit, and SolidStart ([514b8a3](https://github.com/sashamilenkovic/bundlewatch/commit/514b8a318109151a12fe2a1a0f0a072b2be083ff))
+
 # [1.4.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.3.0...v1.4.0) (2025-11-08)
 
 
