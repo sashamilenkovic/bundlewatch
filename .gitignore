@@ -5,6 +5,8 @@ node_modules/
 # Build outputs
 dist/
 *.tsbuildinfo
+.nuxt/
+.output/
 
 # Logs
 *.log
