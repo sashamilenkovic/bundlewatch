@@ -1,4 +1,0 @@
-declare module '#content/server' {
-  const serverQueryContent: typeof import('/Users/sashamilenkovic/Projects/bundlewatch/node_modules/.pnpm/@nuxt+content@2.13.4_db0@0.3.4_ioredis@5.8.2_magicast@0.5.1_nuxt@4.2.1_@biomejs+biome@2_86c681ad1c4e268732d9ec20eccc9e77/node_modules/@nuxt/content/dist/runtime/legacy/types').serverQueryContent
-  const parseContent: typeof import('/Users/sashamilenkovic/Projects/bundlewatch/node_modules/.pnpm/@nuxt+content@2.13.4_db0@0.3.4_ioredis@5.8.2_magicast@0.5.1_nuxt@4.2.1_@biomejs+biome@2_86c681ad1c4e268732d9ec20eccc9e77/node_modules/@nuxt/content/dist/runtime/server').parseContent
-}

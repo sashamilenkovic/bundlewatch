@@ -1,5 +1,0 @@
-// ROLLUP_NO_REPLACE 
- const contentIndex = "{\"/architecture\":[\"content:architecture.md\"],\"/cli\":[\"content:cli.md\"],\"/deployment\":[\"content:deployment.md\"],\"/examples\":[\"content:examples.md\"],\"/framework-recipes\":[\"content:framework-recipes.md\"],\"/getting-started\":[\"content:getting-started.md\"],\"/\":[\"content:index.md\"],\"/next\":[\"content:next.md\"],\"/storage\":[\"content:storage.md\"],\"/vite\":[\"content:vite.md\"],\"/webpack\":[\"content:webpack.md\"]}";
-
-export { contentIndex as default };
-//# sourceMappingURL=content-index.mjs.map
