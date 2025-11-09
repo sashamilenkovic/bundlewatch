@@ -94,25 +94,25 @@
       border: 1px solid #334155;
       overflow: hidden;
     }
-    .dependency-table table {
+    table {
       width: 100%;
       border-collapse: collapse;
     }
-    .dependency-table th {
+    th {
       background: #0f172a;
       padding: 1rem;
       text-align: left;
       font-weight: 600;
-      border-bottom: 1px solid #334155;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
     }
-    .dependency-table td {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid #334155;
+    td {
+      padding: 1rem;
+      border-top: 1px solid #334155;
     }
-    .dependency-table tr:last-child td {
-      border-bottom: none;
-    }
-    .dependency-table tr:hover {
+    tr:hover {
       background: #0f172a;
     }
     .badge {
@@ -120,22 +120,31 @@
       padding: 0.25rem 0.5rem;
       border-radius: 0.25rem;
       font-size: 0.75rem;
-      font-weight: 500;
+      font-weight: 600;
+      text-transform: uppercase;
     }
     .badge-npm {
-      background: #dc2626;
+      background: #3b82f6;
       color: white;
     }
     .badge-app {
       background: #10b981;
       color: white;
     }
+    .badge-vendor {
+      background: #8b5cf6;
+      color: white;
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>📊 Bundle Watch Dashboard</h1>
-    <p style="color: #94a3b8;">Detailed bundle analysis with dependency insights</p>
+    <h1>Bundle Watch Dashboard</h1>
+    <p style="color: #94a3b8;">
+      Branch: <strong>main</strong> |
+      Commit: <strong>2320862</strong> |
+      11/8/2025, 8:52:12 PM
+    </p>
   </div>
 
   <div class="stats">
@@ -146,38 +155,64 @@
     <div class="stat-card">
       <div class="stat-label">Gzipped</div>
       <div class="stat-value">1.99 KB</div>
-      <div class="stat-label" style="margin-top: 0.5rem;">52.6% reduction</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Brotli</div>
       <div class="stat-value">1.69 KB</div>
-      <div class="stat-label" style="margin-top: 0.5rem;">59.8% reduction</div>
     </div>
+    <div class="stat-card">
+      <div class="stat-label">Chunks</div>
+      <div class="stat-value">2</div>
+    </div>
+    
     <div class="stat-card">
       <div class="stat-label">Modules</div>
       <div class="stat-value">6</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Dependencies</div>
-      <div class="stat-value">1</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Analysis Time</div>
-      <div class="stat-value">38ms</div>
-    </div>
+    
   </div>
 
   <h2>Bundle Treemap</h2>
   <div id="treemap" class="treemap"></div>
-  <div id="tooltip" class="tooltip"></div>
 
-  <h2>Top Dependencies</h2>
+  
+  <h2>All Modules</h2>
+  <div class="dependency-table">
+    <table id="modules-table">
+      <thead>
+        <tr>
+          <th style="cursor: pointer;" onclick="sortModulesTable(0)">Name ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(1)">Size ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(2)">Gzipped ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(3)">Brotli ↕</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            <td>
+              <span class="badge badge-app">APP</span> 
+              <strong>your-app</strong>
+            </td>
+            <td>3.88 KB</td>
+            <td>N/A</td>
+            <td>N/A</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+  <h2>Dependencies</h2>
   <div class="dependency-table">
     <table>
       <thead>
         <tr>
           <th>Package</th>
           <th>Size</th>
+          <th>Gzipped</th>
           <th>% of Total</th>
           <th>Modules</th>
           <th>Tree-shakeable</th>
@@ -187,10 +222,13 @@
         
           <tr>
             <td>
-              <span class="badge badge-app">YOUR APP</span> your-app
+              <span class="badge badge-app">APP</span> 
+              <strong>your-app</strong>
+              
             </td>
-            <td>3.99 KB</td>
-            <td>94.9%</td>
+            <td>3.88 KB</td>
+            <td>N/A</td>
+            <td>92.3%</td>
             <td>6</td>
             <td>✅ Yes</td>
           </tr>
@@ -198,6 +236,7 @@
       </tbody>
     </table>
   </div>
+  
 
   
     <h2>Source Files (via Source Maps)</h2>
@@ -259,61 +298,45 @@
   
 
   <script>
-    const data = {"name":"Bundle","children":[{"name":"index-BmeGit54.css","value":1212,"gzip":364,"brotli":309,"type":"css"},{"name":"index-B0KbwCHS.js","value":3093,"gzip":1677,"brotli":1421,"type":"js"}]};
+    const data = {"name":"Bundle Composition","children":[{"name":"your-app","value":3975,"gzip":0,"brotli":0,"type":"app"}]};
 
     const width = document.getElementById('treemap').clientWidth;
     const height = 600;
 
     const color = d3.scaleOrdinal()
-      .domain(['js', 'css', 'asset', 'html', 'other'])
-      .range(['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6']);
+      .domain(['js', 'css', 'asset', 'html', 'other', 'app', 'npm'])
+      .range(['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#10b981', '#3b82f6']);
 
-    const root = d3.hierarchy(data)
-      .sum(d => d.value)
-      .sort((a, b) => b.value - a.value);
-
-    d3.treemap()
+    const treemap = d3.treemap()
       .size([width, height])
       .padding(1)
-      .round(true)(root);
+      .round(true);
+
+    const root = d3.hierarchy(data)
+      .sum(d => d.value) // Use exact sizes
+      .sort((a, b) => b.value - a.value);
+
+    treemap(root);
 
     const svg = d3.select('#treemap')
       .append('svg')
       .attr('width', width)
       .attr('height', height);
 
-    const tooltip = d3.select('#tooltip');
+    const tooltip = d3.select('body')
+      .append('div')
+      .attr('class', 'tooltip');
 
     const nodes = svg.selectAll('g')
       .data(root.leaves())
       .join('g')
+      .attr('class', 'node')
       .attr('transform', d => `translate(${d.x0},${d.y0})`);
 
     nodes.append('rect')
-      .attr('class', 'node')
       .attr('width', d => d.x1 - d.x0)
       .attr('height', d => d.y1 - d.y0)
-      .attr('fill', d => color(d.data.type))
-      .on('mouseover', function(event, d) {
-        tooltip
-          .style('opacity', 1)
-          .style('left', event.pageX + 10 + 'px')
-          .style('top', event.pageY + 10 + 'px')
-          .html(`
-            <div class="tooltip-title">${d.data.name}</div>
-            <div class="tooltip-size">Size: ${formatBytes(d.data.value)}</div>
-            <div class="tooltip-size">Gzip: ${formatBytes(d.data.gzip)}</div>
-            <div class="tooltip-size">Brotli: ${formatBytes(d.data.brotli)}</div>
-          `);
-      })
-      .on('mousemove', function(event) {
-        tooltip
-          .style('left', event.pageX + 10 + 'px')
-          .style('top', event.pageY + 10 + 'px');
-      })
-      .on('mouseout', function() {
-        tooltip.style('opacity', 0);
-      });
+      .attr('fill', d => color(d.data.type));
 
     nodes.append('text')
       .attr('class', 'node-label')
@@ -321,10 +344,51 @@
       .attr('y', 16)
       .text(d => {
         const width = d.x1 - d.x0;
-        const height = d.y1 - d.y0;
-        if (width < 50 || height < 20) return '';
-        return d.data.name.length > 20 ? d.data.name.slice(0, 18) + '...' : d.data.name;
+        return width > 50 ? d.data.name : '';
       });
+
+    nodes.on('mouseover', (event, d) => {
+      tooltip
+        .style('opacity', 1)
+        .html(`
+          <div class="tooltip-title">${d.data.name}</div>
+          <div class="tooltip-size">Size: ${formatBytes(d.data.value)}</div>
+          <div class="tooltip-size">Gzip: ${formatBytes(d.data.gzip || 0)}</div>
+          <div class="tooltip-size">Brotli: ${formatBytes(d.data.brotli || 0)}</div>
+        `);
+
+      // Smart positioning to keep tooltip in viewport
+      const tooltipNode = tooltip.node();
+      const tooltipRect = tooltipNode.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Default position: right and below cursor
+      let left = event.pageX + 10;
+      let top = event.pageY - 28;
+
+      // If tooltip would go off right edge, position to left of cursor
+      if (event.clientX + tooltipRect.width + 10 > viewportWidth) {
+        left = event.pageX - tooltipRect.width - 10;
+      }
+
+      // If tooltip would go off bottom edge, position above cursor
+      if (event.clientY + tooltipRect.height > viewportHeight) {
+        top = event.pageY - tooltipRect.height - 10;
+      }
+
+      // If tooltip would go off top edge, position below cursor
+      if (top < 0) {
+        top = event.pageY + 10;
+      }
+
+      tooltip
+        .style('left', left + 'px')
+        .style('top', top + 'px');
+    })
+    .on('mouseout', () => {
+      tooltip.style('opacity', 0);
+    });
 
     function formatBytes(bytes) {
       if (bytes === 0) return '0 B';
@@ -332,6 +396,42 @@
       const sizes = ['B', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+    }
+
+    // Sort modules table
+    let sortDirection = [1, -1, -1, -1]; // 1 = ascending, -1 = descending
+    function sortModulesTable(columnIndex) {
+      const table = document.getElementById('modules-table');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+
+      sortDirection[columnIndex] *= -1;
+
+      rows.sort((a, b) => {
+        const aCell = a.cells[columnIndex].textContent.trim();
+        const bCell = b.cells[columnIndex].textContent.trim();
+
+        if (columnIndex === 0) {
+          // Name column - text sort
+          const aName = aCell.replace(/^(APP|NPM)\s+/, '');
+          const bName = bCell.replace(/^(APP|NPM)\s+/, '');
+          return sortDirection[columnIndex] * aName.localeCompare(bName);
+        } else {
+          // Size columns - numeric sort
+          const parseSize = (str) => {
+            if (str === 'N/A') return 0;
+            const match = str.match(/([0-9.]+)\s*(B|KB|MB|GB)/);
+            if (!match) return 0;
+            const value = parseFloat(match[1]);
+            const unit = match[2];
+            const multipliers = { B: 1, KB: 1024, MB: 1024 ** 2, GB: 1024 ** 3 };
+            return value * (multipliers[unit] || 1);
+          };
+          return sortDirection[columnIndex] * (parseSize(aCell) - parseSize(bCell));
+        }
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
     }
   </script>
 </body>
