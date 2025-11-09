@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/sashamilenkovic/bundlewatch/compare/v1.5.0...v1.5.1) (2025-11-09)
+
+
+### Bug Fixes
+
+* **parsers:** extract meaningful module names from file paths ([6e5bea3](https://github.com/sashamilenkovic/bundlewatch/commit/6e5bea3257196796cb14f2fab4091c4f6e8f7489))
+
 # [1.5.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.4.0...v1.5.0) (2025-11-09)
 
 
