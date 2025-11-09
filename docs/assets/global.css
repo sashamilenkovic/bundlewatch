@@ -1,32 +1,35 @@
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #020617;
-  color: #e2e8f0;
+  background-color: #f8fafc;
+  color: #0f172a;
 }
 
 body {
   margin: 0;
-  background: #020617;
+  background: #f8fafc;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
+  color: #0f172a;
 }
 
 .prose {
-  color: #e2e8f0;
+  color: #1e293b;
   line-height: 1.7;
+  max-width: 800px;
 }
 
 .prose a {
-  color: #38bdf8;
+  color: #2563eb;
 }
 
 pre {
-  background: #0f172a;
+  background: #f1f5f9;
   padding: 1rem;
   border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
   overflow-x: auto;
 }
 

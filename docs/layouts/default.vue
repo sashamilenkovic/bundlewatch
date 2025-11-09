@@ -5,19 +5,23 @@ const route = useRoute();
 
 <template>
   <div class="layout">
-    <header class="layout__header">
-      <div class="brand">
-        <span aria-hidden="true">📦</span>
-        <div>
-          <p class="brand__title">BundleWatch</p>
-          <p class="brand__subtitle">Docs &amp; Guides</p>
-        </div>
+    <header class="topbar">
+      <div class="topbar__inner">
+        <NuxtLink to="/" class="logo">
+          <span aria-hidden="true">📦</span>
+          <div>
+            <p class="logo__title">BundleWatch Docs</p>
+            <p class="logo__subtitle">Track bundles over time</p>
+          </div>
+        </NuxtLink>
+
+        <nav class="topbar__nav">
+          <NuxtLink to="/getting-started">Getting Started</NuxtLink>
+          <NuxtLink to="/storage">Git Storage</NuxtLink>
+          <NuxtLink to="/examples">Examples</NuxtLink>
+          <a href="https://github.com/sashamilenkovic/bundlewatch" target="_blank" rel="noreferrer">GitHub ↗</a>
+        </nav>
       </div>
-      <nav class="header-nav">
-        <NuxtLink to="/getting-started">Getting Started</NuxtLink>
-        <NuxtLink to="/storage">Git Storage</NuxtLink>
-        <a href="https://github.com/sashamilenkovic/bundlewatch" target="_blank" rel="noreferrer">GitHub ↗</a>
-      </nav>
     </header>
 
     <div class="layout__body">
@@ -49,52 +53,59 @@ const route = useRoute();
 <style scoped>
 .layout {
   min-height: 100vh;
-  background: radial-gradient(circle at top, rgba(14, 165, 233, 0.15), transparent 45%), #020617;
-  color: #e2e8f0;
+  background: #f8fafc;
+  color: #0f172a;
   display: flex;
   flex-direction: column;
 }
 
-.layout__header {
-  padding: 1.5rem 2rem;
+.topbar {
+  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.topbar__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  position: sticky;
-  top: 0;
-  backdrop-filter: blur(8px);
-  background: rgba(2, 6, 23, 0.9);
-  z-index: 10;
 }
 
-.brand {
+.logo {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  text-decoration: none;
+  color: inherit;
 }
 
-.brand span {
+.logo span {
   font-size: 1.5rem;
 }
 
-.brand__title {
+.logo__title {
   font-weight: 600;
   font-size: 1.1rem;
 }
 
-.brand__subtitle {
+.logo__subtitle {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: #475569;
 }
 
-.header-nav {
+.topbar__nav {
   display: flex;
   gap: 1rem;
   font-size: 0.95rem;
 }
 
-.header-nav a {
+.topbar__nav a {
   color: inherit;
   text-decoration: none;
   padding: 0.35rem 0.75rem;
@@ -102,20 +113,24 @@ const route = useRoute();
   transition: background 0.2s;
 }
 
-.header-nav a:hover {
-  background: rgba(14, 165, 233, 0.2);
+.topbar__nav a:hover,
+.topbar__nav a:focus-visible {
+  background: rgba(99, 102, 241, 0.12);
 }
 
 .layout__body {
   display: grid;
   grid-template-columns: 280px 1fr;
   gap: 2rem;
-  padding: 2rem;
+  padding: 2rem clamp(1rem, 4vw, 3rem);
   flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .sidebar {
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid #e2e8f0;
   padding-right: 1.5rem;
 }
 
@@ -123,7 +138,7 @@ const route = useRoute();
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #94a3b8;
+  color: #64748b;
   margin-bottom: 1rem;
 }
 
@@ -147,12 +162,13 @@ const route = useRoute();
 }
 
 .sidebar__link:hover {
-  border-color: rgba(148, 163, 184, 0.4);
+  border-color: rgba(148, 163, 184, 0.5);
+  background: rgba(148, 163, 184, 0.08);
 }
 
 .sidebar__link.is-active {
-  border-color: rgba(14, 165, 233, 0.6);
-  background: rgba(14, 165, 233, 0.08);
+  border-color: rgba(99, 102, 241, 0.6);
+  background: rgba(99, 102, 241, 0.1);
 }
 
 .sidebar__title {
@@ -162,15 +178,16 @@ const route = useRoute();
 
 .sidebar__description {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: #64748b;
 }
 
 .content {
-  background: rgba(2, 6, 23, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: white;
+  border: 1px solid #e2e8f0;
   border-radius: 1rem;
   padding: 2.5rem;
-  box-shadow: 0 20px 40px -24px rgba(2, 6, 23, 1);
+  box-shadow: 0 20px 40px -24px rgba(15, 23, 42, 0.2);
+  min-height: calc(100vh - 200px);
 }
 
 @media (max-width: 1024px) {
@@ -180,8 +197,18 @@ const route = useRoute();
 
   .sidebar {
     border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid #e2e8f0;
     padding-bottom: 1.5rem;
+  }
+
+  .topbar__inner {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .topbar__nav {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 </style>
