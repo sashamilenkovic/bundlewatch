@@ -584,11 +584,69 @@ function calculateDepth(
 }
 
 function extractPackageName(id: string): string {
+  // Handle node_modules packages
   if (id.includes('node_modules')) {
-    const match = id.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)/);
-    return match ? match[1] : 'unknown';
+    // Handle both scoped (@org/package) and regular packages
+    const match = id.match(/node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+    if (match) {
+      return match[1].replace(/\\/g, '/');
+    }
+    return 'unknown';
   }
-  return 'your-app';
+
+  // Handle virtual modules and special prefixes
+  if (id.startsWith('\0') || id.startsWith('virtual:')) {
+    return 'bundler-virtual';
+  }
+
+  // Extract meaningful path from user code
+  // Remove common prefixes and normalize
+  let cleanPath = id
+    .replace(/^[a-z]:/i, '') // Remove Windows drive letters
+    .replace(/\\/g, '/') // Normalize path separators
+    .replace(/^\/+/, ''); // Remove leading slashes
+
+  // Try to find a meaningful top-level directory or file name
+  // Common patterns: src/components/Foo.vue, pages/index.vue, components/Header.tsx, etc.
+  const pathParts = cleanPath.split('/');
+
+  // Remove common root directories
+  const removeRoots = ['home', 'users', 'projects', 'workspace', 'app', 'var', 'tmp'];
+  while (pathParts.length > 0 && removeRoots.some(root => pathParts[0].toLowerCase().includes(root))) {
+    pathParts.shift();
+  }
+
+  // Look for meaningful directories
+  const meaningfulDirs = ['src', 'lib', 'components', 'pages', 'views', 'layouts', 'composables', 'utils', 'helpers', 'services', 'api', 'store', 'assets', 'styles', 'public'];
+
+  let packageName = 'app';
+
+  // If we find a meaningful directory, use it as the base
+  for (let i = 0; i < pathParts.length - 1; i++) {
+    if (meaningfulDirs.includes(pathParts[i])) {
+      // Use the meaningful dir + next level (e.g., "components/Header" or "pages/index")
+      const baseName = pathParts[i];
+      const nextPart = pathParts[i + 1];
+
+      if (nextPart) {
+        // Remove file extension
+        const nameWithoutExt = nextPart.replace(/\.(vue|tsx?|jsx?|svelte|astro)$/, '');
+        packageName = `${baseName}/${nameWithoutExt}`;
+      } else {
+        packageName = baseName;
+      }
+      break;
+    }
+  }
+
+  // If no meaningful structure found, try to use filename
+  if (packageName === 'app' && pathParts.length > 0) {
+    const fileName = pathParts[pathParts.length - 1];
+    const nameWithoutExt = fileName.replace(/\.(vue|tsx?|jsx?|svelte|astro)$/, '');
+    packageName = nameWithoutExt || 'app';
+  }
+
+  return packageName;
 }
 
 function extractVersion(id: string): string | null {

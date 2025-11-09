@@ -36,8 +36,55 @@ export function extractPackageName(modulePath: string): string {
     return 'webpack-runtime';
   }
 
-  // Everything else is your app
-  return 'your-app';
+  // Handle virtual modules and special prefixes
+  if (modulePath.startsWith('\0') || modulePath.startsWith('virtual:')) {
+    return 'bundler-virtual';
+  }
+
+  // Extract meaningful path from user code
+  let cleanPath = modulePath
+    .replace(/^[a-z]:/i, '') // Remove Windows drive letters
+    .replace(/\\/g, '/') // Normalize path separators
+    .replace(/^\/+/, ''); // Remove leading slashes
+
+  const pathParts = cleanPath.split('/');
+
+  // Remove common root directories
+  const removeRoots = ['home', 'users', 'projects', 'workspace', 'app', 'var', 'tmp'];
+  while (pathParts.length > 0 && removeRoots.some(root => pathParts[0].toLowerCase().includes(root))) {
+    pathParts.shift();
+  }
+
+  // Look for meaningful directories
+  const meaningfulDirs = ['src', 'lib', 'components', 'pages', 'views', 'layouts', 'composables', 'utils', 'helpers', 'services', 'api', 'store', 'assets', 'styles', 'public'];
+
+  let packageName = 'app';
+
+  // If we find a meaningful directory, use it as the base
+  for (let i = 0; i < pathParts.length - 1; i++) {
+    if (meaningfulDirs.includes(pathParts[i])) {
+      const baseName = pathParts[i];
+      const nextPart = pathParts[i + 1];
+
+      if (nextPart) {
+        // Remove file extension
+        const nameWithoutExt = nextPart.replace(/\.(vue|tsx?|jsx?|svelte|astro)$/, '');
+        packageName = `${baseName}/${nameWithoutExt}`;
+      } else {
+        packageName = baseName;
+      }
+      break;
+    }
+  }
+
+  // If no meaningful structure found, try to use filename
+  if (packageName === 'app' && pathParts.length > 0) {
+    const fileName = pathParts[pathParts.length - 1];
+    const nameWithoutExt = fileName.replace(/\.(vue|tsx?|jsx?|svelte|astro)$/, '');
+    packageName = nameWithoutExt || 'app';
+  }
+
+  return packageName;
 }
 
 /**
