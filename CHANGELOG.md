@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.0...v2.0.1) (2025-11-15)
+
+
+### Bug Fixes
+
+* **core:** correctly detect if bundlewatch-data branch exists ([4920c0c](https://github.com/sashamilenkovic/bundlewatch/commit/4920c0c17c62358ee3a05422baebe9f8aace2809))
+
 # [2.0.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.5.1...v2.0.0) (2025-11-15)
 
 
