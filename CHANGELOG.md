@@ -1,3 +1,19 @@
+# [2.0.0](https://github.com/sashamilenkovic/bundlewatch/compare/v1.5.1...v2.0.0) (2025-11-15)
+
+
+### Features
+
+* add hybrid backfill with first-run detection and interactive mode ([79c9208](https://github.com/sashamilenkovic/bundlewatch/commit/79c920842bd69daca7fec8d4207fcc6d0593db68))
+
+
+### BREAKING CHANGES
+
+* none
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
 ## [1.5.1](https://github.com/sashamilenkovic/bundlewatch/compare/v1.5.0...v1.5.1) (2025-11-09)
 
 
