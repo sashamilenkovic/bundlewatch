@@ -1,0 +1,101 @@
+# Example GitHub Actions workflow for one-time bundle history backfill
+#
+# This workflow can be run manually from the Actions tab to populate
+# historical bundle metrics without blocking your normal CI pipeline.
+#
+# How to use:
+# 1. Copy this file to your repository's .github/workflows/ directory
+# 2. Customize the options below for your project
+# 3. Go to Actions tab → "Backfill Bundle History" → "Run workflow"
+# 4. Select how many commits to backfill
+# 5. Let it run in the background (doesn't block anything!)
+#
+# After backfilling, your CI builds will have baseline data for comparison.
+
+name: Backfill Bundle History
+
+on:
+  workflow_dispatch:
+    inputs:
+      strategy:
+        description: 'Backfill strategy'
+        required: true
+        default: '10'
+        type: choice
+        options:
+          - '10'    # Last 10 commits (~5-10 min)
+          - '20'    # Last 20 commits (~10-20 min)
+          - '50'    # Last 50 commits (~25-50 min)
+          - '100'   # Last 100 commits (~50-100 min)
+          - 'releases'  # Only tagged releases
+
+      build-command:
+        description: 'Build command'
+        required: false
+        default: 'pnpm build'
+        type: string
+
+      skip-install:
+        description: 'Skip dependency installation (faster if deps unchanged)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  backfill:
+    name: Backfill Bundle Metrics
+    runs-on: ubuntu-latest
+
+    # Increase timeout for large backfills
+    timeout-minutes: 180  # 3 hours max
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # IMPORTANT: Fetch full git history for backfilling
+          fetch-depth: 0
+
+      # Setup pnpm (adjust if you use npm/yarn)
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      # Install dependencies (in the main branch, for the CLI)
+      - name: Install dependencies
+        run: pnpm install
+
+      # Run backfill based on selected strategy
+      - name: Backfill bundle metrics
+        run: |
+          if [ "${{ inputs.strategy }}" = "releases" ]; then
+            npx bundlewatch backfill --releases-only --build-command "${{ inputs.build-command }}" ${{ inputs.skip-install && '--skip-install' || '' }}
+          else
+            npx bundlewatch backfill --last ${{ inputs.strategy }} --build-command "${{ inputs.build-command }}" ${{ inputs.skip-install && '--skip-install' || '' }}
+          fi
+        env:
+          # Pass GitHub token for git operations
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Optional: Post a comment with results
+      - name: Report results
+        if: always()
+        run: |
+          echo "Backfill completed!"
+          echo "Strategy: ${{ inputs.strategy }}"
+          echo "Check the bundlewatch-data branch for historical metrics"
+          git checkout bundlewatch-data 2>/dev/null && git log --oneline -10 || echo "Branch not created yet"
+
+# Maintenance notes:
+# - This workflow doesn't need to run regularly, only when you want historical data
+# - You can delete this file after running it once if you don't need it anymore
+# - The bundlewatch-data branch will contain all historical metrics
+# - Future PR builds will automatically compare against this baseline

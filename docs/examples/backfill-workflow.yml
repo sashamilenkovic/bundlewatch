@@ -1,0 +1,44 @@
+# One-time backfill workflow for BundleWatch
+# Copy this to .github/workflows/backfill.yml in your repository
+
+name: Backfill Bundle History
+
+on:
+  workflow_dispatch:
+    inputs:
+      commits:
+        description: 'Number of commits to backfill'
+        required: true
+        default: '20'
+        type: choice
+        options:
+          - '10'
+          - '20'
+          - '50'
+          - '100'
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history required
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - name: Backfill bundle metrics
+        run: npx bundlewatch backfill --last ${{ inputs.commits }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

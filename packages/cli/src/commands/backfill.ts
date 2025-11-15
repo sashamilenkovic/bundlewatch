@@ -5,13 +5,14 @@
 import { Command } from 'commander';
 import ora from 'ora';
 import chalk from 'chalk';
+import * as clack from '@clack/prompts';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { mkdtemp, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { saveMetrics, getCurrentCommit, getCurrentBranch } from '@milencode/bundlewatch-core';
-import { analyzeBuildOutput } from '../utils/analyzer.js';
+import { analyzeBuildOutput } from '../utils/hybrid-analyzer.js';
 
 const execAsync = promisify(exec);
 
@@ -23,6 +24,8 @@ interface BackfillOptions {
   buildCommand?: string;
   skipInstall?: boolean;
   sample?: number;
+  interactive?: boolean;
+  branch?: string;
 }
 
 interface CommitInfo {
@@ -202,11 +205,123 @@ async function analyzeCommit(
 }
 
 /**
+ * Interactive mode - prompt user for options
+ */
+async function promptForOptions(): Promise<BackfillOptions> {
+  clack.intro(chalk.bold('📊 BundleWatch Backfill'));
+
+  const strategy = await clack.select({
+    message: 'How much history do you want to backfill?',
+    options: [
+      { value: 'last-10', label: 'Last 10 commits', hint: 'recommended, ~5-10 min' },
+      { value: 'last-20', label: 'Last 20 commits', hint: '~10-20 min' },
+      { value: 'last-50', label: 'Last 50 commits', hint: '~25-50 min' },
+      { value: 'releases', label: 'Only tagged releases', hint: 'variable time' },
+      { value: 'custom', label: 'Custom range', hint: 'advanced' },
+    ],
+  });
+
+  if (clack.isCancel(strategy)) {
+    clack.cancel('Operation cancelled');
+    process.exit(0);
+  }
+
+  let options: BackfillOptions = {};
+
+  if (strategy === 'last-10') {
+    options.last = 10;
+  } else if (strategy === 'last-20') {
+    options.last = 20;
+  } else if (strategy === 'last-50') {
+    options.last = 50;
+  } else if (strategy === 'releases') {
+    options.releasesOnly = true;
+  } else if (strategy === 'custom') {
+    const from = await clack.text({
+      message: 'Start from git ref (commit, tag, branch):',
+      placeholder: 'HEAD~100',
+      defaultValue: 'HEAD~100',
+    });
+
+    if (clack.isCancel(from)) {
+      clack.cancel('Operation cancelled');
+      process.exit(0);
+    }
+
+    const to = await clack.text({
+      message: 'Analyze up to git ref:',
+      placeholder: 'HEAD',
+      defaultValue: 'HEAD',
+    });
+
+    if (clack.isCancel(to)) {
+      clack.cancel('Operation cancelled');
+      process.exit(0);
+    }
+
+    options.from = from as string;
+    options.to = to as string;
+  }
+
+  const buildCommand = await clack.text({
+    message: 'Build command:',
+    placeholder: 'pnpm build',
+    defaultValue: 'pnpm build',
+  });
+
+  if (clack.isCancel(buildCommand)) {
+    clack.cancel('Operation cancelled');
+    process.exit(0);
+  }
+
+  options.buildCommand = buildCommand as string;
+
+  const skipInstall = await clack.confirm({
+    message: 'Skip dependency installation?',
+    initialValue: false,
+  });
+
+  if (clack.isCancel(skipInstall)) {
+    clack.cancel('Operation cancelled');
+    process.exit(0);
+  }
+
+  options.skipInstall = skipInstall as boolean;
+
+  const targetBranch = await clack.text({
+    message: 'Which branch to backfill?',
+    placeholder: 'main',
+    defaultValue: 'main',
+  });
+
+  if (clack.isCancel(targetBranch)) {
+    clack.cancel('Operation cancelled');
+    process.exit(0);
+  }
+
+  options.branch = targetBranch as string;
+
+  return options;
+}
+
+/**
  * Backfill command implementation
  */
-async function backfill(options: BackfillOptions) {
+async function backfill(cmdOptions: BackfillOptions) {
   const cwd = process.cwd();
   const spinner = ora();
+
+  // Handle interactive mode
+  let options = cmdOptions;
+  if (cmdOptions.interactive) {
+    options = await promptForOptions();
+  }
+
+  // If no options provided at all, use smart defaults
+  if (!options.last && !options.from && !options.releasesOnly && !options.interactive) {
+    console.log(chalk.dim('No options provided, defaulting to --last 10\n'));
+    options.last = 10;
+  }
 
   try {
     // Validate we're in a git repo
@@ -217,6 +332,20 @@ async function backfill(options: BackfillOptions) {
     // Get current branch to return to it later
     const currentBranch = await getCurrentBranch(cwd);
     const currentCommit = await getCurrentCommit(cwd);
+
+    // If a specific branch is requested, check it out first
+    let targetBranch = currentBranch;
+    if (options.branch && options.branch !== currentBranch) {
+      spinner.start(`Checking out branch '${options.branch}'...`);
+      try {
+        await execAsync(`git checkout ${options.branch}`, { cwd });
+        targetBranch = options.branch;
+        spinner.succeed(`Checked out branch '${options.branch}'`);
+      } catch (error) {
+        spinner.fail(`Failed to checkout branch '${options.branch}'`);
+        throw new Error(`Could not checkout branch '${options.branch}': ${error}`);
+      }
+    }
 
     // Get commits to analyze
     spinner.start('Finding commits to analyze...');
@@ -230,6 +359,7 @@ async function backfill(options: BackfillOptions) {
 
     // Show what we're about to do
     console.log(chalk.dim('\nStrategy:'));
+    console.log(chalk.dim(`  - Branch: ${targetBranch}`));
     if (options.releasesOnly) {
       console.log(chalk.dim(`  - Analyzing all tagged releases`));
     } else if (options.last) {
@@ -281,12 +411,20 @@ async function backfill(options: BackfillOptions) {
     }
 
     // Summary
-    console.log(chalk.bold('\n📈 Backfill Complete\n'));
-    console.log(`  ${chalk.green('✓')} Successful: ${successCount}`);
-    if (failureCount > 0) {
-      console.log(`  ${chalk.red('✗')} Failed: ${failureCount}`);
+    if (options.interactive) {
+      clack.outro(
+        successCount === commits.length
+          ? chalk.green(`✓ Successfully backfilled ${successCount} commits!`)
+          : chalk.yellow(`⚠️  Backfilled ${successCount}/${commits.length} commits (${failureCount} failed)`)
+      );
+    } else {
+      console.log(chalk.bold('\n📈 Backfill Complete\n'));
+      console.log(`  ${chalk.green('✓')} Successful: ${successCount}`);
+      if (failureCount > 0) {
+        console.log(`  ${chalk.red('✗')} Failed: ${failureCount}`);
+      }
+      console.log();
     }
-    console.log();
 
   } catch (error) {
     spinner.fail('Backfill failed');
@@ -300,11 +438,36 @@ async function backfill(options: BackfillOptions) {
  */
 export const backfillCommand = new Command('backfill')
   .description('Analyze historical commits to populate bundle metrics')
+  .option('-i, --interactive', 'Interactive mode with prompts (recommended for first time)')
+  .option('--branch <name>', 'Target specific branch to backfill (e.g., main, develop)')
   .option('--from <ref>', 'Start from this git ref (commit, tag, branch)', 'HEAD~100')
   .option('--to <ref>', 'Analyze up to this git ref', 'HEAD')
-  .option('--last <n>', 'Analyze only the last N commits', parseInt)
+  .option('--last <n>', 'Analyze only the last N commits (defaults to 10 if no options provided)', parseInt)
   .option('--releases-only', 'Only analyze tagged releases')
   .option('--sample <n>', 'Sample approximately N commits from the range', parseInt)
   .option('--build-command <cmd>', 'Command to build the project', 'pnpm build')
   .option('--skip-install', 'Skip dependency installation (faster if deps unchanged)')
+  .addHelpText('after', `
+Examples:
+  $ bundlewatch backfill                            # Smart default (last 10 commits)
+  $ bundlewatch backfill -i                         # Interactive mode (recommended)
+  $ bundlewatch backfill --last 10                  # Quick start
+  $ bundlewatch backfill --branch main --last 20    # Backfill main branch only
+  $ bundlewatch backfill --releases-only            # Only analyze tagged releases
+  $ bundlewatch backfill --last 50                  # More comprehensive history
+  $ bundlewatch backfill --from v1.0.0 --to HEAD    # Specific range
+
+Performance tips:
+  • Backfill will automatically use the fastest analysis method available
+  • Webpack projects: Generate stats.json for faster analysis
+  • Vite projects: Manifests are automatically detected
+  • Estimated compression is used (trends are accurate, absolute values ~approximate)
+  • Tip: You usually only need to backfill your main branch (the one you compare against)
+
+For Webpack projects, add this to your webpack config for faster backfilling:
+  const StatsWriterPlugin = require('webpack-stats-plugin').StatsWriterPlugin;
+  plugins: [
+    new StatsWriterPlugin({ filename: 'stats.json' })
+  ]
+`)
   .action(backfill);

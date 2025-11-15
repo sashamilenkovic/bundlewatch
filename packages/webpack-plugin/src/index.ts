@@ -169,6 +169,24 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
             const baseline = await storage.load(options.compareAgainst);
             if (baseline) {
               comparison = compareMetrics(metrics, baseline, options.compareAgainst);
+            } else {
+              // First run - no baseline found
+              console.log('\n┌─────────────────────────────────────────────────────────────┐');
+              console.log('│ 📊 BundleWatch - First Run Detected                        │');
+              console.log('├─────────────────────────────────────────────────────────────┤');
+              console.log(`│ No baseline found for comparison with '${options.compareAgainst}'${' '.repeat(Math.max(0, 22 - options.compareAgainst.length))}│`);
+              console.log('│                                                             │');
+              console.log('│ 💡 To enable bundle size comparisons:                      │');
+              console.log('│                                                             │');
+              console.log('│   Quick start (recommended):                                │');
+              console.log('│   $ npx bundlewatch backfill --last 10                     │');
+              console.log('│                                                             │');
+              console.log('│   Or backfill releases only:                                │');
+              console.log('│   $ npx bundlewatch backfill --releases-only               │');
+              console.log('│                                                             │');
+              console.log('│ This build will be saved and used as a baseline            │');
+              console.log('│ for future comparisons.                                     │');
+              console.log('└─────────────────────────────────────────────────────────────┘\n');
             }
           }
 
