@@ -39,10 +39,11 @@ function createStorageContext(config: GitStorageConfig = {}): StorageContext {
  */
 async function branchExists(ctx: StorageContext): Promise<boolean> {
   try {
-    await execAsync(`git ls-remote --heads ${ctx.remote} ${ctx.branch}`, {
+    const { stdout } = await execAsync(`git ls-remote --heads ${ctx.remote} ${ctx.branch}`, {
       cwd: ctx.workingDir,
     });
-    return true;
+    // git ls-remote returns empty output if branch doesn't exist
+    return stdout.trim().length > 0;
   } catch {
     return false;
   }
