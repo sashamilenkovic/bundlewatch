@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.3...v2.0.4) (2025-11-16)
+
+
+### Bug Fixes
+
+* **core:** only commit data/ to bundlewatch-data branch and update GitHub Actions output ([b6b8fd4](https://github.com/sashamilenkovic/bundlewatch/commit/b6b8fd4819323d8ea971690278ed09b32dc3daec))
+
 ## [2.0.3](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.2...v2.0.3) (2025-11-16)
 
 
