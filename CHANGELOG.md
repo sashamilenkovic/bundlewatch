@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.2...v2.0.3) (2025-11-16)
+
+
+### Bug Fixes
+
+* **core:** stash changes before switching to data branch ([5641ff6](https://github.com/sashamilenkovic/bundlewatch/commit/5641ff689abdfd8adf4e346392315e8c613b5fea))
+
 ## [2.0.2](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.1...v2.0.2) (2025-11-16)
 
 
