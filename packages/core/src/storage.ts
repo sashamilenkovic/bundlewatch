@@ -26,11 +26,12 @@ interface StorageContext {
 /**
  * Create storage context with defaults
  */
-function createStorageContext(config: GitStorageConfig = {}): StorageContext {
+async function createStorageContext(config: GitStorageConfig = {}): Promise<StorageContext> {
+  const gitRoot = await getGitRoot(config.workingDir || process.cwd());
   return {
     branch: config.branch || 'bundlewatch-data',
     remote: config.remote || 'origin',
-    workingDir: config.workingDir || process.cwd(),
+    workingDir: gitRoot,
   };
 }
 
@@ -71,7 +72,7 @@ async function updateLatest(ctx: StorageContext, branch: string, metrics: BuildM
  * Save metrics to git branch
  */
 export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfig = {}): Promise<void> {
-  const ctx = createStorageContext(config);
+  const ctx = await createStorageContext(config);
   const timestamp = new Date(metrics.timestamp).getTime();
   const filename = `${timestamp}-${metrics.commit.substring(0, 7)}.json`;
   const filepath = join('data', metrics.branch, filename);
@@ -167,7 +168,7 @@ export async function loadMetrics(
   commit?: string,
   config: GitStorageConfig = {}
 ): Promise<BuildMetrics | null> {
-  const ctx = createStorageContext(config);
+  const ctx = await createStorageContext(config);
   
   try {
     // Fetch latest data
@@ -213,7 +214,7 @@ export async function listMetrics(
   branch: string,
   config: GitStorageConfig = {}
 ): Promise<BuildMetrics[]> {
-  const ctx = createStorageContext(config);
+  const ctx = await createStorageContext(config);
   
   try {
     await execAsync(`git fetch ${ctx.remote} ${ctx.branch}`, { cwd: ctx.workingDir });
@@ -264,6 +265,18 @@ export async function getCurrentBranch(workingDir: string = process.cwd()): Prom
     return stdout.trim() || 'unknown';
   } catch {
     return 'unknown';
+  }
+}
+
+/**
+ * Get git repository root directory
+ */
+export async function getGitRoot(workingDir: string = process.cwd()): Promise<string> {
+  try {
+    const { stdout } = await execAsync('git rev-parse --show-toplevel', { cwd: workingDir });
+    return stdout.trim();
+  } catch {
+    return workingDir; // Fallback to working dir if not in a git repo
   }
 }
 
