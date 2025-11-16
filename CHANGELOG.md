@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.1...v2.0.2) (2025-11-16)
+
+
+### Bug Fixes
+
+* filter out node_modules and .pnpm from module-level analysis ([83dd25e](https://github.com/sashamilenkovic/bundlewatch/commit/83dd25ef2efe03a6530dc8fbf49ae0aef9026aa9))
+
 ## [2.0.1](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.0...v2.0.1) (2025-11-15)
 
 
