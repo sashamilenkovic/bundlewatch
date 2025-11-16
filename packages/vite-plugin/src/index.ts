@@ -218,13 +218,21 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
         }
 
         // Set environment variables for GitHub Actions
-        if (isCI) {
+        if (isCI && process.env.GITHUB_OUTPUT) {
           console.log('Setting GitHub Actions outputs...');
-          console.log(`::set-output name=total-size::${metrics.totalSize}`);
-          console.log(`::set-output name=gzip-size::${metrics.totalGzipSize}`);
+          const outputs = [
+            `total-size=${metrics.totalSize}`,
+            `gzip-size=${metrics.totalGzipSize}`,
+          ];
           if (comparison) {
-            console.log(`::set-output name=size-diff::${comparison.changes.totalSize.diff}`);
-            console.log(`::set-output name=size-diff-percent::${comparison.changes.totalSize.diffPercent}`);
+            outputs.push(`size-diff=${comparison.changes.totalSize.diff}`);
+            outputs.push(`size-diff-percent=${comparison.changes.totalSize.diffPercent}`);
+          }
+
+          // Write to GITHUB_OUTPUT file (new method)
+          const { appendFileSync } = await import('fs');
+          for (const output of outputs) {
+            appendFileSync(process.env.GITHUB_OUTPUT, `${output}\n`);
           }
         }
 

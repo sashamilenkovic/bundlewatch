@@ -100,8 +100,9 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
       // Create initial structure
       await writeMetricsFile(ctx, filepath, metrics);
       await updateLatest(ctx, metrics.branch, metrics);
-      
-      await execAsync('git add .', { cwd: ctx.workingDir });
+
+      // Only add the data directory, not everything in working dir
+      await execAsync('git add data/', { cwd: ctx.workingDir });
       await execAsync('git commit -m "Initialize bundle-watch data"', { cwd: ctx.workingDir });
       
       // Push the new branch
@@ -122,8 +123,8 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
       await writeMetricsFile(ctx, filepath, metrics);
       await updateLatest(ctx, metrics.branch, metrics);
 
-      // Commit and push
-      await execAsync('git add .', { cwd: ctx.workingDir });
+      // Commit and push - only add data directory
+      await execAsync('git add data/', { cwd: ctx.workingDir });
       await execAsync(
         `git commit -m "Add metrics for ${metrics.branch}@${metrics.commit.substring(0, 7)}"`,
         { cwd: ctx.workingDir }
