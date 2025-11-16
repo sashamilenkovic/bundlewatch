@@ -1,3 +1,10 @@
+## [2.0.5](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.4...v2.0.5) (2025-11-16)
+
+
+### Bug Fixes
+
+* **core:** use git repository root for data storage in monorepos ([246ae7a](https://github.com/sashamilenkovic/bundlewatch/commit/246ae7a9382ecfb2708f819c97caf2931ea2ce50))
+
 ## [2.0.4](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.3...v2.0.4) (2025-11-16)
 
 
