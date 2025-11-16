@@ -120,6 +120,11 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
     moduleParsed(moduleInfo) {
       if (!options.enabled || !analyzerState) return;
 
+      // Skip node_modules and .pnpm to avoid cluttering the analysis
+      if (moduleInfo.id.includes('node_modules') || moduleInfo.id.includes('.pnpm')) {
+        return;
+      }
+
       // Collect module information during build
       analyzerState = collectModuleInfo(analyzerState, {
         id: moduleInfo.id,

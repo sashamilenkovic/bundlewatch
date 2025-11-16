@@ -123,6 +123,11 @@ export function parseWebpackStats(
         continue;
       }
 
+      // Skip node_modules and .pnpm to avoid cluttering the analysis
+      if (module.name.includes('node_modules') || module.name.includes('.pnpm')) {
+        continue;
+      }
+
       const moduleId = module.identifier || module.name;
       const packageName = extractPackageName(module.name);
 
