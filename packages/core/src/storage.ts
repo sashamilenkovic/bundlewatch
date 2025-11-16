@@ -86,6 +86,11 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
     const exists = await branchExists(ctx);
 
     if (!exists) {
+      // Stash any uncommitted changes to avoid conflicts
+      await execAsync('git stash push -u -m "bundlewatch: temporary stash"', { cwd: ctx.workingDir }).catch(() => {
+        // Ignore errors if nothing to stash
+      });
+
       // Create orphan branch for data storage
       await execAsync(`git checkout --orphan ${ctx.branch}`, { cwd: ctx.workingDir });
       await execAsync('git rm -rf .', { cwd: ctx.workingDir }).catch(() => {
@@ -104,6 +109,12 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
     } else {
       // Checkout existing data branch
       await execAsync(`git fetch ${ctx.remote} ${ctx.branch}`, { cwd: ctx.workingDir });
+
+      // Stash any uncommitted changes to avoid conflicts
+      await execAsync('git stash push -u -m "bundlewatch: temporary stash"', { cwd: ctx.workingDir }).catch(() => {
+        // Ignore errors if nothing to stash
+      });
+
       await execAsync(`git checkout ${ctx.branch}`, { cwd: ctx.workingDir });
       await execAsync(`git pull ${ctx.remote} ${ctx.branch}`, { cwd: ctx.workingDir });
 
@@ -122,8 +133,27 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
 
     // Return to original branch
     await execAsync(`git checkout ${currentBranch.trim()}`, { cwd: ctx.workingDir });
+
+    // Restore stashed changes if any
+    await execAsync('git stash pop', { cwd: ctx.workingDir }).catch(() => {
+      // Ignore errors if no stash to pop
+    });
   } catch (error) {
     console.error('Error saving metrics to git:', error);
+
+    // Try to return to original branch on error
+    try {
+      const { stdout: currentBranch } = await execAsync('git branch --show-current', {
+        cwd: ctx.workingDir,
+      });
+      if (currentBranch.trim() !== ctx.branch) {
+        await execAsync(`git checkout ${currentBranch.trim()}`, { cwd: ctx.workingDir });
+        await execAsync('git stash pop', { cwd: ctx.workingDir }).catch(() => {});
+      }
+    } catch {
+      // Ignore cleanup errors
+    }
+
     throw error;
   }
 }

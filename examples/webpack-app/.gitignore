@@ -10,3 +10,5 @@ dist
 # Misc
 .DS_Store
 
+# Bundlewatch
+bundle-report/
