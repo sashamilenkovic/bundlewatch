@@ -256,7 +256,24 @@ async function processChunk(
   const modules: ModuleMetrics[] = [];
 
   for (const moduleId of moduleIds) {
-    const moduleInfo = state.modules.get(moduleId);
+    // Try to get tracked module info first
+    let moduleInfo = state.modules.get(moduleId);
+
+    // If not tracked (e.g., node_modules were skipped), synthesize from chunk data
+    if (!moduleInfo && chunk.modules) {
+      const chunkModule = chunk.modules[moduleId];
+      const code = chunkModule?.code || '';
+      moduleInfo = {
+        id: moduleId,
+        code,
+        size: Buffer.from(code).length,
+        imports: [],
+        importedBy: [],
+        package: extractPackageName(moduleId),
+        type: getModuleType(moduleId),
+      };
+    }
+
     if (!moduleInfo) continue;
 
     modules.push({
@@ -586,10 +603,28 @@ function calculateDepth(
 function extractPackageName(id: string): string {
   // Handle node_modules packages
   if (id.includes('node_modules')) {
-    // Handle both scoped (@org/package) and regular packages
+    // Handle pnpm paths: .pnpm/react@18.0.0/node_modules/react/index.js
+    // Extract the actual package name after .pnpm/package@version/node_modules/
+    if (id.includes('.pnpm')) {
+      const pnpmMatch = id.match(/\.pnpm[/\\][^/\\]+[/\\]node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+      if (pnpmMatch) {
+        return pnpmMatch[1].replace(/\\/g, '/');
+      }
+    }
+
+    // Handle regular node_modules paths and scoped packages
     const match = id.match(/node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
     if (match) {
-      return match[1].replace(/\\/g, '/');
+      const pkgName = match[1].replace(/\\/g, '/');
+      // Skip cache directories like .vite, .cache, etc.
+      if (pkgName.startsWith('.')) {
+        // Try to find the real package after the cache dir
+        const cacheMatch = id.match(/node_modules[/\\]\.[^/\\]+[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+        if (cacheMatch) {
+          return cacheMatch[1].replace(/\\/g, '/');
+        }
+      }
+      return pkgName;
     }
     return 'unknown';
   }

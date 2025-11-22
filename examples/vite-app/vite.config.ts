@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import { bundleWatch } from "@milencode/bundlewatch-vite-plugin";
 
 export default defineConfig({
@@ -6,6 +7,7 @@ export default defineConfig({
     sourcemap: true, // Enable source maps for analysis
   },
   plugins: [
+    react(),
     bundleWatch({
       enabled: true,
       printReport: true,

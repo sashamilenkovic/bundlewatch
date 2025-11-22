@@ -36,13 +36,26 @@ export function formatBytes(bytes: number): string {
 export function generateTreemapData(metrics: BuildMetrics): TreemapData {
   // If we have detailed dependencies, show module composition
   if (metrics.detailedDependencies && metrics.detailedDependencies.length > 0) {
-    const children: TreemapNode[] = metrics.detailedDependencies.map(dep => ({
-      name: dep.name,
-      value: dep.totalSize,
-      gzip: dep.gzipSize || 0,
-      brotli: dep.brotliSize || 0,
-      type: (dep.name === 'your-app' ? 'app' : 'npm') as 'app' | 'npm',
-    }));
+    const children: TreemapNode[] = metrics.detailedDependencies.map(dep => {
+      // Determine type: app code vs npm packages vs vendor
+      let type: 'app' | 'npm' | 'vendor' = 'npm';
+
+      if (dep.name === 'your-app' || dep.name === 'app' || dep.name.startsWith('src/') ||
+          dep.name.startsWith('lib/') || dep.name.startsWith('components/') ||
+          dep.name.startsWith('pages/') || dep.name.startsWith('views/')) {
+        type = 'app';
+      } else if (dep.name === 'bundler-virtual' || dep.name.startsWith('virtual:')) {
+        type = 'vendor';
+      }
+
+      return {
+        name: dep.name,
+        value: dep.totalSize,
+        gzip: dep.gzipSize || 0,
+        brotli: dep.brotliSize || 0,
+        type: type as 'app' | 'npm',
+      };
+    });
 
     return {
       name: 'Bundle Composition',
