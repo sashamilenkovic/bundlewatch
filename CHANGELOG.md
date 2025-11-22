@@ -1,3 +1,10 @@
+## [2.0.6](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.5...v2.0.6) (2025-11-22)
+
+
+### Bug Fixes
+
+* issue with bundle analysis ([9ef73fa](https://github.com/sashamilenkovic/bundlewatch/commit/9ef73fa1c2e37bdb7e5b4d2bccaf09b842df428f))
+
 ## [2.0.5](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.4...v2.0.5) (2025-11-16)
 
 
