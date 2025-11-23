@@ -1,3 +1,10 @@
+## [2.0.7](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.6...v2.0.7) (2025-11-23)
+
+
+### Bug Fixes
+
+* **parsers:** add gzip/brotli estimates and fix treemap colors ([f7dcde8](https://github.com/sashamilenkovic/bundlewatch/commit/f7dcde8b1db052231ab5c20b28bd41ea61d54d61)), closes [#10b981](https://github.com/sashamilenkovic/bundlewatch/issues/10b981) [#3b82f6](https://github.com/sashamilenkovic/bundlewatch/issues/3b82f6) [#8b5cf6](https://github.com/sashamilenkovic/bundlewatch/issues/8b5cf6)
+
 ## [2.0.6](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.5...v2.0.6) (2025-11-22)
 
 
