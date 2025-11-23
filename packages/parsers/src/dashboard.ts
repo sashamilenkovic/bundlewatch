@@ -320,13 +320,13 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
                 : '<span class="badge badge-npm">NPM</span> '
               }
               <strong>${dep.name}</strong>
-              ${dep.duplicate ? ' <span style="color: #ef4444;">⚠️ DUPLICATE</span>' : ''}
+              ${dep.duplicate ? ' <span style="color: #ef4444;">DUPLICATE</span>' : ''}
             </td>
             <td>${formatBytes(dep.totalSize)}</td>
             <td>${dep.gzipSize ? formatBytes(dep.gzipSize) : 'N/A'}</td>
             <td>${dep.percentOfTotal?.toFixed(1)}%</td>
             <td>${dep.moduleCount}</td>
-            <td>${dep.treeshakeable ? '✅ Yes' : '❌ No'}</td>
+            <td>${dep.treeshakeable === true ? 'Yes' : dep.treeshakeable === false ? 'No' : 'Unknown'}</td>
           </tr>
         `).join('')}
       </tbody>
@@ -336,6 +336,10 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
 
   ${sourceFileData.length > 0 ? `
     <h2>Source Files (via Source Maps)</h2>
+    <p style="color: #64748b; margin-bottom: 1rem; font-size: 0.95em;">
+      Note: These sizes represent original source code before minification and tree-shaking.
+      The actual bundled sizes are shown in the Dependencies and Bundle Composition sections above.
+    </p>
     <div class="dependency-table">
       <table>
         <thead>

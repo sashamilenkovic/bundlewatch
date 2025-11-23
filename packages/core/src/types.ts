@@ -95,8 +95,8 @@ export interface DependencyMetrics {
   /** Entry point that first imported this dependency */
   firstImportedBy?: string;
 
-  /** Whether the package supports tree-shaking */
-  treeshakeable: boolean;
+  /** Whether the package supports tree-shaking (undefined if unknown) */
+  treeshakeable?: boolean;
 
   /** Whether this is a duplicate (multiple versions) */
   duplicate?: boolean;

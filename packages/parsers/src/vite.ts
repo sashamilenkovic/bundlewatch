@@ -532,7 +532,7 @@ function calculateDependencyMetricsFromSourceFiles(
         brotliSize,
         moduleCount: files.length,
         chunks: [], // Source files don't have chunk info
-        treeshakeable: false, // Can't determine from source map
+        treeshakeable: undefined, // Can't determine from source map
         duplicate: false,
         percentOfTotal: (totalSize / totalBundleSize) * 100,
       };
