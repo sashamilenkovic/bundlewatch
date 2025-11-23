@@ -169,16 +169,16 @@ export async function analyzeBundle(
     ? buildDependencyGraph(state, chunkToModules)
     : undefined;
 
-  // Calculate dependency metrics
-  const detailedDependencies = calculateDependencyMetrics(
-    moduleMetrics,
-    bundles
-  );
-
   // Merge source file metrics from all chunks
   const sourceFiles = sourceFilesArrays.length > 0
     ? mergeSourceFileMetrics(sourceFilesArrays)
     : undefined;
+
+  // Calculate dependency metrics
+  // Use sourceFiles if available (accurate minified sizes), otherwise fall back to modules
+  const detailedDependencies = sourceFiles && sourceFiles.length > 0
+    ? calculateDependencyMetricsFromSourceFiles(sourceFiles, bundles)
+    : calculateDependencyMetrics(moduleMetrics, bundles);
 
   // Generate optimizations
   const optimizations = state.options.generateRecommendations
@@ -262,11 +262,12 @@ async function processChunk(
     // If not tracked (e.g., node_modules were skipped), synthesize from chunk data
     if (!moduleInfo && chunk.modules) {
       const chunkModule = chunk.modules[moduleId];
-      const code = chunkModule?.code || '';
+      // Use renderedLength (actual bundled size) not code.length (original source size)
+      const size = chunkModule?.renderedLength || 0;
       moduleInfo = {
         id: moduleId,
-        code,
-        size: Buffer.from(code).length,
+        code: chunkModule?.code || '',
+        size,
         imports: [],
         importedBy: [],
         package: extractPackageName(moduleId),
@@ -488,6 +489,56 @@ function detectDuplicatePackages(
 }
 
 // ===== METRICS CALCULATION =====
+
+/**
+ * Calculate dependency metrics from source map data using proportional distribution
+ *
+ * Source maps contain original source sizes, not minified sizes. We distribute the
+ * actual bundle size proportionally based on source file contributions.
+ */
+function calculateDependencyMetricsFromSourceFiles(
+  sourceFiles: SourceFileMetrics[],
+  bundles: Bundle[]
+): DependencyMetrics[] {
+  const byPackage = new Map<string, SourceFileMetrics[]>();
+
+  for (const file of sourceFiles) {
+    const list = byPackage.get(file.package) || [];
+    list.push(file);
+    byPackage.set(file.package, list);
+  }
+
+  const totalBundleSize = bundles.reduce((sum, b) => sum + b.size, 0);
+  const totalGzipSize = bundles.reduce((sum, b) => sum + b.gzipSize, 0);
+  const totalBrotliSize = bundles.reduce((sum, b) => sum + b.brotliSize, 0);
+
+  // Total source size (before minification/compression)
+  const totalSourceSize = sourceFiles.reduce((sum, f) => sum + f.size, 0);
+
+  return Array.from(byPackage.entries())
+    .map(([pkg, files]) => {
+      const sourceSize = files.reduce((sum, f) => sum + f.size, 0);
+
+      // Distribute actual bundle size proportionally based on source contribution
+      const proportion = totalSourceSize > 0 ? sourceSize / totalSourceSize : 0;
+      const totalSize = Math.round(totalBundleSize * proportion);
+      const gzipSize = Math.round(totalGzipSize * proportion);
+      const brotliSize = Math.round(totalBrotliSize * proportion);
+
+      return {
+        name: pkg,
+        totalSize,
+        gzipSize,
+        brotliSize,
+        moduleCount: files.length,
+        chunks: [], // Source files don't have chunk info
+        treeshakeable: false, // Can't determine from source map
+        duplicate: false,
+        percentOfTotal: (totalSize / totalBundleSize) * 100,
+      };
+    })
+    .sort((a, b) => b.totalSize - a.totalSize);
+}
 
 function calculateDependencyMetrics(
   modules: ModuleMetrics[],

@@ -129,8 +129,29 @@ function analyzeSourceMapContributions(
 function extractPackageFromSource(source: string): string {
   // Handle node_modules paths
   if (source.includes("node_modules")) {
-    const match = source.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)/);
-    return match ? match[1] : "unknown";
+    // Handle pnpm paths: node_modules/.pnpm/react@18.0.0/node_modules/react/index.js
+    if (source.includes(".pnpm")) {
+      const pnpmMatch = source.match(/\.pnpm[/\\][^/\\]+[/\\]node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+      if (pnpmMatch) {
+        return pnpmMatch[1].replace(/\\/g, '/');
+      }
+    }
+
+    // Handle regular node_modules paths
+    const match = source.match(/node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+    if (match) {
+      const pkgName = match[1].replace(/\\/g, '/');
+      // Skip cache directories like .vite, .cache, .pnpm
+      if (pkgName.startsWith('.')) {
+        // Try to find the real package after the cache dir
+        const cacheMatch = source.match(/node_modules[/\\]\.[^/\\]+[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+        if (cacheMatch) {
+          return cacheMatch[1].replace(/\\/g, '/');
+        }
+      }
+      return pkgName;
+    }
+    return "unknown";
   }
 
   // Handle webpack internal modules
