@@ -1,3 +1,10 @@
+## [2.0.8](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.7...v2.0.8) (2025-11-23)
+
+
+### Bug Fixes
+
+* **parsers:** use proportional source map distribution for accurate sizes ([5d450d3](https://github.com/sashamilenkovic/bundlewatch/commit/5d450d30a048efdd5a70cabcb5f6199d917486fb))
+
 ## [2.0.7](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.6...v2.0.7) (2025-11-23)
 
 
