@@ -502,15 +502,27 @@ function calculateDependencyMetrics(
   }
 
   const totalBundleSize = bundles.reduce((sum, b) => sum + b.size, 0);
+  const totalGzipSize = bundles.reduce((sum, b) => sum + b.gzipSize, 0);
+  const totalBrotliSize = bundles.reduce((sum, b) => sum + b.brotliSize, 0);
+
+  // Calculate compression ratios from actual bundle compression
+  const gzipRatio = totalBundleSize > 0 ? totalGzipSize / totalBundleSize : 0.3;
+  const brotliRatio = totalBundleSize > 0 ? totalBrotliSize / totalBundleSize : 0.25;
 
   return Array.from(byPackage.entries())
     .map(([pkg, mods]) => {
       const totalSize = mods.reduce((sum, m) => sum + m.size, 0);
       const chunks = [...new Set(mods.flatMap(m => m.chunks))];
 
+      // Estimate compressed sizes using actual compression ratios
+      const gzipSize = Math.round(totalSize * gzipRatio);
+      const brotliSize = Math.round(totalSize * brotliRatio);
+
       return {
         name: pkg,
         totalSize,
+        gzipSize,
+        brotliSize,
         moduleCount: mods.length,
         chunks,
         firstImportedBy: mods[0]?.importedBy[0],

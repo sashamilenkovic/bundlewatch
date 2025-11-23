@@ -373,8 +373,8 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
     const height = 600;
 
     const color = d3.scaleOrdinal()
-      .domain(['js', 'css', 'asset', 'html', 'other', 'app', 'npm'])
-      .range(['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#10b981', '#3b82f6']);
+      .domain(['app', 'npm', 'vendor', 'js', 'css', 'asset', 'html', 'other'])
+      .range(['#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#f59e0b', '#06b6d4', '#f97316', '#64748b']);
 
     const treemap = d3.treemap()
       .size([width, height])
