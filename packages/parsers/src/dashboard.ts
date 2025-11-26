@@ -104,7 +104,7 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
       padding: 2rem;
     }
     .header {
-      margin-bottom: 2rem;
+      margin: 0 2rem 2rem;
     }
     h1 {
       font-size: 2rem;
@@ -114,13 +114,16 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
     h2 {
       font-size: 1.5rem;
       font-weight: 600;
-      margin: 2rem 0 1rem;
+      margin: 2rem 2rem 1rem;
+    }
+    p {
+      margin: 0 2rem;
     }
     .stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin: 0 2rem 2rem;
     }
     .stat-card {
       background: #1e293b;
@@ -138,8 +141,9 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
       font-weight: 600;
     }
     .treemap {
-      width: 100%;
-      height: 600px;
+      width: calc(100% - 4rem);
+      height: 400px;
+      margin: 0 2rem;
       background: #1e293b;
       border-radius: 0.5rem;
       border: 1px solid #334155;
@@ -178,7 +182,8 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
       color: #94a3b8;
     }
     .dependency-table {
-      width: 100%;
+      width: calc(100% - 4rem);
+      margin: 0 2rem;
       background: #1e293b;
       border-radius: 0.5rem;
       border: 1px solid #334155;
@@ -374,7 +379,7 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
     const data = ${JSON.stringify(treemapData)};
 
     const width = document.getElementById('treemap').clientWidth;
-    const height = 600;
+    const height = 400;
 
     const color = d3.scaleOrdinal()
       .domain(['app', 'npm', 'vendor', 'js', 'css', 'asset', 'html', 'other'])

@@ -4,9 +4,6 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "bundlewatch-dashboard": "./dist/cli.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -23,8 +20,7 @@
   },
   "dependencies": {
     "@milencode/bundlewatch-core": "workspace:*",
-    "h3": "^1.12.0",
-    "open": "^10.0.3"
+    "@milencode/bundlewatch-parsers": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.9.3",

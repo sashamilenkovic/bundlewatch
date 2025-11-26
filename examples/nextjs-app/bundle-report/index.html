@@ -14,7 +14,7 @@
       padding: 2rem;
     }
     .header {
-      margin-bottom: 2rem;
+      margin: 0 2rem 2rem;
     }
     h1 {
       font-size: 2rem;
@@ -24,13 +24,16 @@
     h2 {
       font-size: 1.5rem;
       font-weight: 600;
-      margin: 2rem 0 1rem;
+      margin: 2rem 2rem 1rem;
+    }
+    p {
+      margin: 0 2rem;
     }
     .stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin: 0 2rem 2rem;
     }
     .stat-card {
       background: #1e293b;
@@ -48,8 +51,9 @@
       font-weight: 600;
     }
     .treemap {
-      width: 100%;
-      height: 600px;
+      width: calc(100% - 4rem);
+      height: 400px;
+      margin: 0 2rem;
       background: #1e293b;
       border-radius: 0.5rem;
       border: 1px solid #334155;
@@ -88,7 +92,8 @@
       color: #94a3b8;
     }
     .dependency-table {
-      width: 100%;
+      width: calc(100% - 4rem);
+      margin: 0 2rem;
       background: #1e293b;
       border-radius: 0.5rem;
       border: 1px solid #334155;
@@ -142,8 +147,8 @@
     <h1>Bundle Watch Dashboard</h1>
     <p style="color: #94a3b8;">
       Branch: <strong>main</strong> |
-      Commit: <strong>246ae7a</strong> |
-      11/22/2025, 6:39:28 PM
+      Commit: <strong>a426602</strong> |
+      11/25/2025, 9:05:48 PM
     </p>
   </div>
 
@@ -163,6 +168,11 @@
     <div class="stat-card">
       <div class="stat-label">Chunks</div>
       <div class="stat-value">28</div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-label">Modules</div>
+      <div class="stat-value">2</div>
     </div>
     
   </div>
@@ -186,282 +196,69 @@
         
           <tr>
             <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>framework-d7100435d1a34b54.js</strong>
+              <span class="badge badge-app">APP</span> 
+              <strong>src/app</strong>
             </td>
-            <td>185.32 KB</td>
-            <td>55.60 KB</td>
-            <td>47.26 KB</td>
+            <td>39.00 B</td>
+            <td>N/A</td>
+            <td>N/A</td>
           </tr>
         
           <tr>
             <td>
               <span class="badge badge-npm">NPM</span> 
-              <strong>3a5912a2-2a3b8a4aec81213f.js</strong>
+              <strong>private-next-instrumentation-client (ignored)</strong>
             </td>
-            <td>168.96 KB</td>
-            <td>50.69 KB</td>
-            <td>43.09 KB</td>
+            <td>15.00 B</td>
+            <td>N/A</td>
+            <td>N/A</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </div>
+  
+
+  
+  <h2>Dependencies</h2>
+  <div class="dependency-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Size</th>
+          <th>Gzipped</th>
+          <th>% of Total</th>
+          <th>Modules</th>
+          <th>Tree-shakeable</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>src/app</strong>
+              
+            </td>
+            <td>39.00 B</td>
+            <td>N/A</td>
+            <td>0.0%</td>
+            <td>1</td>
+            <td>No</td>
           </tr>
         
           <tr>
             <td>
               <span class="badge badge-npm">NPM</span> 
-              <strong>277-5947cb65a61fba30.js</strong>
+              <strong>private-next-instrumentation-client (ignored)</strong>
+              
             </td>
-            <td>167.42 KB</td>
-            <td>50.22 KB</td>
-            <td>42.69 KB</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>main-4424bf5ff2ae935e.js</strong>
-            </td>
-            <td>124.20 KB</td>
-            <td>37.26 KB</td>
-            <td>31.67 KB</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>polyfills-42372ed130431b0a.js</strong>
-            </td>
-            <td>109.96 KB</td>
-            <td>32.99 KB</td>
-            <td>28.04 KB</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>page_client-reference-manifest.js</strong>
-            </td>
-            <td>7.59 KB</td>
-            <td>2.28 KB</td>
-            <td>1.93 KB</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>page_client-reference-manifest.js</strong>
-            </td>
-            <td>7.58 KB</td>
-            <td>2.27 KB</td>
-            <td>1.93 KB</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>page_client-reference-manifest.js</strong>
-            </td>
-            <td>7.58 KB</td>
-            <td>2.27 KB</td>
-            <td>1.93 KB</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>page_client-reference-manifest.js</strong>
-            </td>
-            <td>7.49 KB</td>
-            <td>2.25 KB</td>
-            <td>1.91 KB</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>webpack-50e18e6964eabb80.js</strong>
-            </td>
-            <td>3.09 KB</td>
-            <td>951.00 B</td>
-            <td>808.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>page-f087f11799248ff1.js</strong>
-            </td>
-            <td>2.61 KB</td>
-            <td>801.00 B</td>
-            <td>681.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>app-build-manifest.json</strong>
-            </td>
-            <td>1.45 KB</td>
-            <td>445.00 B</td>
-            <td>378.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>build-manifest.json</strong>
-            </td>
-            <td>995.00 B</td>
-            <td>299.00 B</td>
-            <td>254.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>middleware-build-manifest.js</strong>
-            </td>
-            <td>921.00 B</td>
-            <td>276.00 B</td>
-            <td>235.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>3d181dfe8c33fd95.css</strong>
-            </td>
-            <td>727.00 B</td>
-            <td>218.00 B</td>
-            <td>185.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>_buildManifest.js</strong>
-            </td>
-            <td>581.00 B</td>
-            <td>174.00 B</td>
-            <td>148.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>main-app-4fb325485adff971.js</strong>
-            </td>
-            <td>558.00 B</td>
-            <td>167.00 B</td>
-            <td>142.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>_app-1c1b947839b4e6f3.js</strong>
-            </td>
-            <td>236.00 B</td>
-            <td>71.00 B</td>
-            <td>60.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>_error-32e7352a38d707d2.js</strong>
-            </td>
-            <td>217.00 B</td>
-            <td>65.00 B</td>
-            <td>55.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>layout-d1473f20c1b99d80.js</strong>
-            </td>
-            <td>195.00 B</td>
-            <td>59.00 B</td>
-            <td>50.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>page-6ece7e75fa45d305.js</strong>
-            </td>
-            <td>139.00 B</td>
-            <td>42.00 B</td>
-            <td>36.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>page-6ece7e75fa45d305.js</strong>
-            </td>
-            <td>139.00 B</td>
-            <td>42.00 B</td>
-            <td>36.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>page-6ece7e75fa45d305.js</strong>
-            </td>
-            <td>139.00 B</td>
-            <td>42.00 B</td>
-            <td>36.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>next-font-manifest.js</strong>
-            </td>
-            <td>106.00 B</td>
-            <td>32.00 B</td>
-            <td>27.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>next-font-manifest.json</strong>
-            </td>
-            <td>77.00 B</td>
-            <td>23.00 B</td>
-            <td>20.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>_ssgManifest.js</strong>
-            </td>
-            <td>77.00 B</td>
-            <td>23.00 B</td>
-            <td>20.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>middleware-react-loadable-manifest.js</strong>
-            </td>
-            <td>36.00 B</td>
-            <td>11.00 B</td>
-            <td>9.00 B</td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>react-loadable-manifest.json</strong>
-            </td>
-            <td>2.00 B</td>
-            <td>1.00 B</td>
-            <td>1.00 B</td>
+            <td>15.00 B</td>
+            <td>N/A</td>
+            <td>0.0%</td>
+            <td>1</td>
+            <td>No</td>
           </tr>
         
       </tbody>
@@ -471,17 +268,15 @@
 
   
 
-  
-
   <script>
-    const data = {"name":"Bundle","children":[{"name":"framework-d7100435d1a34b54.js","value":189765,"gzip":56930,"brotli":48391,"type":"js"},{"name":"3a5912a2-2a3b8a4aec81213f.js","value":173019,"gzip":51906,"brotli":44120,"type":"js"},{"name":"277-5947cb65a61fba30.js","value":171434,"gzip":51430,"brotli":43716,"type":"js"},{"name":"main-4424bf5ff2ae935e.js","value":127178,"gzip":38153,"brotli":32430,"type":"js"},{"name":"polyfills-42372ed130431b0a.js","value":112594,"gzip":33778,"brotli":28711,"type":"js"},{"name":"page_client-reference-manifest.js","value":7771,"gzip":2331,"brotli":1981,"type":"js"},{"name":"page_client-reference-manifest.js","value":7761,"gzip":2328,"brotli":1979,"type":"js"},{"name":"page_client-reference-manifest.js","value":7759,"gzip":2328,"brotli":1979,"type":"js"},{"name":"page_client-reference-manifest.js","value":7667,"gzip":2300,"brotli":1955,"type":"js"},{"name":"webpack-50e18e6964eabb80.js","value":3169,"gzip":951,"brotli":808,"type":"js"},{"name":"page-f087f11799248ff1.js","value":2670,"gzip":801,"brotli":681,"type":"js"},{"name":"app-build-manifest.json","value":1483,"gzip":445,"brotli":378,"type":"other"},{"name":"build-manifest.json","value":995,"gzip":299,"brotli":254,"type":"other"},{"name":"middleware-build-manifest.js","value":921,"gzip":276,"brotli":235,"type":"js"},{"name":"3d181dfe8c33fd95.css","value":727,"gzip":218,"brotli":185,"type":"css"},{"name":"_buildManifest.js","value":581,"gzip":174,"brotli":148,"type":"js"},{"name":"main-app-4fb325485adff971.js","value":558,"gzip":167,"brotli":142,"type":"js"},{"name":"_app-1c1b947839b4e6f3.js","value":236,"gzip":71,"brotli":60,"type":"js"},{"name":"_error-32e7352a38d707d2.js","value":217,"gzip":65,"brotli":55,"type":"js"},{"name":"layout-d1473f20c1b99d80.js","value":195,"gzip":59,"brotli":50,"type":"js"},{"name":"page-6ece7e75fa45d305.js","value":139,"gzip":42,"brotli":36,"type":"js"},{"name":"page-6ece7e75fa45d305.js","value":139,"gzip":42,"brotli":36,"type":"js"},{"name":"page-6ece7e75fa45d305.js","value":139,"gzip":42,"brotli":36,"type":"js"},{"name":"next-font-manifest.js","value":106,"gzip":32,"brotli":27,"type":"js"},{"name":"next-font-manifest.json","value":77,"gzip":23,"brotli":20,"type":"other"},{"name":"_ssgManifest.js","value":77,"gzip":23,"brotli":20,"type":"js"},{"name":"middleware-react-loadable-manifest.js","value":36,"gzip":11,"brotli":9,"type":"js"},{"name":"react-loadable-manifest.json","value":2,"gzip":1,"brotli":1,"type":"other"}]};
+    const data = {"name":"Bundle Composition","children":[{"name":"src/app","value":39,"gzip":0,"brotli":0,"type":"app"},{"name":"private-next-instrumentation-client (ignored)","value":15,"gzip":0,"brotli":0,"type":"npm"}]};
 
     const width = document.getElementById('treemap').clientWidth;
-    const height = 600;
+    const height = 400;
 
     const color = d3.scaleOrdinal()
-      .domain(['js', 'css', 'asset', 'html', 'other', 'app', 'npm'])
-      .range(['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#10b981', '#3b82f6']);
+      .domain(['app', 'npm', 'vendor', 'js', 'css', 'asset', 'html', 'other'])
+      .range(['#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#f59e0b', '#06b6d4', '#f97316', '#64748b']);
 
     const treemap = d3.treemap()
       .size([width, height])

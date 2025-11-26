@@ -4,7 +4,7 @@
 
 import { writeFile, mkdir } from 'fs/promises';
 import { resolve, join } from 'path';
-import { generateDashboardHTML, type DashboardData } from './template.js';
+import { generateEnhancedDashboard } from '@milencode/bundlewatch-parsers';
 import type { BuildMetrics } from '@milencode/bundlewatch-core';
 
 export interface ExportOptions {
@@ -46,15 +46,8 @@ export async function exportStatic(options: ExportOptions): Promise<string> {
     baseline,
   } = options;
 
-  // Prepare data
-  const dashboardData: DashboardData = {
-    current: metrics,
-    historical: historical.length > 0 ? historical : [metrics],
-    baseline,
-  };
-
   // Generate HTML
-  const html = generateDashboardHTML(dashboardData);
+  const html = generateEnhancedDashboard(metrics, baseline);
 
   // Ensure output directory exists
   const outputDir = resolve(process.cwd(), output);
@@ -66,7 +59,7 @@ export async function exportStatic(options: ExportOptions): Promise<string> {
 
   // Write raw data as JSON (for API access or debugging)
   const dataPath = join(outputDir, 'data.json');
-  await writeFile(dataPath, JSON.stringify(dashboardData, null, 2), 'utf-8');
+  await writeFile(dataPath, JSON.stringify({ metrics, baseline }, null, 2), 'utf-8');
 
   return indexPath;
 }

@@ -14,7 +14,7 @@
       padding: 2rem;
     }
     .header {
-      margin-bottom: 2rem;
+      margin: 0 2rem 2rem;
     }
     h1 {
       font-size: 2rem;
@@ -24,13 +24,16 @@
     h2 {
       font-size: 1.5rem;
       font-weight: 600;
-      margin: 2rem 0 1rem;
+      margin: 2rem 2rem 1rem;
+    }
+    p {
+      margin: 0 2rem;
     }
     .stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin: 0 2rem 2rem;
     }
     .stat-card {
       background: #1e293b;
@@ -48,8 +51,9 @@
       font-weight: 600;
     }
     .treemap {
-      width: 100%;
-      height: 600px;
+      width: calc(100% - 4rem);
+      height: 400px;
+      margin: 0 2rem;
       background: #1e293b;
       border-radius: 0.5rem;
       border: 1px solid #334155;
@@ -88,7 +92,8 @@
       color: #94a3b8;
     }
     .dependency-table {
-      width: 100%;
+      width: calc(100% - 4rem);
+      margin: 0 2rem;
       background: #1e293b;
       border-radius: 0.5rem;
       border: 1px solid #334155;
@@ -142,8 +147,8 @@
     <h1>Bundle Watch Dashboard</h1>
     <p style="color: #94a3b8;">
       Branch: <strong>main</strong> |
-      Commit: <strong>246ae7a</strong> |
-      11/22/2025, 6:39:41 PM
+      Commit: <strong>a426602</strong> |
+      11/25/2025, 9:06:00 PM
     </p>
   </div>
 
@@ -191,7 +196,7 @@
         
           <tr>
             <td>
-              <span class="badge badge-npm">NPM</span> 
+              <span class="badge badge-app">APP</span> 
               <strong>src/index.tsx + 96 modules</strong>
             </td>
             <td>222.95 KB</td>
@@ -230,7 +235,7 @@
             <td>N/A</td>
             <td>71.1%</td>
             <td>1</td>
-            <td>❌ No</td>
+            <td>No</td>
           </tr>
         
       </tbody>
@@ -241,14 +246,14 @@
   
 
   <script>
-    const data = {"name":"Bundle Composition","children":[{"name":"src/index.tsx + 96 modules","value":228297,"gzip":0,"brotli":0,"type":"npm"}]};
+    const data = {"name":"Bundle Composition","children":[{"name":"src/index.tsx + 96 modules","value":228297,"gzip":0,"brotli":0,"type":"app"}]};
 
     const width = document.getElementById('treemap').clientWidth;
-    const height = 600;
+    const height = 400;
 
     const color = d3.scaleOrdinal()
-      .domain(['js', 'css', 'asset', 'html', 'other', 'app', 'npm'])
-      .range(['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#10b981', '#3b82f6']);
+      .domain(['app', 'npm', 'vendor', 'js', 'css', 'asset', 'html', 'other'])
+      .range(['#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#f59e0b', '#06b6d4', '#f97316', '#64748b']);
 
     const treemap = d3.treemap()
       .size([width, height])
