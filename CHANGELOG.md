@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.8...v2.1.0) (2025-11-26)
+
+
+### Features
+
+* **dashboard:** new sci-fi UI with light/dark mode and copy button ([d764065](https://github.com/sashamilenkovic/bundlewatch/commit/d764065d65188e2e6c738782c278ab88f689d34a))
+
 ## [2.0.8](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.7...v2.0.8) (2025-11-23)
 
 
