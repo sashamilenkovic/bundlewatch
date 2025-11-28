@@ -34,36 +34,8 @@ export function formatBytes(bytes: number): string {
  * Prefers showing module composition when available, falls back to bundles
  */
 export function generateTreemapData(metrics: BuildMetrics): TreemapData {
-  // If we have detailed dependencies, show module composition
-  if (metrics.detailedDependencies && metrics.detailedDependencies.length > 0) {
-    const children: TreemapNode[] = metrics.detailedDependencies.map(dep => {
-      // Determine type: app code vs npm packages vs vendor
-      let type: 'app' | 'npm' | 'vendor' = 'npm';
-
-      if (dep.name === 'your-app' || dep.name === 'app' || dep.name.startsWith('src/') ||
-          dep.name.startsWith('lib/') || dep.name.startsWith('components/') ||
-          dep.name.startsWith('pages/') || dep.name.startsWith('views/')) {
-        type = 'app';
-      } else if (dep.name === 'bundler-virtual' || dep.name.startsWith('virtual:')) {
-        type = 'vendor';
-      }
-
-      return {
-        name: dep.name,
-        value: dep.totalSize,
-        gzip: dep.gzipSize || 0,
-        brotli: dep.brotliSize || 0,
-        type: type as 'app' | 'npm',
-      };
-    });
-
-    return {
-      name: 'Bundle Composition',
-      children,
-    };
-  }
-
-  // Fallback to bundle files
+  // Primary view: actual output chunks (bundles/assets)
+  // This shows what files are shipped to users
   const children = metrics.bundles.map(
     (bundle): TreemapNode => ({
       name: bundle.name.split('/').pop() || bundle.name,
@@ -75,7 +47,42 @@ export function generateTreemapData(metrics: BuildMetrics): TreemapData {
   );
 
   return {
-    name: 'Bundle',
+    name: 'Output Chunks',
+    children,
+  };
+}
+
+/**
+ * Generate dependency composition data for secondary view
+ */
+export function generateDependencyData(metrics: BuildMetrics): TreemapData | null {
+  if (!metrics.detailedDependencies || metrics.detailedDependencies.length === 0) {
+    return null;
+  }
+
+  const children: TreemapNode[] = metrics.detailedDependencies.map(dep => {
+    // Determine type: app code vs npm packages vs vendor
+    let type: 'app' | 'npm' | 'vendor' = 'npm';
+
+    if (dep.name === 'your-app' || dep.name === 'app' || dep.name.startsWith('src/') ||
+        dep.name.startsWith('lib/') || dep.name.startsWith('components/') ||
+        dep.name.startsWith('pages/') || dep.name.startsWith('views/')) {
+      type = 'app';
+    } else if (dep.name === 'bundler-virtual' || dep.name.startsWith('virtual:')) {
+      type = 'vendor';
+    }
+
+    return {
+      name: dep.name,
+      value: dep.totalSize,
+      gzip: dep.gzipSize || 0,
+      brotli: dep.brotliSize || 0,
+      type: type as 'app' | 'npm',
+    };
+  });
+
+  return {
+    name: 'Dependencies',
     children,
   };
 }
@@ -328,7 +335,7 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
   <div id="treemap" class="treemap"></div>
 
   ${treemapData.children && treemapData.children.length > 0 ? `
-  <h2>All Modules</h2>
+  <h2>Output Chunks</h2>
   <div class="dependency-table">
     <table id="modules-table">
       <colgroup>

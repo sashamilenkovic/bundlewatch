@@ -199,7 +199,7 @@
       <div>
         <h1>Bundle Watch</h1>
         <p style="color: var(--text-muted); font-size: 11px;">
-          main / c160f18 / 11/28/2025, 2:36:24 PM
+          main / 763fbd1 / 11/28/2025, 3:27:22 PM
         </p>
       </div>
       <div class="header-controls">
@@ -238,7 +238,7 @@
   <div id="treemap" class="treemap"></div>
 
   
-  <h2>All Modules</h2>
+  <h2>Output Chunks</h2>
   <div class="dependency-table">
     <table id="modules-table">
       <colgroup>
@@ -264,11 +264,11 @@
           <tr>
             <td>
               <span class="badge badge-npm">NPM</span> 
-              <strong>react-dom</strong>
+              <strong>index-BmeGit54.css</strong>
             </td>
-            <td>180.44 KB</td>
-            <td>56.66 KB</td>
-            <td>48.72 KB</td>
+            <td>1.18 KB</td>
+            <td>364.00 B</td>
+            <td>309.00 B</td>
             <td></td>
             <td></td>
           </tr>
@@ -276,35 +276,11 @@
           <tr>
             <td>
               <span class="badge badge-npm">NPM</span> 
-              <strong>react</strong>
+              <strong>index-DfaLYpSh.js</strong>
             </td>
-            <td>6.15 KB</td>
-            <td>1.93 KB</td>
-            <td>1.66 KB</td>
-            <td></td>
-            <td></td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>scheduler</strong>
-            </td>
-            <td>3.43 KB</td>
-            <td>1.08 KB</td>
-            <td>949.00 B</td>
-            <td></td>
-            <td></td>
-          </tr>
-        
-          <tr>
-            <td>
-              <span class="badge badge-app">APP</span> 
-              <strong>your-app</strong>
-            </td>
-            <td>201.00 B</td>
-            <td>63.00 B</td>
-            <td>54.00 B</td>
+            <td>189.04 KB</td>
+            <td>59.37 KB</td>
+            <td>51.06 KB</td>
             <td></td>
             <td></td>
           </tr>
@@ -580,7 +556,7 @@
       btn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
     }
 
-    const data = {"name":"Bundle Composition","children":[{"name":"react-dom","value":184771,"gzip":58015,"brotli":49889,"type":"npm"},{"name":"react","value":6298,"gzip":1977,"brotli":1700,"type":"npm"},{"name":"scheduler","value":3515,"gzip":1104,"brotli":949,"type":"npm"},{"name":"your-app","value":201,"gzip":63,"brotli":54,"type":"app"}]};
+    const data = {"name":"Output Chunks","children":[{"name":"index-BmeGit54.css","value":1212,"gzip":364,"brotli":309,"type":"css"},{"name":"index-DfaLYpSh.js","value":193572,"gzip":60795,"brotli":52284,"type":"js"}]};
 
     const width = document.getElementById('treemap').clientWidth;
     const height = 350;
@@ -682,7 +658,7 @@
 
     // Copy all data as markdown
     function copyAll() {
-      const metrics = {"branch":"main","commit":"c160f1815c354fdc9f213cfa59e843d3b456e794","timestamp":"2025-11-28T19:36:24.373Z","totalSize":194784,"totalGzipSize":61159,"totalBrotliSize":52593,"chunkCount":2};
+      const metrics = {"branch":"main","commit":"763fbd172a1c74342cd4cdccde3716f25b980ef7","timestamp":"2025-11-28T20:27:22.632Z","totalSize":194784,"totalGzipSize":61159,"totalBrotliSize":52593,"chunkCount":2};
 
       const modules = data.children || [];
       const deps = [{"name":"react-dom","totalSize":184771,"gzipSize":58015,"brotliSize":49889,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":94.85943403975686},{"name":"react","totalSize":6298,"gzipSize":1977,"brotliSize":1700,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":3.233325119106292},{"name":"scheduler","totalSize":3515,"gzipSize":1104,"brotliSize":949,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":1.8045630031214062},{"name":"your-app","totalSize":201,"gzipSize":63,"brotliSize":54,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":0.10319122720551996}];

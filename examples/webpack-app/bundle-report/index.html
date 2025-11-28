@@ -199,7 +199,7 @@
       <div>
         <h1>Bundle Watch</h1>
         <p style="color: var(--text-muted); font-size: 11px;">
-          main / c160f18 / 11/28/2025, 2:36:45 PM
+          main / 763fbd1 / 11/28/2025, 3:27:27 PM
         </p>
       </div>
       <div class="header-controls">
@@ -229,7 +229,7 @@
     
     <div class="stat-card">
       <span class="stat-label">Modules</span>
-      <span class="stat-value">1</span>
+      <span class="stat-value">13</span>
     </div>
     
   </div>
@@ -238,7 +238,7 @@
   <div id="treemap" class="treemap"></div>
 
   
-  <h2>All Modules</h2>
+  <h2>Output Chunks</h2>
   <div class="dependency-table">
     <table id="modules-table">
       <colgroup>
@@ -263,12 +263,24 @@
         
           <tr>
             <td>
-              <span class="badge badge-app">APP</span> 
-              <strong>src/index.tsx + 96 modules</strong>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>main.dfd837b3ab12f3ff900e.js</strong>
             </td>
-            <td>222.95 KB</td>
-            <td>N/A</td>
-            <td>N/A</td>
+            <td>313.14 KB</td>
+            <td>93.94 KB</td>
+            <td>79.85 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>index.html</strong>
+            </td>
+            <td>277.00 B</td>
+            <td>83.00 B</td>
+            <td>71.00 B</td>
             <td></td>
             <td></td>
           </tr>
@@ -305,12 +317,77 @@
           <tr>
             <td>
               <span class="badge badge-npm">NPM</span> 
+              <strong>react-dom</strong>
+              
+            </td>
+            <td>532.62 KB</td>
+            <td>159.79 KB</td>
+            <td>169.9%</td>
+            <td>4</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>lodash</strong>
+              
+            </td>
+            <td>531.35 KB</td>
+            <td>159.40 KB</td>
+            <td>169.5%</td>
+            <td>1</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
               <strong>src/index.tsx + 96 modules</strong>
               
             </td>
             <td>222.95 KB</td>
-            <td>N/A</td>
+            <td>66.88 KB</td>
             <td>71.1%</td>
+            <td>1</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>react</strong>
+              
+            </td>
+            <td>18.15 KB</td>
+            <td>5.45 KB</td>
+            <td>5.8%</td>
+            <td>4</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>scheduler</strong>
+              
+            </td>
+            <td>10.13 KB</td>
+            <td>3.04 KB</td>
+            <td>3.2%</td>
+            <td>2</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>classnames</strong>
+              
+            </td>
+            <td>1.49 KB</td>
+            <td>459.00 B</td>
+            <td>0.5%</td>
             <td>1</td>
             <td>No</td>
           </tr>
@@ -330,7 +407,7 @@
       btn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
     }
 
-    const data = {"name":"Bundle Composition","children":[{"name":"src/index.tsx + 96 modules","value":228297,"gzip":0,"brotli":0,"type":"app"}]};
+    const data = {"name":"Output Chunks","children":[{"name":"main.dfd837b3ab12f3ff900e.js","value":320659,"gzip":96198,"brotli":81768,"type":"js"},{"name":"index.html","value":277,"gzip":83,"brotli":71,"type":"html"}]};
 
     const width = document.getElementById('treemap').clientWidth;
     const height = 350;
@@ -432,10 +509,10 @@
 
     // Copy all data as markdown
     function copyAll() {
-      const metrics = {"branch":"main","commit":"c160f1815c354fdc9f213cfa59e843d3b456e794","timestamp":"2025-11-28T19:36:45.216Z","totalSize":320936,"totalGzipSize":96281,"totalBrotliSize":81839,"chunkCount":2};
+      const metrics = {"branch":"main","commit":"763fbd172a1c74342cd4cdccde3716f25b980ef7","timestamp":"2025-11-28T20:27:27.773Z","totalSize":320936,"totalGzipSize":96281,"totalBrotliSize":81839,"chunkCount":2};
 
       const modules = data.children || [];
-      const deps = [{"name":"src/index.tsx + 96 modules","totalSize":228297,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"percentOfTotal":71.1347433756263}];
+      const deps = [{"name":"react-dom","totalSize":545403,"moduleCount":4,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":163622,"brotliSize":139078,"percentOfTotal":169.9413590248523},{"name":"lodash","totalSize":544098,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":163229,"brotliSize":138745,"percentOfTotal":169.53473589749981},{"name":"src/index.tsx + 96 modules","totalSize":228297,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":68489,"brotliSize":58216,"percentOfTotal":71.1347433756263},{"name":"react","totalSize":18589,"moduleCount":4,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":5577,"brotliSize":4741,"percentOfTotal":5.792120547398858},{"name":"scheduler","totalSize":10375,"moduleCount":2,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":3112,"brotliSize":2645,"percentOfTotal":3.2327317596031606},{"name":"classnames","totalSize":1530,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":459,"brotliSize":390,"percentOfTotal":0.47673056310292394}];
 
       let text = `# Bundle Analysis Report
 
