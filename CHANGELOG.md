@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/sashamilenkovic/bundlewatch/compare/v2.1.0...v2.1.1) (2025-11-28)
+
+
+### Bug Fixes
+
+* add require and default exports for CJS compatibility ([c160f18](https://github.com/sashamilenkovic/bundlewatch/commit/c160f1815c354fdc9f213cfa59e843d3b456e794))
+
 # [2.1.0](https://github.com/sashamilenkovic/bundlewatch/compare/v2.0.8...v2.1.0) (2025-11-26)
 
 
