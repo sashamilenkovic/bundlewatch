@@ -1,0 +1,51 @@
+{
+  "name": "@milencode/bundlewatch-nextjs",
+  "version": "1.0.0",
+  "description": "Next.js integration for BundleWatch - supports both Webpack and Turbopack",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@milencode/bundlewatch-core": "workspace:*",
+    "@milencode/bundlewatch-parsers": "workspace:*",
+    "@milencode/bundlewatch-webpack-plugin": "workspace:*"
+  },
+  "peerDependencies": {
+    "next": "^14.0.0 || ^15.0.0 || ^16.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "next": "^15.0.0",
+    "typescript": "~5.9.3",
+    "vitest": "^4.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "next.js",
+    "nextjs",
+    "turbopack",
+    "webpack",
+    "bundle",
+    "size",
+    "analyzer",
+    "bundlewatch"
+  ]
+}

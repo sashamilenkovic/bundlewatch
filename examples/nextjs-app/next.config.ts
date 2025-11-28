@@ -1,26 +1,21 @@
 import type { NextConfig } from 'next';
-import { bundleWatchPlugin } from '@milencode/bundlewatch-webpack-plugin';
+import { withBundleWatch } from '@milencode/bundlewatch-nextjs';
 
 const nextConfig: NextConfig = {
-  webpack: (config, { isServer }) => {
-    // Only run on client bundle
-    if (!isServer) {
-      config.plugins.push(
-        bundleWatchPlugin({
-          enabled: true,
-          printReport: true,
-          saveToGit: false,
-          extractModules: true,
-          buildDependencyGraph: true,
-          generateRecommendations: true,
-          generateDashboard: true,
-          dashboardPath: './bundle-report',
-        })
-      );
-    }
-    return config;
-  },
+  // Your existing Next.js config
 };
 
-export default nextConfig;
+// withBundleWatch automatically detects Webpack vs Turbopack
+// - Webpack: injects plugin directly
+// - Turbopack: sets up post-build analysis
+export default withBundleWatch(nextConfig, {
+  enabled: true,
+  printReport: true,
+  saveToGit: false,
+  extractModules: true,
+  buildDependencyGraph: true,
+  generateRecommendations: true,
+  generateDashboard: true,
+  dashboardPath: './bundle-report',
+});
 

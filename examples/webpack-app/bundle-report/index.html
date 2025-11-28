@@ -6,173 +6,230 @@
   <title>Bundle Watch Dashboard</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
+    :root {
+      --bg: #000;
+      --bg-secondary: #0a0a0a;
+      --border: #222;
+      --text: #e0e0e0;
+      --text-muted: #666;
+      --accent: #0f0;
+      --accent-secondary: #0a0;
+    }
+    .light {
+      --bg: #fff;
+      --bg-secondary: #f5f5f5;
+      --border: #ddd;
+      --text: #111;
+      --text-muted: #666;
+      --accent: #000;
+      --accent-secondary: #333;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 2rem;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      background: var(--bg);
+      color: var(--text);
+      padding: 1rem;
+      font-size: 13px;
+      line-height: 1.4;
     }
     .header {
-      margin: 0 2rem 2rem;
+      margin: 0 1rem 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
     }
     h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 400;
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
     h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin: 2rem 2rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 400;
+      margin: 1.5rem 1rem 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
     }
     p {
-      margin: 0 2rem;
+      margin: 0 1rem;
     }
     .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin: 0 2rem 2rem;
+      display: flex;
+      gap: 2rem;
+      margin: 0 1rem 1rem;
+      flex-wrap: wrap;
     }
     .stat-card {
-      background: #1e293b;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      border: 1px solid #334155;
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
     }
     .stat-label {
-      color: #94a3b8;
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
     }
     .stat-value {
-      font-size: 1.5rem;
+      font-size: 1rem;
       font-weight: 600;
+      color: var(--accent);
     }
     .treemap {
-      width: calc(100% - 4rem);
-      height: 400px;
-      margin: 0 2rem;
-      background: #1e293b;
-      border-radius: 0.5rem;
-      border: 1px solid #334155;
+      width: calc(100% - 2rem);
+      height: 350px;
+      margin: 0 1rem;
+      border: 1px solid var(--border);
       overflow: hidden;
     }
     .node {
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: opacity 0.1s;
     }
     .node:hover {
-      opacity: 0.8;
+      opacity: 0.7;
     }
     .node-label {
-      font-size: 12px;
+      font-size: 10px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
       fill: white;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
       pointer-events: none;
     }
     .tooltip {
       position: absolute;
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 0.75rem;
-      border-radius: 0.375rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.5rem;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.2s;
-      font-size: 0.875rem;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+      transition: opacity 0.1s;
+      font-size: 11px;
     }
     .tooltip-title {
       font-weight: 600;
       margin-bottom: 0.25rem;
     }
     .tooltip-size {
-      color: #94a3b8;
+      color: var(--text-muted);
     }
     .dependency-table {
-      width: calc(100% - 4rem);
-      margin: 0 2rem;
-      background: #1e293b;
-      border-radius: 0.5rem;
-      border: 1px solid #334155;
-      overflow: hidden;
+      width: calc(100% - 2rem);
+      margin: 0 1rem;
+      border: 1px solid var(--border);
+      overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     th {
-      background: #0f172a;
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      font-size: 0.875rem;
+      background: var(--bg-secondary);
+      font-weight: 400;
+      font-size: 0.7rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #94a3b8;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
     }
     td {
-      padding: 1rem;
-      border-top: 1px solid #334155;
+      border-bottom: 1px solid var(--border);
     }
     tr:hover {
-      background: #0f172a;
+      background: var(--bg-secondary);
     }
     .badge {
       display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
+      padding: 0.1rem 0.3rem;
+      font-size: 0.6rem;
       font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 1px solid;
     }
     .badge-npm {
-      background: #3b82f6;
-      color: white;
+      border-color: #666;
+      color: #888;
     }
     .badge-app {
-      background: #10b981;
-      color: white;
+      border-color: var(--accent);
+      color: var(--accent);
     }
     .badge-vendor {
-      background: #8b5cf6;
-      color: white;
+      border-color: #666;
+      color: #888;
+    }
+    .header-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .copy-btn, .theme-btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.1s;
+    }
+    .copy-btn:hover, .theme-btn:hover {
+      border-color: var(--text);
+    }
+    .copy-btn.copied {
+      border-color: var(--accent);
+      color: var(--accent);
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Bundle Watch Dashboard</h1>
-    <p style="color: #94a3b8;">
-      Branch: <strong>main</strong> |
-      Commit: <strong>a426602</strong> |
-      11/25/2025, 9:06:00 PM
-    </p>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div>
+        <h1>Bundle Watch</h1>
+        <p style="color: var(--text-muted); font-size: 11px;">
+          main / c160f18 / 11/28/2025, 2:36:45 PM
+        </p>
+      </div>
+      <div class="header-controls">
+        <button class="theme-btn" onclick="toggleTheme()">Light</button>
+        <button class="copy-btn" onclick="copyAll()">Copy</button>
+      </div>
+    </div>
   </div>
 
   <div class="stats">
     <div class="stat-card">
-      <div class="stat-label">Total Size</div>
-      <div class="stat-value">313.41 KB</div>
+      <span class="stat-label">Total</span>
+      <span class="stat-value">313.41 KB</span>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Gzipped</div>
-      <div class="stat-value">94.02 KB</div>
+      <span class="stat-label">Gzip</span>
+      <span class="stat-value">94.02 KB</span>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Brotli</div>
-      <div class="stat-value">79.92 KB</div>
+      <span class="stat-label">Brotli</span>
+      <span class="stat-value">79.92 KB</span>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Chunks</div>
-      <div class="stat-value">2</div>
+      <span class="stat-label">Chunks</span>
+      <span class="stat-value">2</span>
     </div>
     
     <div class="stat-card">
-      <div class="stat-label">Modules</div>
-      <div class="stat-value">1</div>
+      <span class="stat-label">Modules</span>
+      <span class="stat-value">1</span>
     </div>
     
   </div>
@@ -184,12 +241,22 @@
   <h2>All Modules</h2>
   <div class="dependency-table">
     <table id="modules-table">
+      <colgroup>
+        <col style="width: 30%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+      </colgroup>
       <thead>
         <tr>
           <th style="cursor: pointer;" onclick="sortModulesTable(0)">Name ↕</th>
           <th style="cursor: pointer;" onclick="sortModulesTable(1)">Size ↕</th>
           <th style="cursor: pointer;" onclick="sortModulesTable(2)">Gzipped ↕</th>
           <th style="cursor: pointer;" onclick="sortModulesTable(3)">Brotli ↕</th>
+          <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -202,6 +269,8 @@
             <td>222.95 KB</td>
             <td>N/A</td>
             <td>N/A</td>
+            <td></td>
+            <td></td>
           </tr>
         
       </tbody>
@@ -213,6 +282,14 @@
   <h2>Dependencies</h2>
   <div class="dependency-table">
     <table>
+      <colgroup>
+        <col style="width: 30%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+      </colgroup>
       <thead>
         <tr>
           <th>Package</th>
@@ -246,10 +323,17 @@
   
 
   <script>
+    // Theme toggle
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      const btn = document.querySelector('.theme-btn');
+      btn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
+    }
+
     const data = {"name":"Bundle Composition","children":[{"name":"src/index.tsx + 96 modules","value":228297,"gzip":0,"brotli":0,"type":"app"}]};
 
     const width = document.getElementById('treemap').clientWidth;
-    const height = 400;
+    const height = 350;
 
     const color = d3.scaleOrdinal()
       .domain(['app', 'npm', 'vendor', 'js', 'css', 'asset', 'html', 'other'])
@@ -344,6 +428,55 @@
       const sizes = ['B', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+    }
+
+    // Copy all data as markdown
+    function copyAll() {
+      const metrics = {"branch":"main","commit":"c160f1815c354fdc9f213cfa59e843d3b456e794","timestamp":"2025-11-28T19:36:45.216Z","totalSize":320936,"totalGzipSize":96281,"totalBrotliSize":81839,"chunkCount":2};
+
+      const modules = data.children || [];
+      const deps = [{"name":"src/index.tsx + 96 modules","totalSize":228297,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"percentOfTotal":71.1347433756263}];
+
+      let text = `# Bundle Analysis Report
+
+## Summary
+- **Branch:** ${metrics.branch}
+- **Commit:** ${metrics.commit.substring(0, 7)}
+- **Date:** ${new Date(metrics.timestamp).toLocaleString()}
+- **Total Size:** ${formatBytes(metrics.totalSize)}
+- **Gzipped:** ${formatBytes(metrics.totalGzipSize || 0)}
+- **Brotli:** ${formatBytes(metrics.totalBrotliSize || 0)}
+- **Chunks:** ${metrics.chunkCount}
+
+## Bundle Composition
+| Module | Type | Size | Gzipped |
+|--------|------|------|---------|
+`;
+
+      modules.forEach(m => {
+        text += `| ${m.name} | ${m.type.toUpperCase()} | ${formatBytes(m.value)} | ${formatBytes(m.gzip || 0)} |\n`;
+      });
+
+      if (deps.length > 0) {
+        text += `
+## Top Dependencies
+| Package | Size | % of Total | Modules |
+|---------|------|------------|---------|
+`;
+        deps.forEach(d => {
+          text += `| ${d.name} | ${formatBytes(d.totalSize)} | ${d.percentOfTotal?.toFixed(1)}% | ${d.moduleCount} |\n`;
+        });
+      }
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
     }
 
     // Sort modules table

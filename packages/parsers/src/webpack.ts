@@ -123,18 +123,23 @@ export function parseWebpackStats(
         continue;
       }
 
-      // Skip node_modules and .pnpm to avoid cluttering the analysis
-      if (module.name.includes('node_modules') || module.name.includes('.pnpm')) {
-        continue;
-      }
-
       const moduleId = module.identifier || module.name;
       const packageName = extractPackageName(module.name);
+
+      // Estimate compression for modules (same ratio as bundles)
+      let gzipSize = 0;
+      let brotliSize = 0;
+      if (options.estimateCompression !== false) {
+        gzipSize = Math.round(module.size * 0.3);
+        brotliSize = Math.round(gzipSize * 0.85);
+      }
 
       modules.push({
         id: moduleId,
         package: packageName,
         size: module.size,
+        gzipSize,
+        brotliSize,
         chunks: (module.chunks || []).map(String),
         importedBy: (module.reasons || [])
           .map(r => r.moduleIdentifier || r.moduleName)

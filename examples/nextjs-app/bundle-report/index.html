@@ -6,173 +6,230 @@
   <title>Bundle Watch Dashboard</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
+    :root {
+      --bg: #000;
+      --bg-secondary: #0a0a0a;
+      --border: #222;
+      --text: #e0e0e0;
+      --text-muted: #666;
+      --accent: #0f0;
+      --accent-secondary: #0a0;
+    }
+    .light {
+      --bg: #fff;
+      --bg-secondary: #f5f5f5;
+      --border: #ddd;
+      --text: #111;
+      --text-muted: #666;
+      --accent: #000;
+      --accent-secondary: #333;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 2rem;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      background: var(--bg);
+      color: var(--text);
+      padding: 1rem;
+      font-size: 13px;
+      line-height: 1.4;
     }
     .header {
-      margin: 0 2rem 2rem;
+      margin: 0 1rem 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
     }
     h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 400;
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
     h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin: 2rem 2rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 400;
+      margin: 1.5rem 1rem 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
     }
     p {
-      margin: 0 2rem;
+      margin: 0 1rem;
     }
     .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin: 0 2rem 2rem;
+      display: flex;
+      gap: 2rem;
+      margin: 0 1rem 1rem;
+      flex-wrap: wrap;
     }
     .stat-card {
-      background: #1e293b;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      border: 1px solid #334155;
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
     }
     .stat-label {
-      color: #94a3b8;
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
     }
     .stat-value {
-      font-size: 1.5rem;
+      font-size: 1rem;
       font-weight: 600;
+      color: var(--accent);
     }
     .treemap {
-      width: calc(100% - 4rem);
-      height: 400px;
-      margin: 0 2rem;
-      background: #1e293b;
-      border-radius: 0.5rem;
-      border: 1px solid #334155;
+      width: calc(100% - 2rem);
+      height: 350px;
+      margin: 0 1rem;
+      border: 1px solid var(--border);
       overflow: hidden;
     }
     .node {
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: opacity 0.1s;
     }
     .node:hover {
-      opacity: 0.8;
+      opacity: 0.7;
     }
     .node-label {
-      font-size: 12px;
+      font-size: 10px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
       fill: white;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
       pointer-events: none;
     }
     .tooltip {
       position: absolute;
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 0.75rem;
-      border-radius: 0.375rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.5rem;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.2s;
-      font-size: 0.875rem;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+      transition: opacity 0.1s;
+      font-size: 11px;
     }
     .tooltip-title {
       font-weight: 600;
       margin-bottom: 0.25rem;
     }
     .tooltip-size {
-      color: #94a3b8;
+      color: var(--text-muted);
     }
     .dependency-table {
-      width: calc(100% - 4rem);
-      margin: 0 2rem;
-      background: #1e293b;
-      border-radius: 0.5rem;
-      border: 1px solid #334155;
-      overflow: hidden;
+      width: calc(100% - 2rem);
+      margin: 0 1rem;
+      border: 1px solid var(--border);
+      overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     th {
-      background: #0f172a;
-      padding: 1rem;
-      text-align: left;
-      font-weight: 600;
-      font-size: 0.875rem;
+      background: var(--bg-secondary);
+      font-weight: 400;
+      font-size: 0.7rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #94a3b8;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
     }
     td {
-      padding: 1rem;
-      border-top: 1px solid #334155;
+      border-bottom: 1px solid var(--border);
     }
     tr:hover {
-      background: #0f172a;
+      background: var(--bg-secondary);
     }
     .badge {
       display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
+      padding: 0.1rem 0.3rem;
+      font-size: 0.6rem;
       font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 1px solid;
     }
     .badge-npm {
-      background: #3b82f6;
-      color: white;
+      border-color: #666;
+      color: #888;
     }
     .badge-app {
-      background: #10b981;
-      color: white;
+      border-color: var(--accent);
+      color: var(--accent);
     }
     .badge-vendor {
-      background: #8b5cf6;
-      color: white;
+      border-color: #666;
+      color: #888;
+    }
+    .header-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .copy-btn, .theme-btn {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.1s;
+    }
+    .copy-btn:hover, .theme-btn:hover {
+      border-color: var(--text);
+    }
+    .copy-btn.copied {
+      border-color: var(--accent);
+      color: var(--accent);
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Bundle Watch Dashboard</h1>
-    <p style="color: #94a3b8;">
-      Branch: <strong>main</strong> |
-      Commit: <strong>a426602</strong> |
-      11/25/2025, 9:05:48 PM
-    </p>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div>
+        <h1>Bundle Watch</h1>
+        <p style="color: var(--text-muted); font-size: 11px;">
+          main / c160f18 / 11/28/2025, 2:49:50 PM
+        </p>
+      </div>
+      <div class="header-controls">
+        <button class="theme-btn" onclick="toggleTheme()">Light</button>
+        <button class="copy-btn" onclick="copyAll()">Copy</button>
+      </div>
+    </div>
   </div>
 
   <div class="stats">
     <div class="stat-card">
-      <div class="stat-label">Total Size</div>
-      <div class="stat-value">798.26 KB</div>
+      <span class="stat-label">Total</span>
+      <span class="stat-value">929.77 KB</span>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Gzipped</div>
-      <div class="stat-value">239.48 KB</div>
+      <span class="stat-label">Gzip</span>
+      <span class="stat-value">278.93 KB</span>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Brotli</div>
-      <div class="stat-value">203.56 KB</div>
+      <span class="stat-label">Brotli</span>
+      <span class="stat-value">237.09 KB</span>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Chunks</div>
-      <div class="stat-value">28</div>
+      <span class="stat-label">Chunks</span>
+      <span class="stat-value">31</span>
     </div>
     
     <div class="stat-card">
-      <div class="stat-label">Modules</div>
-      <div class="stat-value">2</div>
+      <span class="stat-label">Modules</span>
+      <span class="stat-value">293</span>
     </div>
     
   </div>
@@ -184,24 +241,168 @@
   <h2>All Modules</h2>
   <div class="dependency-table">
     <table id="modules-table">
+      <colgroup>
+        <col style="width: 30%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+      </colgroup>
       <thead>
         <tr>
           <th style="cursor: pointer;" onclick="sortModulesTable(0)">Name ↕</th>
           <th style="cursor: pointer;" onclick="sortModulesTable(1)">Size ↕</th>
           <th style="cursor: pointer;" onclick="sortModulesTable(2)">Gzipped ↕</th>
           <th style="cursor: pointer;" onclick="sortModulesTable(3)">Brotli ↕</th>
+          <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         
           <tr>
             <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>next</strong>
+            </td>
+            <td>1.43 MB</td>
+            <td>438.00 KB</td>
+            <td>372.31 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>react-dom</strong>
+            </td>
+            <td>532.62 KB</td>
+            <td>159.79 KB</td>
+            <td>135.82 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>lodash</strong>
+            </td>
+            <td>531.35 KB</td>
+            <td>159.40 KB</td>
+            <td>135.49 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>date-fns</strong>
+            </td>
+            <td>130.50 KB</td>
+            <td>39.15 KB</td>
+            <td>33.28 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
               <span class="badge badge-app">APP</span> 
               <strong>src/app</strong>
             </td>
-            <td>39.00 B</td>
-            <td>N/A</td>
-            <td>N/A</td>
+            <td>33.76 KB</td>
+            <td>10.13 KB</td>
+            <td>8.61 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>@tanstack/query-core</strong>
+            </td>
+            <td>32.35 KB</td>
+            <td>9.71 KB</td>
+            <td>8.25 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>@tanstack/react-query</strong>
+            </td>
+            <td>26.35 KB</td>
+            <td>7.91 KB</td>
+            <td>6.72 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>react</strong>
+            </td>
+            <td>18.15 KB</td>
+            <td>5.45 KB</td>
+            <td>4.63 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>process</strong>
+            </td>
+            <td>10.58 KB</td>
+            <td>3.17 KB</td>
+            <td>2.70 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>scheduler</strong>
+            </td>
+            <td>10.13 KB</td>
+            <td>3.04 KB</td>
+            <td>2.58 KB</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>@swc/helpers</strong>
+            </td>
+            <td>3.23 KB</td>
+            <td>993.00 B</td>
+            <td>845.00 B</td>
+            <td></td>
+            <td></td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>zustand</strong>
+            </td>
+            <td>1.70 KB</td>
+            <td>522.00 B</td>
+            <td>444.00 B</td>
+            <td></td>
+            <td></td>
           </tr>
         
           <tr>
@@ -210,8 +411,10 @@
               <strong>private-next-instrumentation-client (ignored)</strong>
             </td>
             <td>15.00 B</td>
-            <td>N/A</td>
-            <td>N/A</td>
+            <td>5.00 B</td>
+            <td>4.00 B</td>
+            <td></td>
+            <td></td>
           </tr>
         
       </tbody>
@@ -223,6 +426,14 @@
   <h2>Dependencies</h2>
   <div class="dependency-table">
     <table>
+      <colgroup>
+        <col style="width: 30%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+      </colgroup>
       <thead>
         <tr>
           <th>Package</th>
@@ -238,14 +449,157 @@
           <tr>
             <td>
               <span class="badge badge-npm">NPM</span> 
+              <strong>next</strong>
+              
+            </td>
+            <td>1.43 MB</td>
+            <td>438.00 KB</td>
+            <td>157.0%</td>
+            <td>247</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>react-dom</strong>
+              
+            </td>
+            <td>532.62 KB</td>
+            <td>159.79 KB</td>
+            <td>57.3%</td>
+            <td>4</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>lodash</strong>
+              
+            </td>
+            <td>531.35 KB</td>
+            <td>159.40 KB</td>
+            <td>57.1%</td>
+            <td>1</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>date-fns</strong>
+              
+            </td>
+            <td>130.50 KB</td>
+            <td>39.15 KB</td>
+            <td>14.0%</td>
+            <td>10</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
               <strong>src/app</strong>
               
             </td>
-            <td>39.00 B</td>
-            <td>N/A</td>
-            <td>0.0%</td>
-            <td>1</td>
+            <td>33.76 KB</td>
+            <td>10.13 KB</td>
+            <td>3.6%</td>
+            <td>3</td>
             <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>@tanstack/query-core</strong>
+              
+            </td>
+            <td>32.35 KB</td>
+            <td>9.71 KB</td>
+            <td>3.5%</td>
+            <td>10</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>@tanstack/react-query</strong>
+              
+            </td>
+            <td>26.35 KB</td>
+            <td>7.91 KB</td>
+            <td>2.8%</td>
+            <td>2</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>react</strong>
+              
+            </td>
+            <td>18.15 KB</td>
+            <td>5.45 KB</td>
+            <td>2.0%</td>
+            <td>4</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>process</strong>
+              
+            </td>
+            <td>10.58 KB</td>
+            <td>3.17 KB</td>
+            <td>1.1%</td>
+            <td>2</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>scheduler</strong>
+              
+            </td>
+            <td>10.13 KB</td>
+            <td>3.04 KB</td>
+            <td>1.1%</td>
+            <td>2</td>
+            <td>No</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>@swc/helpers</strong>
+              
+            </td>
+            <td>3.23 KB</td>
+            <td>993.00 B</td>
+            <td>0.3%</td>
+            <td>6</td>
+            <td>Yes</td>
+          </tr>
+        
+          <tr>
+            <td>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>zustand</strong>
+              
+            </td>
+            <td>1.70 KB</td>
+            <td>522.00 B</td>
+            <td>0.2%</td>
+            <td>1</td>
+            <td>Yes</td>
           </tr>
         
           <tr>
@@ -255,7 +609,7 @@
               
             </td>
             <td>15.00 B</td>
-            <td>N/A</td>
+            <td>5.00 B</td>
             <td>0.0%</td>
             <td>1</td>
             <td>No</td>
@@ -269,10 +623,17 @@
   
 
   <script>
-    const data = {"name":"Bundle Composition","children":[{"name":"src/app","value":39,"gzip":0,"brotli":0,"type":"app"},{"name":"private-next-instrumentation-client (ignored)","value":15,"gzip":0,"brotli":0,"type":"npm"}]};
+    // Theme toggle
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      const btn = document.querySelector('.theme-btn');
+      btn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
+    }
+
+    const data = {"name":"Bundle Composition","children":[{"name":"next","value":1494958,"gzip":448509,"brotli":381245,"type":"npm"},{"name":"react-dom","value":545403,"gzip":163622,"brotli":139078,"type":"npm"},{"name":"lodash","value":544098,"gzip":163229,"brotli":138745,"type":"npm"},{"name":"date-fns","value":133628,"gzip":40089,"brotli":34076,"type":"npm"},{"name":"src/app","value":34567,"gzip":10371,"brotli":8816,"type":"app"},{"name":"@tanstack/query-core","value":33129,"gzip":9938,"brotli":8447,"type":"npm"},{"name":"@tanstack/react-query","value":26987,"gzip":8096,"brotli":6882,"type":"npm"},{"name":"react","value":18589,"gzip":5577,"brotli":4741,"type":"npm"},{"name":"process","value":10836,"gzip":3250,"brotli":2762,"type":"npm"},{"name":"scheduler","value":10375,"gzip":3112,"brotli":2645,"type":"npm"},{"name":"@swc/helpers","value":3312,"gzip":993,"brotli":845,"type":"npm"},{"name":"zustand","value":1740,"gzip":522,"brotli":444,"type":"npm"},{"name":"private-next-instrumentation-client (ignored)","value":15,"gzip":5,"brotli":4,"type":"npm"}]};
 
     const width = document.getElementById('treemap').clientWidth;
-    const height = 400;
+    const height = 350;
 
     const color = d3.scaleOrdinal()
       .domain(['app', 'npm', 'vendor', 'js', 'css', 'asset', 'html', 'other'])
@@ -367,6 +728,55 @@
       const sizes = ['B', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+    }
+
+    // Copy all data as markdown
+    function copyAll() {
+      const metrics = {"branch":"main","commit":"c160f1815c354fdc9f213cfa59e843d3b456e794","timestamp":"2025-11-28T19:49:50.172Z","totalSize":952080,"totalGzipSize":285626,"totalBrotliSize":242785,"chunkCount":31};
+
+      const modules = data.children || [];
+      const deps = [{"name":"next","totalSize":1494958,"moduleCount":247,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":448509,"brotliSize":381245,"percentOfTotal":157.02020838584994},{"name":"react-dom","totalSize":545403,"moduleCount":4,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":163622,"brotliSize":139078,"percentOfTotal":57.28541719183262},{"name":"lodash","totalSize":544098,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":163229,"brotliSize":138745,"percentOfTotal":57.14834887824553},{"name":"date-fns","totalSize":133628,"moduleCount":10,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":40089,"brotliSize":34076,"percentOfTotal":14.035375178556425},{"name":"src/app","totalSize":34567,"moduleCount":3,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":10371,"brotliSize":8816,"percentOfTotal":3.6306822956054114},{"name":"@tanstack/query-core","totalSize":33129,"moduleCount":10,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":9938,"brotliSize":8447,"percentOfTotal":3.4796445676833883},{"name":"@tanstack/react-query","totalSize":26987,"moduleCount":2,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":8096,"brotliSize":6882,"percentOfTotal":2.834530711704899},{"name":"react","totalSize":18589,"moduleCount":4,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":5577,"brotliSize":4741,"percentOfTotal":1.9524619779850434},{"name":"process","totalSize":10836,"moduleCount":2,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":3250,"brotliSize":2762,"percentOfTotal":1.138139652130073},{"name":"scheduler","totalSize":10375,"moduleCount":2,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":3112,"brotliSize":2645,"percentOfTotal":1.0897193513150156},{"name":"@swc/helpers","totalSize":3312,"moduleCount":6,"chunks":[],"treeshakeable":true,"duplicate":false,"gzipSize":993,"brotliSize":845,"percentOfTotal":0.34786992689689944},{"name":"zustand","totalSize":1740,"moduleCount":1,"chunks":[],"treeshakeable":true,"duplicate":false,"gzipSize":522,"brotliSize":444,"percentOfTotal":0.18275775144945802},{"name":"private-next-instrumentation-client (ignored)","totalSize":15,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":5,"brotliSize":4,"percentOfTotal":0.0015754978573229142}];
+
+      let text = `# Bundle Analysis Report
+
+## Summary
+- **Branch:** ${metrics.branch}
+- **Commit:** ${metrics.commit.substring(0, 7)}
+- **Date:** ${new Date(metrics.timestamp).toLocaleString()}
+- **Total Size:** ${formatBytes(metrics.totalSize)}
+- **Gzipped:** ${formatBytes(metrics.totalGzipSize || 0)}
+- **Brotli:** ${formatBytes(metrics.totalBrotliSize || 0)}
+- **Chunks:** ${metrics.chunkCount}
+
+## Bundle Composition
+| Module | Type | Size | Gzipped |
+|--------|------|------|---------|
+`;
+
+      modules.forEach(m => {
+        text += `| ${m.name} | ${m.type.toUpperCase()} | ${formatBytes(m.value)} | ${formatBytes(m.gzip || 0)} |\n`;
+      });
+
+      if (deps.length > 0) {
+        text += `
+## Top Dependencies
+| Package | Size | % of Total | Modules |
+|---------|------|------------|---------|
+`;
+        deps.forEach(d => {
+          text += `| ${d.name} | ${formatBytes(d.totalSize)} | ${d.percentOfTotal?.toFixed(1)}% | ${d.moduleCount} |\n`;
+        });
+      }
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
     }
 
     // Sort modules table

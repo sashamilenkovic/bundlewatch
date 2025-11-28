@@ -277,10 +277,20 @@ async function processChunk(
 
     if (!moduleInfo) continue;
 
+    // Estimate compression for modules if not using real compression
+    const gzipSize = state.options.realCompression
+      ? 0 // Real compression would need actual code content
+      : Math.round(moduleInfo.size * 0.3);
+    const brotliSize = state.options.realCompression
+      ? 0
+      : Math.round(gzipSize * 0.85);
+
     modules.push({
       id: moduleId,
       package: moduleInfo.package,
       size: moduleInfo.size,
+      gzipSize,
+      brotliSize,
       chunks: [fileName],
       importedBy: moduleInfo.importedBy,
       imports: moduleInfo.imports,
