@@ -26,6 +26,7 @@ function resolveOptions(options: BundleWatchNextOptions): ResolvedBundleWatchOpt
   return {
     enabled: options.enabled ?? true,
     bundler: options.bundler ?? 'auto',
+    verbose: options.verbose ?? false,
     printReport: options.printReport ?? true,
     saveToGit: options.saveToGit, // undefined means auto-detect (CI = true)
     compareAgainst: options.compareAgainst ?? 'main',

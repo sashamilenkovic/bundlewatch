@@ -49,6 +49,7 @@ export function injectWebpackPlugin<T extends NextConfigBase>(
         modifiedConfig.plugins.push(
           bundleWatchPlugin({
             enabled: options.enabled,
+            verbose: options.verbose,
             printReport: options.printReport,
             saveToGit: options.saveToGit,
             compareAgainst: options.compareAgainst,

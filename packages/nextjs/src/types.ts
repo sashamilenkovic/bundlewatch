@@ -27,6 +27,12 @@ export interface BundleWatchNextOptions {
   bundler?: BundlerType;
 
   /**
+   * Enable verbose logging
+   * @default false
+   */
+  verbose?: boolean;
+
+  /**
    * Print report to console after build
    * @default true
    */

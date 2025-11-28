@@ -27,6 +27,20 @@ export interface WebpackBundleWatchOptions extends Partial<BundleWatchConfig> {
   enabled?: boolean;
 
   /**
+   * When to apply the plugin
+   * - 'build': Only production builds (default, recommended)
+   * - 'all': All builds including dev (use with caution)
+   * @default 'build'
+   */
+  apply?: 'build' | 'all';
+
+  /**
+   * Enable verbose logging
+   * @default false
+   */
+  verbose?: boolean;
+
+  /**
    * Print report to console after build
    * @default true
    */
@@ -34,7 +48,7 @@ export interface WebpackBundleWatchOptions extends Partial<BundleWatchConfig> {
 
   /**
    * Save metrics to git storage
-   * @default true in CI, false locally
+   * @default true in CI (except test runners), false locally
    */
   saveToGit?: boolean;
 
@@ -89,8 +103,10 @@ export interface WebpackBundleWatchOptions extends Partial<BundleWatchConfig> {
 
 const defaultOptions: WebpackBundleWatchOptions = {
   enabled: true,
+  apply: 'build',
+  verbose: false,
   printReport: true,
-  saveToGit: undefined, // Will be determined based on CI env
+  saveToGit: undefined, // Will be determined based on CI/test env
   compareAgainst: 'main',
   failOnSizeIncrease: false,
   sizeIncreaseThreshold: 10,
@@ -102,6 +118,39 @@ const defaultOptions: WebpackBundleWatchOptions = {
 };
 
 /**
+ * Detect if running in a test runner environment
+ * Tests shouldn't mutate git or interfere with builds
+ */
+function isTestEnvironment(): boolean {
+  return !!(
+    process.env.PLAYWRIGHT_TEST ||
+    process.env.PLAYWRIGHT ||
+    process.env.JEST_WORKER_ID ||
+    process.env.VITEST ||
+    process.env.VITEST_WORKER_ID ||
+    process.env.TEST_MODE ||
+    process.env.CYPRESS ||
+    process.env.SKIP_BUNDLE_WATCH
+  );
+}
+
+/**
+ * Determine if we should save to git
+ */
+function shouldSaveToGit(explicitValue: boolean | undefined, isCI: boolean): boolean {
+  // Explicitly configured? Use that value
+  if (explicitValue !== undefined) return explicitValue;
+
+  // Not in CI? Don't save
+  if (!isCI) return false;
+
+  // In a test runner? Don't save (tests shouldn't mutate git)
+  if (isTestEnvironment()) return false;
+
+  return true;
+}
+
+/**
  * Webpack plugin for Bundle Watch (functional composition)
  */
 export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
@@ -109,21 +158,40 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
   const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
   let buildStartTime = 0;
 
-  // Default saveToGit based on CI environment
-  if (options.saveToGit === undefined) {
-    options.saveToGit = isCI;
-  }
+  // Resolve saveToGit based on CI/test environment
+  const saveToGit = shouldSaveToGit(options.saveToGit, isCI);
 
   return {
     apply(compiler: Compiler) {
       if (!options.enabled) return;
+
+      // Auto-skip in dev/watch mode unless explicitly configured
+      const isDevMode = compiler.options.mode === 'development';
+      const isWatching = compiler.options.watch === true;
+
+      if (options.apply === 'build' && (isDevMode || isWatching)) {
+        if (options.verbose) {
+          console.log('📊 Bundle Watch: Skipping (dev/watch mode)');
+        }
+        return;
+      }
+
+      // Skip if in test environment and not explicitly enabled
+      if (isTestEnvironment() && options.enabled !== true) {
+        if (options.verbose) {
+          console.log('📊 Bundle Watch: Skipping (test environment detected)');
+        }
+        return;
+      }
 
       const pluginName = 'BundleWatchPlugin';
 
       // Track build start time
       compiler.hooks.compile.tap(pluginName, () => {
         buildStartTime = Date.now();
-        console.log('📊 Bundle Watch: Starting analysis...');
+        if (options.verbose || options.printReport) {
+          console.log('📊 Bundle Watch: Starting analysis...');
+        }
       });
 
       // Analyze after build completes
@@ -214,10 +282,24 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
           }
 
           // Save to git storage
-          if (options.saveToGit) {
-            console.log('💾 Saving metrics to git...');
-            await storage.save(metrics);
-            console.log('✅ Metrics saved successfully');
+          if (saveToGit) {
+            try {
+              if (options.verbose) {
+                console.log('💾 Saving metrics to git...');
+              }
+              await storage.save(metrics);
+              if (options.verbose) {
+                console.log('✅ Metrics saved successfully');
+              }
+            } catch (gitError) {
+              // Graceful handling - git issues shouldn't break builds
+              if (options.verbose) {
+                console.warn('⚠️ Bundle Watch: Could not save to git:',
+                  gitError instanceof Error ? gitError.message : gitError
+                );
+              }
+              // Continue without throwing - this is non-critical
+            }
           }
 
           // Check thresholds
@@ -232,10 +314,16 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
           }
 
         } catch (error) {
-          console.error('❌ Bundle Watch error:', error);
+          // Only log errors if verbose, or if it's a threshold failure
           if (options.failOnSizeIncrease) {
+            // This is an intentional failure - always show
+            console.error('❌ Bundle Watch:', error instanceof Error ? error.message : error);
             throw error;
+          } else if (options.verbose) {
+            // Only show in verbose mode to avoid scary logs
+            console.warn('⚠️ Bundle Watch error:', error instanceof Error ? error.message : error);
           }
+          // Silently continue - bundlewatch issues shouldn't break builds
         }
       });
     },
