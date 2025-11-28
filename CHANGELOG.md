@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/sashamilenkovic/bundlewatch/compare/v2.1.1...v2.2.0) (2025-11-28)
+
+
+### Features
+
+* add Turopack support and fix per-module gzip analysis ([763fbd1](https://github.com/sashamilenkovic/bundlewatch/commit/763fbd172a1c74342cd4cdccde3716f25b980ef7))
+
 ## [2.1.1](https://github.com/sashamilenkovic/bundlewatch/compare/v2.1.0...v2.1.1) (2025-11-28)
 
 
