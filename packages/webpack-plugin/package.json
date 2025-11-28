@@ -1,6 +1,6 @@
 {
   "name": "@milencode/bundlewatch-webpack-plugin",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

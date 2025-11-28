@@ -1,6 +1,6 @@
 {
   "name": "@milencode/bundlewatch-nextjs",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Next.js integration for BundleWatch - supports both Webpack and Turbopack",
   "type": "module",
   "main": "./dist/index.js",

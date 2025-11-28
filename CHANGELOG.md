@@ -1,3 +1,10 @@
+## [2.2.2](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.1...v2.2.2) (2025-11-28)
+
+
+### Bug Fixes
+
+* auto-skip in dev/test environments, graceful error handling ([12ae8a8](https://github.com/sashamilenkovic/bundlewatch/commit/12ae8a81f8a568d66077c668ef43b5df07d5b511))
+
 ## [2.2.1](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.0...v2.2.1) (2025-11-28)
 
 
