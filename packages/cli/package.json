@@ -1,6 +1,6 @@
 {
   "name": "@milencode/bundlewatch-cli",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "CLI utilities for BundleWatch",
   "type": "module",
   "main": "./dist/index.js",

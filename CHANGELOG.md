@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.0...v2.2.1) (2025-11-28)
+
+
+### Bug Fixes
+
+* show output chunks instead of module aggregations ([6250d47](https://github.com/sashamilenkovic/bundlewatch/commit/6250d479e860af3020c2819a718a781abb9abf51))
+
 # [2.2.0](https://github.com/sashamilenkovic/bundlewatch/compare/v2.1.1...v2.2.0) (2025-11-28)
 
 
