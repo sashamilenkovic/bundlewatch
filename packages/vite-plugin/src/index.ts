@@ -61,6 +61,7 @@ export interface ViteBundleWatchOptions extends Partial<BundleWatchConfig> {
    * @default './bundle-report'
    */
   dashboardPath?: string;
+
 }
 
 const defaultOptions: ViteBundleWatchOptions = {
@@ -99,7 +100,10 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
 
     async buildStart() {
       if (!options.enabled) return;
-      console.log('📊 Bundle Watch: Starting analysis...');
+      // Detect SSR build for logging
+      const isSSR = !!config.build?.ssr;
+      const buildType = isSSR ? 'SSR/Server' : 'Client';
+      console.log(`📊 Bundle Watch: Starting ${buildType} analysis...`);
 
       // Get git info
       const commit = await GitStorage.getCurrentCommit(config.root);
@@ -150,8 +154,8 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
 
         let comparison;
 
-        // Load baseline for comparison
-        if (options.compareAgainst) {
+        // Load baseline for comparison (only when saveToGit is enabled, as it requires remote access)
+        if (options.compareAgainst && options.saveToGit) {
           const baseline = await storage.load(options.compareAgainst);
           if (baseline) {
             comparison = analyzer.compare(metrics, baseline, options.compareAgainst);
@@ -184,16 +188,22 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
         // Generate enhanced dashboard
         if (options.generateDashboard) {
           const dashboardDir = resolve(config.root, options.dashboardPath!);
-          console.log(`📊 Generating enhanced dashboard at ${dashboardDir}...`);
+
+          // Detect SSR build to save to different file
+          const isSSR = !!config.build.ssr;
+          const dashboardFilename = isSSR ? 'index-ssr.html' : 'index.html';
+          const buildType = isSSR ? 'SSR/Server' : 'Client';
+
+          console.log(`📊 Generating ${buildType} dashboard at ${dashboardDir}...`);
 
           try {
             mkdirSync(dashboardDir, { recursive: true });
 
             const dashboardHTML = generateEnhancedDashboard(metrics, comparison);
-            writeFileSync(resolve(dashboardDir, 'index.html'), dashboardHTML);
+            writeFileSync(resolve(dashboardDir, dashboardFilename), dashboardHTML);
 
-            console.log(`✅ Dashboard generated: ${resolve(dashboardDir, 'index.html')}`);
-            console.log(`   Open with: open ${resolve(dashboardDir, 'index.html')}`);
+            console.log(`✅ ${buildType} dashboard generated: ${resolve(dashboardDir, dashboardFilename)}`);
+            console.log(`   Open with: open ${resolve(dashboardDir, dashboardFilename)}`);
           } catch (dashboardError) {
             console.error('Failed to generate dashboard:', dashboardError);
           }

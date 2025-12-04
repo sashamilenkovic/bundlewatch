@@ -31,11 +31,38 @@ export function formatBytes(bytes: number): string {
 
 /**
  * Generate treemap data structure for D3 visualization
- * Prefers showing module composition when available, falls back to bundles
+ * Prefers showing dependency composition when available (more meaningful names)
+ * Falls back to output chunk filenames
  */
 export function generateTreemapData(metrics: BuildMetrics): TreemapData {
-  // Primary view: actual output chunks (bundles/assets)
-  // This shows what files are shipped to users
+  // Prefer dependency data if available - shows meaningful package names
+  if (metrics.detailedDependencies && metrics.detailedDependencies.length > 0) {
+    const children = metrics.detailedDependencies.map((dep): TreemapNode => {
+      // Determine type: app code vs npm packages
+      let type: TreemapNode['type'] = 'npm';
+      if (dep.name === 'your-app' || dep.name === 'app' || dep.name.startsWith('src/') ||
+          dep.name.startsWith('lib/') || dep.name.startsWith('components/') ||
+          dep.name.startsWith('pages/') || dep.name.startsWith('views/')) {
+        type = 'app';
+      }
+
+      return {
+        name: dep.name,
+        value: dep.totalSize,
+        gzip: dep.gzipSize || 0,
+        brotli: dep.brotliSize || 0,
+        type,
+      };
+    });
+
+    return {
+      name: 'Dependencies',
+      children,
+    };
+  }
+
+  // Fallback: actual output chunks (bundles/assets)
+  // This shows hashed filenames like C-pWVb_6.js
   const children = metrics.bundles.map(
     (bundle): TreemapNode => ({
       name: bundle.name.split('/').pop() || bundle.name,
