@@ -28,7 +28,7 @@ interface NextConfigBase {
  */
 export function injectWebpackPlugin<T extends NextConfigBase>(
   nextConfig: T,
-  options: ResolvedBundleWatchOptions
+  options: ResolvedBundleWatchOptions,
 ): T {
   const originalWebpack = nextConfig.webpack as
     | ((config: WebpackConfig, context: WebpackContext) => WebpackConfig)
@@ -60,7 +60,7 @@ export function injectWebpackPlugin<T extends NextConfigBase>(
             extractModules: options.extractModules,
             buildDependencyGraph: options.buildDependencyGraph,
             generateRecommendations: options.generateRecommendations,
-          })
+          }),
         );
       }
 

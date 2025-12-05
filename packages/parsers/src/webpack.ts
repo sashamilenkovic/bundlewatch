@@ -3,15 +3,22 @@
  * Converts webpack stats output to BundleWatch BuildMetrics format
  */
 
-import type { BuildMetrics, ModuleMetrics, Bundle } from '@milencode/bundlewatch-core';
-import { compressBoth } from './compression.js';
+import type {
+  BuildMetrics,
+  Bundle,
+  DependencyGraph,
+  DependencyMetrics,
+  ModuleMetrics,
+  OptimizationRecommendation,
+} from '@milencode/bundlewatch-core';
 import {
-  extractPackageName,
-  getModuleType,
-  buildDependencyGraph,
   aggregateDependencyMetrics,
+  buildDependencyGraph,
+  extractPackageName,
   generateOptimizationRecommendations,
+  getModuleType,
 } from './analysis-utils.js';
+import { compressBoth } from './compression.js';
 
 /**
  * Webpack stats.json format (simplified)
@@ -72,7 +79,7 @@ export interface WebpackParseOptions {
  */
 export function parseWebpackStats(
   stats: WebpackStats,
-  options: WebpackParseOptions = {}
+  options: WebpackParseOptions = {},
 ): BuildMetrics {
   const bundles: Bundle[] = [];
   const modules: ModuleMetrics[] = [];
@@ -160,9 +167,9 @@ export function parseWebpackStats(
   const byType = calculateAssetBreakdown(bundles);
 
   // Build detailed analysis if modules were extracted
-  let detailedDependencies;
-  let dependencyGraph;
-  let optimizations;
+  let detailedDependencies: DependencyMetrics[] | undefined;
+  let dependencyGraph: DependencyGraph | undefined;
+  let optimizations: OptimizationRecommendation[] | undefined;
 
   if (modules.length > 0) {
     // Build dependency graph
@@ -256,5 +263,3 @@ function calculateAssetBreakdown(bundles: Bundle[]): BuildMetrics['byType'] {
 
   return breakdown;
 }
-
-

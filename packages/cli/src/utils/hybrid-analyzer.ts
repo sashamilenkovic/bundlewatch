@@ -3,8 +3,8 @@
  * Tries to use existing bundler stats files (fast), falls back to file analysis (slower)
  */
 
-import { readdir, stat, readFile } from 'fs/promises';
-import { join, extname, relative } from 'path';
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { extname, join, relative } from 'node:path';
 import type { BuildMetrics, Bundle } from '@milencode/bundlewatch-core';
 import { parseWebpackStats, type WebpackStats } from '@milencode/bundlewatch-parsers';
 
@@ -81,7 +81,7 @@ async function analyzeFromWebpackStats(
   commit: string,
   branch: string,
   timestamp: string,
-  buildDuration: number
+  buildDuration: number,
 ): Promise<BuildMetrics> {
   const content = await readFile(statsPath, 'utf-8');
   const stats: WebpackStats = JSON.parse(content);
@@ -114,7 +114,7 @@ async function analyzeFromViteManifest(
   commit: string,
   branch: string,
   timestamp: string,
-  buildDuration: number
+  buildDuration: number,
 ): Promise<BuildMetrics> {
   const content = await readFile(manifestPath, 'utf-8');
   const manifest = JSON.parse(content);
@@ -204,7 +204,7 @@ async function analyzeFromFiles(
   commit: string,
   branch: string,
   timestamp: string,
-  buildDuration: number
+  buildDuration: number,
 ): Promise<BuildMetrics> {
   // Find build directory
   const buildDir = await findBuildDir(projectRoot);
@@ -276,7 +276,7 @@ export async function analyzeBuildOutput(
   commit: string,
   branch: string,
   timestamp: string,
-  buildDuration: number
+  buildDuration: number,
 ): Promise<BuildMetrics> {
   const strategy = await detectStrategy(projectRoot);
 
@@ -284,13 +284,7 @@ export async function analyzeBuildOutput(
 
   switch (strategy.type) {
     case 'webpack-stats':
-      return analyzeFromWebpackStats(
-        strategy.path!,
-        commit,
-        branch,
-        timestamp,
-        buildDuration
-      );
+      return analyzeFromWebpackStats(strategy.path!, commit, branch, timestamp, buildDuration);
 
     case 'vite-manifest':
       return analyzeFromViteManifest(
@@ -299,7 +293,7 @@ export async function analyzeBuildOutput(
         commit,
         branch,
         timestamp,
-        buildDuration
+        buildDuration,
       );
 
     case 'fallback':
@@ -316,14 +310,7 @@ export async function analyzeBuildOutput(
  * Find common build output directories
  */
 async function findBuildDir(projectRoot: string): Promise<string | null> {
-  const commonDirs = [
-    'dist',
-    'build',
-    '.next/static',
-    '.output/public',
-    'out',
-    'public/build',
-  ];
+  const commonDirs = ['dist', 'build', '.next/static', '.output/public', 'out', 'public/build'];
 
   for (const dir of commonDirs) {
     const fullPath = join(projectRoot, dir);
@@ -332,9 +319,7 @@ async function findBuildDir(projectRoot: string): Promise<string | null> {
       if (stats.isDirectory()) {
         return fullPath;
       }
-    } catch {
-      continue;
-    }
+    } catch {}
   }
 
   return null;
@@ -383,8 +368,25 @@ async function collectFiles(dir: string, rootDir: string, files: string[] = []):
     } else if (entry.isFile()) {
       // Only include actual bundle files
       const ext = extname(entry.name).toLowerCase();
-      if (['.js', '.mjs', '.cjs', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg',
-           '.webp', '.woff', '.woff2', '.ttf', '.eot', '.otf'].includes(ext)) {
+      if (
+        [
+          '.js',
+          '.mjs',
+          '.cjs',
+          '.css',
+          '.png',
+          '.jpg',
+          '.jpeg',
+          '.gif',
+          '.svg',
+          '.webp',
+          '.woff',
+          '.woff2',
+          '.ttf',
+          '.eot',
+          '.otf',
+        ].includes(ext)
+      ) {
         files.push(fullPath);
       }
     }
@@ -400,18 +402,16 @@ function calculateAssetBreakdown(bundles: Bundle[]): BuildMetrics['byType'] {
   const assetBundles = bundles.filter(b => b.type === 'asset');
   const imageAssets = assetBundles.filter(b => /\.(png|jpg|jpeg|gif|svg|webp)$/i.test(b.name));
   const fontAssets = assetBundles.filter(b => /\.(woff|woff2|ttf|eot|otf)$/i.test(b.name));
-  const otherAssets = assetBundles.filter(b =>
-    !imageAssets.includes(b) && !fontAssets.includes(b)
-  );
+  const otherAssets = assetBundles.filter(b => !imageAssets.includes(b) && !fontAssets.includes(b));
 
   return {
     javascript: bundles.filter(b => b.type === 'js').reduce((sum, b) => sum + b.size, 0),
     css: bundles.filter(b => b.type === 'css').reduce((sum, b) => sum + b.size, 0),
     images: imageAssets.reduce((sum, b) => sum + b.size, 0),
     fonts: fontAssets.reduce((sum, b) => sum + b.size, 0),
-    other: [
-      ...bundles.filter(b => b.type === 'other' || b.type === 'html'),
-      ...otherAssets
-    ].reduce((sum, b) => sum + b.size, 0),
+    other: [...bundles.filter(b => b.type === 'other' || b.type === 'html'), ...otherAssets].reduce(
+      (sum, b) => sum + b.size,
+      0,
+    ),
   };
 }

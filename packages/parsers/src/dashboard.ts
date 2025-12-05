@@ -3,7 +3,11 @@
  * Used by both Vite and Webpack plugins
  */
 
-import type { BuildMetrics } from '@milencode/bundlewatch-core';
+import type {
+  BuildMetrics,
+  DependencyMetrics,
+  SourceFileMetrics,
+} from '@milencode/bundlewatch-core';
 
 interface TreemapNode {
   name: string;
@@ -26,7 +30,7 @@ export function formatBytes(bytes: number): string {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+  return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
 }
 
 /**
@@ -91,9 +95,15 @@ export function generateDependencyData(metrics: BuildMetrics): TreemapData | nul
     // Determine type: app code vs npm packages vs vendor
     let type: 'app' | 'npm' | 'vendor' = 'npm';
 
-    if (dep.name === 'your-app' || dep.name === 'app' || dep.name.startsWith('src/') ||
-        dep.name.startsWith('lib/') || dep.name.startsWith('components/') ||
-        dep.name.startsWith('pages/') || dep.name.startsWith('views/')) {
+    if (
+      dep.name === 'your-app' ||
+      dep.name === 'app' ||
+      dep.name.startsWith('src/') ||
+      dep.name.startsWith('lib/') ||
+      dep.name.startsWith('components/') ||
+      dep.name.startsWith('pages/') ||
+      dep.name.startsWith('views/')
+    ) {
       type = 'app';
     } else if (dep.name === 'bundler-virtual' || dep.name.startsWith('virtual:')) {
       type = 'vendor';
@@ -350,18 +360,24 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
       <span class="stat-label">Chunks</span>
       <span class="stat-value">${metrics.chunkCount}</span>
     </div>
-    ${metrics.modules ? `
+    ${
+      metrics.modules
+        ? `
     <div class="stat-card">
       <span class="stat-label">Modules</span>
       <span class="stat-value">${metrics.modules.length}</span>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
   </div>
 
   <h2>Bundle Treemap</h2>
   <div id="treemap" class="treemap"></div>
 
-  ${treemapData.children && treemapData.children.length > 0 ? `
+  ${
+    treemapData.children && treemapData.children.length > 0
+      ? `
   <h2>Output Chunks</h2>
   <div class="dependency-table">
     <table id="modules-table">
@@ -384,12 +400,15 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
         </tr>
       </thead>
       <tbody>
-        ${treemapData.children.map((child: any) => `
+        ${treemapData.children
+          .map(
+            (child: TreemapNode) => `
           <tr>
             <td>
-              ${child.type === 'app'
-                ? '<span class="badge badge-app">APP</span> '
-                : '<span class="badge badge-npm">NPM</span> '
+              ${
+                child.type === 'app'
+                  ? '<span class="badge badge-app">APP</span> '
+                  : '<span class="badge badge-npm">NPM</span> '
               }
               <strong>${child.name}</strong>
             </td>
@@ -399,13 +418,19 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
             <td></td>
             <td></td>
           </tr>
-        `).join('')}
+        `,
+          )
+          .join('')}
       </tbody>
     </table>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
 
-  ${dependencyData.length > 0 ? `
+  ${
+    dependencyData.length > 0
+      ? `
   <h2>Dependencies</h2>
   <div class="dependency-table">
     <table>
@@ -428,12 +453,16 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
         </tr>
       </thead>
       <tbody>
-        ${dependencyData.slice(0, 20).map((dep: any) => `
+        ${dependencyData
+          .slice(0, 20)
+          .map(
+            (dep: DependencyMetrics) => `
           <tr>
             <td>
-              ${dep.name === 'your-app'
-                ? '<span class="badge badge-app">APP</span> '
-                : '<span class="badge badge-npm">NPM</span> '
+              ${
+                dep.name === 'your-app'
+                  ? '<span class="badge badge-app">APP</span> '
+                  : '<span class="badge badge-npm">NPM</span> '
               }
               <strong>${dep.name}</strong>
               ${dep.duplicate ? ' <span style="color: #ef4444;">DUPLICATE</span>' : ''}
@@ -444,13 +473,19 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
             <td>${dep.moduleCount}</td>
             <td>${dep.treeshakeable === true ? 'Yes' : dep.treeshakeable === false ? 'No' : 'Unknown'}</td>
           </tr>
-        `).join('')}
+        `,
+          )
+          .join('')}
       </tbody>
     </table>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
 
-  ${sourceFileData.length > 0 ? `
+  ${
+    sourceFileData.length > 0
+      ? `
     <h2>Source Files (via Source Maps)</h2>
     <p style="color: #64748b; margin-bottom: 1rem; font-size: 0.95em;">
       Note: These sizes represent original source code before minification and tree-shaking.
@@ -477,12 +512,16 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
           </tr>
         </thead>
         <tbody>
-          ${sourceFileData.slice(0, 20).map((file: any) => `
+          ${sourceFileData
+            .slice(0, 20)
+            .map(
+              (file: SourceFileMetrics) => `
             <tr>
               <td>
-                ${file.package === 'your-app'
-                  ? '<span class="badge badge-app">APP</span> '
-                  : '<span class="badge badge-npm">NPM</span> '
+                ${
+                  file.package === 'your-app'
+                    ? '<span class="badge badge-app">APP</span> '
+                    : '<span class="badge badge-npm">NPM</span> '
                 }
                 ${file.path}
               </td>
@@ -492,11 +531,15 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
               <td></td>
               <td></td>
             </tr>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </tbody>
       </table>
     </div>
-  ` : ''}
+  `
+      : ''
+  }
 
   <script>
     // Theme toggle

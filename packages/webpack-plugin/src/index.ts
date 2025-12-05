@@ -3,20 +3,20 @@
  * Bundle Watch plugin for Webpack
  */
 
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import {
+  type BundleWatchConfig,
+  type Comparison,
   compareMetrics,
   GitStorage,
   ReportGenerator,
-  ComparisonEngine,
-  type BundleWatchConfig,
 } from '@milencode/bundlewatch-core';
 import {
-  parseWebpackStats,
   generateEnhancedDashboard,
+  parseWebpackStats,
   type WebpackStats,
 } from '@milencode/bundlewatch-parsers';
-import { resolve } from 'path';
-import { writeFileSync, mkdirSync } from 'fs';
 import type { Compiler } from 'webpack';
 
 export interface WebpackBundleWatchOptions extends Partial<BundleWatchConfig> {
@@ -156,7 +156,7 @@ function shouldSaveToGit(explicitValue: boolean | undefined, isCI: boolean): boo
 export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
   const options = { ...defaultOptions, ...userOptions };
   const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
-  let buildStartTime = 0;
+  let _buildStartTime = 0;
 
   // Resolve saveToGit based on CI/test environment
   const saveToGit = shouldSaveToGit(options.saveToGit, isCI);
@@ -188,14 +188,14 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
 
       // Track build start time
       compiler.hooks.compile.tap(pluginName, () => {
-        buildStartTime = Date.now();
+        _buildStartTime = Date.now();
         if (options.verbose || options.printReport) {
           console.log('📊 Bundle Watch: Starting analysis...');
         }
       });
 
       // Analyze after build completes
-      compiler.hooks.done.tapPromise(pluginName, async (stats) => {
+      compiler.hooks.done.tapPromise(pluginName, async stats => {
         try {
           const workingDir = compiler.context || process.cwd();
 
@@ -230,7 +230,7 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
           });
           const reporter = new ReportGenerator();
 
-          let comparison;
+          let comparison: Comparison | undefined;
 
           // Load baseline for comparison
           if (options.compareAgainst) {
@@ -242,7 +242,9 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
               console.log('\n┌─────────────────────────────────────────────────────────────┐');
               console.log('│ 📊 BundleWatch - First Run Detected                        │');
               console.log('├─────────────────────────────────────────────────────────────┤');
-              console.log(`│ No baseline found for comparison with '${options.compareAgainst}'${' '.repeat(Math.max(0, 22 - options.compareAgainst.length))}│`);
+              console.log(
+                `│ No baseline found for comparison with '${options.compareAgainst}'${' '.repeat(Math.max(0, 22 - options.compareAgainst.length))}│`,
+              );
               console.log('│                                                             │');
               console.log('│ 💡 To enable bundle size comparisons:                      │');
               console.log('│                                                             │');
@@ -294,8 +296,9 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
             } catch (gitError) {
               // Graceful handling - git issues shouldn't break builds
               if (options.verbose) {
-                console.warn('⚠️ Bundle Watch: Could not save to git:',
-                  gitError instanceof Error ? gitError.message : gitError
+                console.warn(
+                  '⚠️ Bundle Watch: Could not save to git:',
+                  gitError instanceof Error ? gitError.message : gitError,
                 );
               }
               // Continue without throwing - this is non-critical
@@ -308,11 +311,10 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
             if (comparison.changes.totalSize.diffPercent > threshold) {
               throw new Error(
                 `Bundle size increased by ${comparison.changes.totalSize.diffPercent.toFixed(1)}% ` +
-                `(threshold: ${threshold}%). Build failed.`
+                  `(threshold: ${threshold}%). Build failed.`,
               );
             }
           }
-
         } catch (error) {
           // Only log errors if verbose, or if it's a threshold failure
           if (options.failOnSizeIncrease) {
@@ -331,4 +333,3 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
 }
 
 export default bundleWatchPlugin;
-

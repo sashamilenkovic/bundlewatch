@@ -6,8 +6,8 @@
  */
 
 import { Command } from 'commander';
-import { backfillCommand } from './commands/backfill.js';
 import { analyzeCommand } from './commands/analyze.js';
+import { backfillCommand } from './commands/backfill.js';
 
 const program = new Command();
 

@@ -1,24 +1,24 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { format } from 'date-fns';
-  import axios from 'axios';
+import axios from 'axios';
+import { onMount } from 'svelte';
 
-  let time = $state(new Date());
-  let data = $state('Loading...');
+let _time = $state(new Date());
+let data = $state('Loading...');
 
-  $effect(() => {
-    const timer = setInterval(() => {
-      time = new Date();
-    }, 1000);
+$effect(() => {
+  const timer = setInterval(() => {
+    _time = new Date();
+  }, 1000);
 
-    return () => clearInterval(timer);
-  });
+  return () => clearInterval(timer);
+});
 
-  onMount(() => {
-    axios.get('https://api.github.com/repos/anthropics/claude-code')
-      .then(res => data = res.data.description)
-      .catch(() => data = 'Bundle Watch + SvelteKit Example');
-  });
+onMount(() => {
+  axios
+    .get('https://api.github.com/repos/anthropics/claude-code')
+    .then(res => (data = res.data.description))
+    .catch(() => (data = 'Bundle Watch + SvelteKit Example'));
+});
 </script>
 
 <div class="container">

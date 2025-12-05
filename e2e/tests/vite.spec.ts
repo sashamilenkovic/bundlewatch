@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { readFile, access } from 'fs/promises';
-import { join } from 'path';
+import { exec } from 'node:child_process';
+import { access } from 'node:fs/promises';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { expect, test } from '@playwright/test';
 
 const execAsync = promisify(exec);
 
@@ -13,30 +13,30 @@ test.describe('Vite Plugin', () => {
     // Clean build
     try {
       await execAsync('rm -rf dist', { cwd: VITE_APP_DIR });
-    } catch (e) {
+    } catch (_e) {
       // Ignore if dist doesn't exist
     }
   });
 
   test('should build Vite app successfully', async () => {
-    const { stdout, stderr } = await execAsync('pnpm build', {
+    const { stdout } = await execAsync('pnpm build', {
       cwd: VITE_APP_DIR,
       env: { ...process.env, CI: 'false' },
     });
 
     // Check build succeeded
     expect(stdout).toContain('built in');
-    
+
     // Check that bundle watch ran
     expect(stdout).toContain('Bundle Watch');
   });
 
   test('should generate build output', async () => {
     const distPath = join(VITE_APP_DIR, 'dist');
-    
+
     // Check dist directory exists
     await expect(access(distPath)).resolves.not.toThrow();
-    
+
     // Check for index.html
     const indexPath = join(distPath, 'index.html');
     await expect(access(indexPath)).resolves.not.toThrow();
@@ -77,4 +77,3 @@ test.describe('Vite Plugin', () => {
     expect(stdout).toContain('built in');
   });
 });
-

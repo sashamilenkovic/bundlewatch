@@ -3,20 +3,20 @@
  * Collects module data during build and generates comprehensive metrics
  */
 
-import { gzipSync, brotliCompressSync } from 'node:zlib';
-import type { OutputBundle, OutputChunk, OutputAsset } from 'rollup';
+import { brotliCompressSync, gzipSync } from 'node:zlib';
 import type {
+  AssetBreakdown,
   BuildMetrics,
-  ModuleMetrics,
-  DependencyMetrics,
+  Bundle,
   DependencyGraph,
   DependencyGraphNode,
+  DependencyMetrics,
+  ModuleMetrics,
   OptimizationRecommendation,
-  Bundle,
-  AssetBreakdown,
   SourceFileMetrics,
 } from '@milencode/bundlewatch-core';
-import { parseSourceMapWithContent, mergeSourceFileMetrics } from './source-map-parser.js';
+import type { OutputAsset, OutputBundle, OutputChunk } from 'rollup';
+import { mergeSourceFileMetrics, parseSourceMapWithContent } from './source-map-parser.js';
 
 /**
  * Module information collected during build
@@ -69,9 +69,7 @@ export interface AnalyzerState {
 /**
  * Create a new analyzer state
  */
-export function createAnalyzerState(
-  options: DetailedAnalysisOptions = {}
-): AnalyzerState {
+export function createAnalyzerState(options: DetailedAnalysisOptions = {}): AnalyzerState {
   return {
     modules: new Map(),
     options: {
@@ -97,7 +95,7 @@ export function collectModuleInfo(
     id: string;
     code: string | null;
     importedIds: readonly string[];
-  }
+  },
 ): AnalyzerState {
   if (!moduleInfo.code) return state;
 
@@ -138,7 +136,7 @@ export function collectModuleInfo(
  */
 export async function analyzeBundle(
   state: AnalyzerState,
-  bundle: OutputBundle
+  bundle: OutputBundle,
 ): Promise<BuildMetrics> {
   const bundles: Bundle[] = [];
   const moduleMetrics: ModuleMetrics[] = [];
@@ -170,15 +168,15 @@ export async function analyzeBundle(
     : undefined;
 
   // Merge source file metrics from all chunks
-  const sourceFiles = sourceFilesArrays.length > 0
-    ? mergeSourceFileMetrics(sourceFilesArrays)
-    : undefined;
+  const sourceFiles =
+    sourceFilesArrays.length > 0 ? mergeSourceFileMetrics(sourceFilesArrays) : undefined;
 
   // Calculate dependency metrics
   // Use sourceFiles if available (accurate minified sizes), otherwise fall back to modules
-  const detailedDependencies = sourceFiles && sourceFiles.length > 0
-    ? calculateDependencyMetricsFromSourceFiles(sourceFiles, bundles)
-    : calculateDependencyMetrics(moduleMetrics, bundles);
+  const detailedDependencies =
+    sourceFiles && sourceFiles.length > 0
+      ? calculateDependencyMetricsFromSourceFiles(sourceFiles, bundles)
+      : calculateDependencyMetrics(moduleMetrics, bundles);
 
   // Generate optimizations
   const optimizations = state.options.generateRecommendations
@@ -230,7 +228,7 @@ async function processChunk(
   state: AnalyzerState,
   fileName: string,
   chunk: OutputChunk,
-  bundle: OutputBundle
+  bundle: OutputBundle,
 ): Promise<{
   bundle: Bundle;
   modules: ModuleMetrics[];
@@ -281,9 +279,7 @@ async function processChunk(
     const gzipSize = state.options.realCompression
       ? 0 // Real compression would need actual code content
       : Math.round(moduleInfo.size * 0.3);
-    const brotliSize = state.options.realCompression
-      ? 0
-      : Math.round(gzipSize * 0.85);
+    const brotliSize = state.options.realCompression ? 0 : Math.round(gzipSize * 0.85);
 
     modules.push({
       id: moduleId,
@@ -309,14 +305,10 @@ async function processChunk(
       const mapOutput = bundle[mapFileName];
 
       if (mapOutput && mapOutput.type === 'asset') {
-        const mapSource = typeof mapOutput.source === 'string'
-          ? mapOutput.source
-          : mapOutput.source.toString();
+        const mapSource =
+          typeof mapOutput.source === 'string' ? mapOutput.source : mapOutput.source.toString();
 
-        sourceFiles = await parseSourceMapWithContent(
-          JSON.parse(mapSource),
-          fileName
-        );
+        sourceFiles = await parseSourceMapWithContent(JSON.parse(mapSource), fileName);
       } else if (typeof chunk.map === 'object') {
         // Use inline source map
         sourceFiles = await parseSourceMapWithContent(chunk.map, fileName);
@@ -346,11 +338,9 @@ async function processChunk(
 async function processAsset(
   _state: AnalyzerState,
   fileName: string,
-  asset: OutputAsset
+  asset: OutputAsset,
 ): Promise<Bundle> {
-  const source = typeof asset.source === 'string'
-    ? asset.source
-    : asset.source.toString();
+  const source = typeof asset.source === 'string' ? asset.source : asset.source.toString();
   const size = Buffer.from(source).length;
 
   // Assets often already compressed
@@ -371,7 +361,7 @@ async function processAsset(
 
 function buildDependencyGraph(
   state: AnalyzerState,
-  _chunkToModules: Map<string, string[]>
+  _chunkToModules: Map<string, string[]>,
 ): DependencyGraph {
   const nodes = new Map<string, DependencyGraphNode>();
 
@@ -411,7 +401,7 @@ function buildDependencyGraph(
 }
 
 function detectCircularDependencies(
-  nodes: Map<string, DependencyGraphNode>
+  nodes: Map<string, DependencyGraphNode>,
 ): Array<{ chain: string[]; impact: 'warning' | 'error' }> {
   const circular: Array<{ chain: string[]; impact: 'warning' | 'error' }> = [];
   const visited = new Set<string>();
@@ -450,9 +440,7 @@ function detectCircularDependencies(
   return circular;
 }
 
-function detectDuplicatePackages(
-  modules: Map<string, ModuleInfo>
-): Array<{
+function detectDuplicatePackages(modules: Map<string, ModuleInfo>): Array<{
   package: string;
   versions: Array<{ version: string; size: number; modules: string[] }>;
 }> {
@@ -508,7 +496,7 @@ function detectDuplicatePackages(
  */
 function calculateDependencyMetricsFromSourceFiles(
   sourceFiles: SourceFileMetrics[],
-  bundles: Bundle[]
+  bundles: Bundle[],
 ): DependencyMetrics[] {
   const byPackage = new Map<string, SourceFileMetrics[]>();
 
@@ -552,7 +540,7 @@ function calculateDependencyMetricsFromSourceFiles(
 
 function calculateDependencyMetrics(
   modules: ModuleMetrics[],
-  bundles: Bundle[]
+  bundles: Bundle[],
 ): DependencyMetrics[] {
   const byPackage = new Map<string, ModuleMetrics[]>();
 
@@ -598,7 +586,7 @@ function calculateDependencyMetrics(
 function generateOptimizations(
   dependencies: DependencyMetrics[],
   _modules: ModuleMetrics[],
-  graph?: DependencyGraph
+  graph?: DependencyGraph,
 ): OptimizationRecommendation[] {
   const recommendations: OptimizationRecommendation[] = [];
 
@@ -619,8 +607,14 @@ function generateOptimizations(
   // Duplicates
   if (graph?.duplicates) {
     for (const dup of graph.duplicates) {
-      const totalWaste = dup.versions.reduce((sum: number, v: { version: string; size: number; modules: string[] }) => sum + v.size, 0)
-        - Math.max(...dup.versions.map((v: { version: string; size: number; modules: string[] }) => v.size));
+      const totalWaste =
+        dup.versions.reduce(
+          (sum: number, v: { version: string; size: number; modules: string[] }) => sum + v.size,
+          0,
+        ) -
+        Math.max(
+          ...dup.versions.map((v: { version: string; size: number; modules: string[] }) => v.size),
+        );
 
       recommendations.push({
         type: 'duplicate',
@@ -643,7 +637,7 @@ function generateOptimizations(
         message: 'Circular dependency detected',
         action: 'Refactor to break circular imports',
         affectedPackages: circ.chain.map((id: string) => extractPackageName(id)),
-        example: circ.chain.slice(0, 3).join(' → ') + '...',
+        example: `${circ.chain.slice(0, 3).join(' → ')}...`,
       });
     }
   }
@@ -656,7 +650,7 @@ function generateOptimizations(
 function calculateDepth(
   modules: Map<string, ModuleInfo>,
   moduleId: string,
-  visited = new Set<string>()
+  visited = new Set<string>(),
 ): number {
   if (visited.has(moduleId)) return Infinity;
 
@@ -666,9 +660,7 @@ function calculateDepth(
   }
 
   visited.add(moduleId);
-  const depths = moduleInfo.importedBy.map(id =>
-    calculateDepth(modules, id, new Set(visited))
-  );
+  const depths = moduleInfo.importedBy.map(id => calculateDepth(modules, id, new Set(visited)));
 
   return Math.min(...depths) + 1;
 }
@@ -679,7 +671,9 @@ function extractPackageName(id: string): string {
     // Handle pnpm paths: .pnpm/react@18.0.0/node_modules/react/index.js
     // Extract the actual package name after .pnpm/package@version/node_modules/
     if (id.includes('.pnpm')) {
-      const pnpmMatch = id.match(/\.pnpm[/\\][^/\\]+[/\\]node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+      const pnpmMatch = id.match(
+        /\.pnpm[/\\][^/\\]+[/\\]node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/,
+      );
       if (pnpmMatch) {
         return pnpmMatch[1].replace(/\\/g, '/');
       }
@@ -692,7 +686,9 @@ function extractPackageName(id: string): string {
       // Skip cache directories like .vite, .cache, etc.
       if (pkgName.startsWith('.')) {
         // Try to find the real package after the cache dir
-        const cacheMatch = id.match(/node_modules[/\\]\.[^/\\]+[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+        const cacheMatch = id.match(
+          /node_modules[/\\]\.[^/\\]+[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/,
+        );
         if (cacheMatch) {
           return cacheMatch[1].replace(/\\/g, '/');
         }
@@ -709,7 +705,7 @@ function extractPackageName(id: string): string {
 
   // Extract meaningful path from user code
   // Remove common prefixes and normalize
-  let cleanPath = id
+  const cleanPath = id
     .replace(/^[a-z]:/i, '') // Remove Windows drive letters
     .replace(/\\/g, '/') // Normalize path separators
     .replace(/^\/+/, ''); // Remove leading slashes
@@ -720,12 +716,31 @@ function extractPackageName(id: string): string {
 
   // Remove common root directories
   const removeRoots = ['home', 'users', 'projects', 'workspace', 'app', 'var', 'tmp'];
-  while (pathParts.length > 0 && removeRoots.some(root => pathParts[0].toLowerCase().includes(root))) {
+  while (
+    pathParts.length > 0 &&
+    removeRoots.some(root => pathParts[0].toLowerCase().includes(root))
+  ) {
     pathParts.shift();
   }
 
   // Look for meaningful directories
-  const meaningfulDirs = ['src', 'lib', 'components', 'pages', 'views', 'layouts', 'composables', 'utils', 'helpers', 'services', 'api', 'store', 'assets', 'styles', 'public'];
+  const meaningfulDirs = [
+    'src',
+    'lib',
+    'components',
+    'pages',
+    'views',
+    'layouts',
+    'composables',
+    'utils',
+    'helpers',
+    'services',
+    'api',
+    'store',
+    'assets',
+    'styles',
+    'public',
+  ];
 
   let packageName = 'app';
 
@@ -833,5 +848,5 @@ function formatSize(bytes: number): string {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
+  return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
 }

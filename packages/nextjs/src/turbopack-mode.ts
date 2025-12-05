@@ -6,18 +6,19 @@
  * 2. Register a process exit hook to analyze after build completes
  */
 
-import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'fs';
-import { resolve, join } from 'path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import {
-  GitStorage,
-  ReportGenerator,
+  type Comparison,
   compareMetrics,
-  getCurrentCommit,
+  GitStorage,
   getCurrentBranch,
+  getCurrentCommit,
+  ReportGenerator,
 } from '@milencode/bundlewatch-core';
 import {
-  parseWebpackStats,
   generateEnhancedDashboard,
+  parseWebpackStats,
   type WebpackStats,
 } from '@milencode/bundlewatch-parsers';
 import type { ResolvedBundleWatchOptions } from './types.js';
@@ -29,7 +30,7 @@ const STATS_PATH = '.next/server/webpack-stats.json';
  */
 export async function analyzeTurbopackBuild(
   options: ResolvedBundleWatchOptions,
-  workingDir: string = process.cwd()
+  workingDir: string = process.cwd(),
 ): Promise<void> {
   const statsPath = resolve(workingDir, STATS_PATH);
 
@@ -70,7 +71,7 @@ export async function analyzeTurbopackBuild(
     const storage = new GitStorage({ workingDir });
     const reporter = new ReportGenerator();
 
-    let comparison;
+    let comparison: Comparison | undefined;
 
     // Load baseline for comparison
     if (options.compareAgainst) {
@@ -86,7 +87,7 @@ export async function analyzeTurbopackBuild(
 
     // Print report
     if (options.printReport) {
-      console.log('\n' + reporter.generateConsoleOutput(metrics, comparison));
+      console.log(`\n${reporter.generateConsoleOutput(metrics, comparison)}`);
     }
 
     // Generate dashboard
@@ -114,7 +115,7 @@ export async function analyzeTurbopackBuild(
       if (increase > options.sizeIncreaseThreshold) {
         console.error(
           `\n❌ Bundle size increased by ${increase.toFixed(1)}% ` +
-            `(threshold: ${options.sizeIncreaseThreshold}%)\n`
+            `(threshold: ${options.sizeIncreaseThreshold}%)\n`,
         );
         process.exitCode = 1;
       }
@@ -143,7 +144,7 @@ export function setupTurbopackAnalysis(options: ResolvedBundleWatchOptions): voi
     analyzed = true;
 
     // Small delay to ensure stats file is fully written
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 100));
     await analyzeTurbopackBuild(options);
   };
 

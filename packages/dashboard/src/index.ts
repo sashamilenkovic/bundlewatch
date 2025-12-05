@@ -5,10 +5,10 @@
 
 // Re-export dashboard generation from parsers
 export {
+  formatBytes,
   generateEnhancedDashboard,
   generateTreemapData,
-  formatBytes,
 } from '@milencode/bundlewatch-parsers';
 
 // Export utilities
-export { exportStatic, exportComparison, type ExportOptions } from './export.js';
+export { type ExportOptions, exportComparison, exportStatic } from './export.js';

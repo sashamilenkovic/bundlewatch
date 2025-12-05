@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { access } from 'fs/promises';
-import { join } from 'path';
+import { exec } from 'node:child_process';
+import { access } from 'node:fs/promises';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { expect, test } from '@playwright/test';
 
 const execAsync = promisify(exec);
 
@@ -13,7 +13,7 @@ test.describe('Nuxt Integration (Vite Plugin)', () => {
     // Clean build
     try {
       await execAsync('rm -rf .nuxt .output', { cwd: NUXT_APP_DIR });
-    } catch (e) {
+    } catch (_e) {
       // Ignore if directories don't exist
     }
   });
@@ -26,14 +26,14 @@ test.describe('Nuxt Integration (Vite Plugin)', () => {
 
     // Check build succeeded
     expect(stdout).toContain('Client built');
-    
+
     // Check that bundle watch ran
     expect(stdout).toContain('Bundle Watch');
   });
 
   test('should generate .output directory', async () => {
     const outputPath = join(NUXT_APP_DIR, '.output');
-    
+
     // Check .output directory exists
     await expect(access(outputPath)).resolves.not.toThrow();
   });
@@ -81,7 +81,7 @@ test.describe('Nuxt Integration (Vite Plugin)', () => {
     // Extract gzip and brotli sizes
     const gzipMatch = stdout.match(/Gzipped:\s+([\d.]+\s+[KMG]?B)/);
     const brotliMatch = stdout.match(/Brotli:\s+([\d.]+\s+[KMG]?B)/);
-    
+
     if (gzipMatch && brotliMatch) {
       // Just verify both are present - brotli should be smaller
       expect(gzipMatch[1]).toBeTruthy();
@@ -89,4 +89,3 @@ test.describe('Nuxt Integration (Vite Plugin)', () => {
     }
   });
 });
-

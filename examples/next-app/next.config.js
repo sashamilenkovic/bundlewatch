@@ -15,7 +15,7 @@ const nextConfig = {
           generateRecommendations: true,
           generateDashboard: true,
           dashboardPath: './bundle-report',
-        })
+        }),
       );
     }
     return config;

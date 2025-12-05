@@ -1,5 +1,5 @@
-import { defineConfig } from "@solidjs/start/config";
 import { bundleWatch } from '@milencode/bundlewatch-vite-plugin';
+import { defineConfig } from '@solidjs/start/config';
 
 export default defineConfig({
   vite: {

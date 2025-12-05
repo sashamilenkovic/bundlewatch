@@ -3,11 +3,11 @@
  * Using functional composition instead of classes
  */
 
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { writeFile, mkdir } from 'fs/promises';
-import { join, dirname } from 'path';
-import type { BuildMetrics, StorageOptions } from './types.js';
+import { exec } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { promisify } from 'node:util';
+import type { BuildMetrics } from './types.js';
 
 const execAsync = promisify(exec);
 
@@ -53,7 +53,11 @@ async function branchExists(ctx: StorageContext): Promise<boolean> {
 /**
  * Write metrics to file
  */
-async function writeMetricsFile(ctx: StorageContext, filepath: string, metrics: BuildMetrics): Promise<void> {
+async function writeMetricsFile(
+  ctx: StorageContext,
+  filepath: string,
+  metrics: BuildMetrics,
+): Promise<void> {
   const fullPath = join(ctx.workingDir, filepath);
   await mkdir(dirname(fullPath), { recursive: true });
   await writeFile(fullPath, JSON.stringify(metrics, null, 2));
@@ -62,7 +66,11 @@ async function writeMetricsFile(ctx: StorageContext, filepath: string, metrics: 
 /**
  * Update latest.json symlink/copy
  */
-async function updateLatest(ctx: StorageContext, branch: string, metrics: BuildMetrics): Promise<void> {
+async function updateLatest(
+  ctx: StorageContext,
+  branch: string,
+  metrics: BuildMetrics,
+): Promise<void> {
   const latestPath = join(ctx.workingDir, 'data', branch, 'latest.json');
   await mkdir(dirname(latestPath), { recursive: true });
   await writeFile(latestPath, JSON.stringify(metrics, null, 2));
@@ -71,7 +79,10 @@ async function updateLatest(ctx: StorageContext, branch: string, metrics: BuildM
 /**
  * Save metrics to git branch
  */
-export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfig = {}): Promise<void> {
+export async function saveMetrics(
+  metrics: BuildMetrics,
+  config: GitStorageConfig = {},
+): Promise<void> {
   const ctx = await createStorageContext(config);
   const timestamp = new Date(metrics.timestamp).getTime();
   const filename = `${timestamp}-${metrics.commit.substring(0, 7)}.json`;
@@ -88,7 +99,9 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
 
     if (!exists) {
       // Stash any uncommitted changes to avoid conflicts
-      await execAsync('git stash push -u -m "bundlewatch: temporary stash"', { cwd: ctx.workingDir }).catch(() => {
+      await execAsync('git stash push -u -m "bundlewatch: temporary stash"', {
+        cwd: ctx.workingDir,
+      }).catch(() => {
         // Ignore errors if nothing to stash
       });
 
@@ -97,7 +110,7 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
       await execAsync('git rm -rf .', { cwd: ctx.workingDir }).catch(() => {
         // Ignore errors if no files to remove
       });
-      
+
       // Create initial structure
       await writeMetricsFile(ctx, filepath, metrics);
       await updateLatest(ctx, metrics.branch, metrics);
@@ -105,7 +118,7 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
       // Only add the data directory, not everything in working dir
       await execAsync('git add data/', { cwd: ctx.workingDir });
       await execAsync('git commit -m "Initialize bundle-watch data"', { cwd: ctx.workingDir });
-      
+
       // Push the new branch
       await execAsync(`git push -u ${ctx.remote} ${ctx.branch}`, { cwd: ctx.workingDir });
     } else {
@@ -113,7 +126,9 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
       await execAsync(`git fetch ${ctx.remote} ${ctx.branch}`, { cwd: ctx.workingDir });
 
       // Stash any uncommitted changes to avoid conflicts
-      await execAsync('git stash push -u -m "bundlewatch: temporary stash"', { cwd: ctx.workingDir }).catch(() => {
+      await execAsync('git stash push -u -m "bundlewatch: temporary stash"', {
+        cwd: ctx.workingDir,
+      }).catch(() => {
         // Ignore errors if nothing to stash
       });
 
@@ -128,7 +143,7 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
       await execAsync('git add data/', { cwd: ctx.workingDir });
       await execAsync(
         `git commit -m "Add metrics for ${metrics.branch}@${metrics.commit.substring(0, 7)}"`,
-        { cwd: ctx.workingDir }
+        { cwd: ctx.workingDir },
       );
       await execAsync(`git push ${ctx.remote} ${ctx.branch}`, { cwd: ctx.workingDir });
     }
@@ -166,10 +181,10 @@ export async function saveMetrics(metrics: BuildMetrics, config: GitStorageConfi
 export async function loadMetrics(
   branch: string,
   commit?: string,
-  config: GitStorageConfig = {}
+  config: GitStorageConfig = {},
 ): Promise<BuildMetrics | null> {
   const ctx = await createStorageContext(config);
-  
+
   try {
     // Fetch latest data
     await execAsync(`git fetch ${ctx.remote} ${ctx.branch}`, { cwd: ctx.workingDir });
@@ -178,16 +193,15 @@ export async function loadMetrics(
       // Load latest for branch
       const { stdout } = await execAsync(
         `git show ${ctx.remote}/${ctx.branch}:data/${branch}/latest.json`,
-        { cwd: ctx.workingDir }
+        { cwd: ctx.workingDir },
       );
       return JSON.parse(stdout);
     } else {
       // Find specific commit data
-      const { stdout } = await execAsync(
-        `git show ${ctx.remote}/${ctx.branch}:data/${branch}/`,
-        { cwd: ctx.workingDir }
-      );
-      
+      const { stdout } = await execAsync(`git show ${ctx.remote}/${ctx.branch}:data/${branch}/`, {
+        cwd: ctx.workingDir,
+      });
+
       // Parse file list and find matching commit
       const files = stdout.split('\n').filter(f => f.includes(commit.substring(0, 7)));
       if (files.length === 0) {
@@ -197,11 +211,11 @@ export async function loadMetrics(
       const filename = files[0];
       const { stdout: content } = await execAsync(
         `git show ${ctx.remote}/${ctx.branch}:data/${branch}/${filename}`,
-        { cwd: ctx.workingDir }
+        { cwd: ctx.workingDir },
       );
       return JSON.parse(content);
     }
-  } catch (error) {
+  } catch (_error) {
     // Branch might not exist yet - this is expected on first run
     return null;
   }
@@ -212,31 +226,32 @@ export async function loadMetrics(
  */
 export async function listMetrics(
   branch: string,
-  config: GitStorageConfig = {}
+  config: GitStorageConfig = {},
 ): Promise<BuildMetrics[]> {
   const ctx = await createStorageContext(config);
-  
+
   try {
     await execAsync(`git fetch ${ctx.remote} ${ctx.branch}`, { cwd: ctx.workingDir });
 
     const { stdout } = await execAsync(
       `git ls-tree -r --name-only ${ctx.remote}/${ctx.branch} data/${branch}/`,
-      { cwd: ctx.workingDir }
+      { cwd: ctx.workingDir },
     );
 
-    const files = stdout.split('\n').filter(f => f && f.endsWith('.json') && !f.endsWith('latest.json'));
-    
+    const files = stdout
+      .split('\n')
+      .filter(f => f?.endsWith('.json') && !f.endsWith('latest.json'));
+
     const metrics: BuildMetrics[] = [];
     for (const file of files) {
-      const { stdout: content } = await execAsync(
-        `git show ${ctx.remote}/${ctx.branch}:${file}`,
-        { cwd: ctx.workingDir }
-      );
+      const { stdout: content } = await execAsync(`git show ${ctx.remote}/${ctx.branch}:${file}`, {
+        cwd: ctx.workingDir,
+      });
       metrics.push(JSON.parse(content));
     }
 
-    return metrics.sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    return metrics.sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
   } catch (error) {
     console.error('Error listing metrics:', error);

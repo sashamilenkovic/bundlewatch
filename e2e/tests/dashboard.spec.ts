@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { readFile, access } from 'fs/promises';
-import { join } from 'path';
+import { exec } from 'node:child_process';
+import { access, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { expect, test } from '@playwright/test';
 
 const execAsync = promisify(exec);
 
@@ -69,5 +69,3 @@ test.describe('Dashboard Generation', () => {
     expect(html).toContain('d3.v7');
   });
 });
-
-

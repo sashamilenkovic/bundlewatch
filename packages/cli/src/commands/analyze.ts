@@ -3,24 +3,25 @@
  * Works with any Next.js build (webpack or turbopack)
  */
 
-import { Command } from 'commander';
-import ora from 'ora';
-import chalk from 'chalk';
-import { readFile, stat, writeFile, mkdir } from 'fs/promises';
-import { join, resolve } from 'path';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import {
-  GitStorage,
-  ReportGenerator,
-  compareMetrics,
-  getCurrentCommit,
-  getCurrentBranch,
   type BuildMetrics,
+  type Comparison,
+  compareMetrics,
+  GitStorage,
+  getCurrentBranch,
+  getCurrentCommit,
+  ReportGenerator,
 } from '@milencode/bundlewatch-core';
 import {
-  parseWebpackStats,
   generateEnhancedDashboard,
+  parseWebpackStats,
   type WebpackStats,
 } from '@milencode/bundlewatch-parsers';
+import chalk from 'chalk';
+import { Command } from 'commander';
+import ora from 'ora';
 import { analyzeBuildOutput } from '../utils/hybrid-analyzer.js';
 
 interface AnalyzeOptions {
@@ -145,10 +146,7 @@ async function detectBuildOutput(projectRoot: string): Promise<{
 /**
  * Analyze build using stats file or fallback methods
  */
-async function analyzeBuild(
-  projectRoot: string,
-  options: AnalyzeOptions
-): Promise<AnalysisResult> {
+async function analyzeBuild(projectRoot: string, options: AnalyzeOptions): Promise<AnalysisResult> {
   const detection = await detectBuildOutput(projectRoot);
 
   // Get git info
@@ -163,7 +161,10 @@ async function analyzeBuild(
   }
 
   // If we have stats, use the parser
-  if (detection.statsPath && (detection.strategy === 'turbopack-stats' || detection.strategy === 'webpack-stats')) {
+  if (
+    detection.statsPath &&
+    (detection.strategy === 'turbopack-stats' || detection.strategy === 'webpack-stats')
+  ) {
     const content = await readFile(detection.statsPath, 'utf-8');
     const stats: WebpackStats = JSON.parse(content);
 
@@ -189,7 +190,7 @@ async function analyzeBuild(
     commit,
     branch,
     new Date().toISOString(),
-    0
+    0,
   );
 
   return {
@@ -213,23 +214,22 @@ async function analyze(cmdOptions: AnalyzeOptions) {
     spinner.start('Detecting build output...');
     const result = await analyzeBuild(projectRoot, cmdOptions);
 
-    const bundlerLabel = result.bundler === 'turbopack'
-      ? chalk.cyan('Turbopack')
-      : result.bundler === 'webpack'
-        ? chalk.yellow('Webpack')
-        : result.bundler === 'vite'
-          ? chalk.magenta('Vite')
-          : chalk.gray('Unknown');
+    const bundlerLabel =
+      result.bundler === 'turbopack'
+        ? chalk.cyan('Turbopack')
+        : result.bundler === 'webpack'
+          ? chalk.yellow('Webpack')
+          : result.bundler === 'vite'
+            ? chalk.magenta('Vite')
+            : chalk.gray('Unknown');
 
-    spinner.succeed(
-      `Analyzed ${bundlerLabel} build using ${chalk.dim(result.strategy)} strategy`
-    );
+    spinner.succeed(`Analyzed ${bundlerLabel} build using ${chalk.dim(result.strategy)} strategy`);
 
     // Initialize tools
     const storage = new GitStorage({ workingDir: projectRoot });
     const reporter = new ReportGenerator();
 
-    let comparison;
+    let comparison: Comparison | undefined;
 
     // Load baseline for comparison
     if (cmdOptions.compareAgainst) {
@@ -243,7 +243,7 @@ async function analyze(cmdOptions: AnalyzeOptions) {
         } else {
           spinner.info(
             `No baseline found for ${chalk.bold(cmdOptions.compareAgainst)}. ` +
-            `Run ${chalk.dim('bundlewatch backfill')} to populate history.`
+              `Run ${chalk.dim('bundlewatch backfill')} to populate history.`,
           );
         }
       } catch (error) {
@@ -252,7 +252,7 @@ async function analyze(cmdOptions: AnalyzeOptions) {
     }
 
     // Print report
-    console.log('\n' + reporter.generateConsoleOutput(result.metrics, comparison));
+    console.log(`\n${reporter.generateConsoleOutput(result.metrics, comparison)}`);
 
     // Generate dashboard
     if (cmdOptions.generateDashboard) {
@@ -263,7 +263,7 @@ async function analyze(cmdOptions: AnalyzeOptions) {
       const dashboardHTML = generateEnhancedDashboard(result.metrics, comparison);
       await writeFile(join(dashboardDir, 'index.html'), dashboardHTML);
 
-      spinner.succeed(`Dashboard saved to ${chalk.dim(dashboardDir + '/index.html')}`);
+      spinner.succeed(`Dashboard saved to ${chalk.dim(`${dashboardDir}/index.html`)}`);
     }
 
     // Save to git
@@ -283,25 +283,26 @@ async function analyze(cmdOptions: AnalyzeOptions) {
       const increase = comparison.changes.totalSize.diffPercent;
 
       if (increase > threshold) {
-        console.error(chalk.red(
-          `\n❌ Bundle size increased by ${increase.toFixed(1)}% ` +
-          `(threshold: ${threshold}%)\n`
-        ));
+        console.error(
+          chalk.red(
+            `\n❌ Bundle size increased by ${increase.toFixed(1)}% ` +
+              `(threshold: ${threshold}%)\n`,
+          ),
+        );
         process.exit(1);
       } else if (increase > 0) {
-        console.log(chalk.yellow(
-          `\n⚠️  Bundle size increased by ${increase.toFixed(1)}% ` +
-          `(within ${threshold}% threshold)\n`
-        ));
+        console.log(
+          chalk.yellow(
+            `\n⚠️  Bundle size increased by ${increase.toFixed(1)}% ` +
+              `(within ${threshold}% threshold)\n`,
+          ),
+        );
       } else {
-        console.log(chalk.green(
-          `\n✅ Bundle size is ${Math.abs(increase).toFixed(1)}% smaller\n`
-        ));
+        console.log(chalk.green(`\n✅ Bundle size is ${Math.abs(increase).toFixed(1)}% smaller\n`));
       }
     }
 
     console.log(); // Final newline
-
   } catch (error) {
     spinner.fail('Analysis failed');
     console.error(chalk.red(`\n❌ Error: ${error}\n`));
@@ -323,7 +324,9 @@ export const analyzeCommand = new Command('analyze')
   .option('--size-increase-threshold <percent>', 'Size increase threshold percentage', '10')
   .option('--real-compression', 'Calculate real gzip/brotli sizes (slower but accurate)')
   .option('--extract-modules', 'Extract module-level metrics')
-  .addHelpText('after', `
+  .addHelpText(
+    'after',
+    `
 ${chalk.bold('Examples:')}
   ${chalk.dim('# Analyze after a standard Next.js build')}
   $ next build && bundlewatch analyze
@@ -349,5 +352,6 @@ ${chalk.bold('Turbopack Support:')}
 
   Example:
     $ TURBOPACK_STATS=1 next build && bundlewatch analyze --save-to-git
-`)
+`,
+  )
   .action(analyze);

@@ -2,12 +2,12 @@
  * Tests for reporter functions
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   generateBadge,
-  generateReadmeSection,
-  generatePRComment,
   generateConsoleOutput,
+  generatePRComment,
+  generateReadmeSection,
 } from '../src/reporter';
 import type { BuildMetrics, Comparison } from '../src/types';
 
@@ -97,9 +97,7 @@ describe('reporter functions', () => {
       ],
     },
     summary: '📉 Bundle is 14.65 KB (6.1%) smaller than main',
-    recommendations: [
-      '✅ Great job! Bundle size reduced by 6.1%',
-    ],
+    recommendations: ['✅ Great job! Bundle size reduced by 6.1%'],
   };
 
   describe('generateBadge', () => {
@@ -520,4 +518,3 @@ describe('reporter functions', () => {
     });
   });
 });
-

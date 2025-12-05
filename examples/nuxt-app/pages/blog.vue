@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-const posts = [
+const _posts = [
   { id: 1, title: 'Getting Started with Bundle Watch', date: '2025-11-01' },
   { id: 2, title: 'Optimizing Your Bundle Size', date: '2025-11-02' },
   { id: 3, title: 'Advanced Bundle Analysis', date: '2025-11-03' },

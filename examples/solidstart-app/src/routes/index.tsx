@@ -1,6 +1,6 @@
-import { createSignal, onMount, onCleanup } from 'solid-js';
-import { format } from 'date-fns';
 import axios from 'axios';
+import { format } from 'date-fns';
+import { createSignal, onCleanup, onMount } from 'solid-js';
 
 export default function Home() {
   const [time, setTime] = createSignal(new Date());
@@ -11,7 +11,8 @@ export default function Home() {
       setTime(new Date());
     }, 1000);
 
-    axios.get('https://api.github.com/repos/anthropics/claude-code')
+    axios
+      .get('https://api.github.com/repos/anthropics/claude-code')
       .then(res => setData(res.data.description))
       .catch(() => setData('Bundle Watch + SolidStart Example'));
 
@@ -25,7 +26,9 @@ export default function Home() {
       <p class="description">{data()}</p>
       <div class="card">
         <p>This SolidStart app uses Bundle Watch via the Vite plugin!</p>
-        <p>Check <code>bundle-report/index.html</code> after building.</p>
+        <p>
+          Check <code>bundle-report/index.html</code> after building.
+        </p>
       </div>
     </div>
   );

@@ -2,9 +2,9 @@
  * Tests for dashboard generation
  */
 
-import { describe, it, expect } from 'vitest';
-import { generateTreemapData, generateDependencyData } from '../src/dashboard';
 import type { BuildMetrics } from '@milencode/bundlewatch-core';
+import { describe, expect, it } from 'vitest';
+import { generateDependencyData, generateTreemapData } from '../src/dashboard';
 
 describe('Dashboard', () => {
   const mockMetrics: BuildMetrics = {

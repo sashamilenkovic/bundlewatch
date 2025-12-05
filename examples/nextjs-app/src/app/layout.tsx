@@ -7,11 +7,7 @@ export const metadata: Metadata = {
   description: 'Example Next.js app with Bundle Watch',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -20,4 +16,3 @@ export default function RootLayout({
     </html>
   );
 }
-

@@ -28,8 +28,6 @@
 <script setup lang="ts">
 useHead({
   title: 'Nuxt + Bundle Watch',
-  meta: [
-    { name: 'description', content: 'Example Nuxt app with Bundle Watch' },
-  ],
+  meta: [{ name: 'description', content: 'Example Nuxt app with Bundle Watch' }],
 });
 </script>

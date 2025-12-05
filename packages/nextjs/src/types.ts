@@ -97,6 +97,7 @@ export interface BundleWatchNextOptions {
 /**
  * Resolved options with all defaults applied
  */
-export interface ResolvedBundleWatchOptions extends Required<Omit<BundleWatchNextOptions, 'saveToGit'>> {
+export interface ResolvedBundleWatchOptions
+  extends Required<Omit<BundleWatchNextOptions, 'saveToGit'>> {
   saveToGit: boolean | undefined;
 }

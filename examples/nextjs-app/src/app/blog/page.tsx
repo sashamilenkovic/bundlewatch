@@ -10,7 +10,7 @@ export default function Blog() {
       <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '0 2rem' }}>
         <h1 style={{ marginBottom: '2rem' }}>Blog</h1>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {posts.map((post) => (
+          {posts.map(post => (
             <article
               key={post.id}
               style={{
@@ -27,15 +27,10 @@ export default function Blog() {
             </article>
           ))}
         </div>
-        <a
-          href="/"
-          className="button button-green"
-          style={{ marginTop: '2rem' }}
-        >
+        <a href="/" className="button button-green" style={{ marginTop: '2rem' }}>
           ← Back Home
         </a>
       </div>
     </main>
   );
 }
-

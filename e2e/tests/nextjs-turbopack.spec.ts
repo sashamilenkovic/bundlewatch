@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { access, readFile } from 'fs/promises';
-import { join } from 'path';
+import { exec } from 'node:child_process';
+import { access, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { expect, test } from '@playwright/test';
 
 const execAsync = promisify(exec);
 
@@ -16,29 +16,25 @@ test.describe('Next.js Turbopack Plugin', () => {
     // Clean build
     try {
       await execAsync('rm -rf .next', { cwd: NEXTJS_APP_DIR });
-    } catch (e) {
+    } catch (_e) {
       // Ignore if .next doesn't exist
     }
   });
 
   test('should build Next.js app with Turbopack successfully', async () => {
     // Build with Turbopack and stats enabled
-    const { stdout, stderr } = await execAsync(
-      'TURBOPACK_STATS=1 pnpm build --turbo',
-      {
-        cwd: NEXTJS_APP_DIR,
-        env: { ...process.env, CI: 'false' },
-        timeout: 120000,
-      }
-    );
+    const { stdout } = await execAsync('TURBOPACK_STATS=1 pnpm build --turbo', {
+      cwd: NEXTJS_APP_DIR,
+      env: { ...process.env, CI: 'false' },
+      timeout: 120000,
+    });
 
     // Check build succeeded
     expect(stdout).toContain('Compiled');
 
     // Should either show bundlewatch output or turbopack mode message
     const hasBundleWatchOutput =
-      stdout.includes('Bundle Watch') ||
-      stdout.includes('Turbopack mode enabled');
+      stdout.includes('Bundle Watch') || stdout.includes('Turbopack mode enabled');
 
     expect(hasBundleWatchOutput).toBe(true);
   });
@@ -67,9 +63,7 @@ test.describe('Next.js Turbopack Plugin', () => {
     } catch {
       // Stats file may not be generated in all Next.js versions
       // This is expected - the test should still pass
-      console.log(
-        'Note: webpack-stats.json not found (may be expected for this Next.js version)'
-      );
+      console.log('Note: webpack-stats.json not found (may be expected for this Next.js version)');
     }
   });
 
@@ -98,14 +92,11 @@ test.describe('Next.js Turbopack Plugin', () => {
     // Run CLI analyze command using local workspace CLI
     // Use pnpm exec to run the local bundlewatch-cli package
     const cliPath = join(process.cwd(), '../packages/cli/dist/cli.js');
-    const { stdout } = await execAsync(
-      `node ${cliPath} analyze --compare-against main`,
-      {
-        cwd: NEXTJS_APP_DIR,
-        env: { ...process.env, CI: 'false' },
-        timeout: 60000,
-      }
-    );
+    const { stdout } = await execAsync(`node ${cliPath} analyze --compare-against main`, {
+      cwd: NEXTJS_APP_DIR,
+      env: { ...process.env, CI: 'false' },
+      timeout: 60000,
+    });
 
     // Check for analyze output
     const hasAnalyzeOutput =

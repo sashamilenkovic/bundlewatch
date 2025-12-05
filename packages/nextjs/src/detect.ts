@@ -73,7 +73,7 @@ export function isCI(): boolean {
  */
 export function resolveBundler(
   bundlerOption: BundlerType,
-  nextConfig: NextConfigLike = {}
+  nextConfig: NextConfigLike = {},
 ): 'webpack' | 'turbopack' {
   if (bundlerOption === 'auto') {
     return detectBundler(nextConfig);

@@ -3,7 +3,7 @@
  * Using functional composition instead of classes
  */
 
-import type { BuildMetrics, Comparison, BundleChange, SizeChange } from './types.js';
+import type { BuildMetrics, BundleChange, Comparison, SizeChange } from './types.js';
 
 /**
  * Calculate size change between two values
@@ -25,7 +25,7 @@ function calculateSizeChange(current: number, previous: number): SizeChange {
  */
 function compareBundles(
   current: BuildMetrics['bundles'],
-  baseline: BuildMetrics['bundles']
+  baseline: BuildMetrics['bundles'],
 ): BundleChange[] {
   const changes: BundleChange[] = [];
   const baselineMap = new Map(baseline.map(b => [b.name, b]));
@@ -49,7 +49,7 @@ function compareBundles(
       // Changed or unchanged
       const diff = bundle.size - baseBundle.size;
       const diffPercent = baseBundle.size === 0 ? 0 : (diff / baseBundle.size) * 100;
-      
+
       changes.push({
         name: bundle.name,
         current: bundle.size,
@@ -89,13 +89,13 @@ function formatSize(bytes: number): string {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));
-  return Math.round((Math.abs(bytes) / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+  return `${Math.round((Math.abs(bytes) / k ** i) * 100) / 100} ${sizes[i]}`;
 }
 
 /**
  * Generate human-readable summary
  */
-function generateSummary(totalSize: SizeChange, gzipSize: SizeChange, target: string): string {
+function generateSummary(totalSize: SizeChange, _gzipSize: SizeChange, target: string): string {
   const { diff, diffPercent } = totalSize;
   const absDiff = Math.abs(diff);
   const absPercent = Math.abs(diffPercent);
@@ -122,14 +122,16 @@ function generateInsights(changes: BundleChange[], totalSize: SizeChange): strin
   if (totalSize.diffPercent > 10) {
     insights.push(`⚠️ Total bundle size increased by ${totalSize.diffPercent.toFixed(1)}%`);
   } else if (totalSize.diffPercent < -10) {
-    insights.push(`✅ Great job! Bundle size reduced by ${Math.abs(totalSize.diffPercent).toFixed(1)}%`);
+    insights.push(
+      `✅ Great job! Bundle size reduced by ${Math.abs(totalSize.diffPercent).toFixed(1)}%`,
+    );
   }
 
   // Largest increases
   const largestIncrease = changes.find(c => c.status === 'changed' && c.diff > 0);
   if (largestIncrease && largestIncrease.diff > 50 * 1024) {
     insights.push(
-      `📦 ${largestIncrease.name} grew by ${formatSize(largestIncrease.diff)} (${largestIncrease.diffPercent.toFixed(1)}%)`
+      `📦 ${largestIncrease.name} grew by ${formatSize(largestIncrease.diff)} (${largestIncrease.diffPercent.toFixed(1)}%)`,
     );
   }
 
@@ -144,7 +146,9 @@ function generateInsights(changes: BundleChange[], totalSize: SizeChange): strin
   const removedBundles = changes.filter(c => c.status === 'removed');
   if (removedBundles.length > 0) {
     const totalRemoved = Math.abs(removedBundles.reduce((sum, b) => sum + b.diff, 0));
-    insights.push(`➖ ${removedBundles.length} bundle(s) removed (${formatSize(totalRemoved)} saved)`);
+    insights.push(
+      `➖ ${removedBundles.length} bundle(s) removed (${formatSize(totalRemoved)} saved)`,
+    );
   }
 
   return insights;
@@ -157,7 +161,7 @@ function generateInsights(changes: BundleChange[], totalSize: SizeChange): strin
 export function compareMetrics(
   current: BuildMetrics,
   baseline: BuildMetrics,
-  targetName: string = 'previous'
+  targetName: string = 'previous',
 ): Comparison {
   const totalSize = calculateSizeChange(current.totalSize, baseline.totalSize);
   const totalGzipSize = calculateSizeChange(current.totalGzipSize, baseline.totalGzipSize);
@@ -169,7 +173,7 @@ export function compareMetrics(
   const recommendations = generateInsights(byBundle, totalSize);
 
   return {
-    target: targetName as any,
+    target: targetName,
     targetCommit: baseline.commit,
     currentCommit: current.commit,
     changes: {
@@ -189,7 +193,11 @@ export function compareMetrics(
  * @deprecated Use compareMetrics() function directly
  */
 export class ComparisonEngine {
-  compare(current: BuildMetrics, baseline: BuildMetrics, targetName: string = 'previous'): Comparison {
+  compare(
+    current: BuildMetrics,
+    baseline: BuildMetrics,
+    targetName: string = 'previous',
+  ): Comparison {
     return compareMetrics(current, baseline, targetName);
   }
 }
