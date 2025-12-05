@@ -1,3 +1,12 @@
+## [2.2.3](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.2...v2.2.3) (2025-12-05)
+
+
+### Bug Fixes
+
+* improve ssr support and treemap visualization ([b19acb8](https://github.com/sashamilenkovic/bundlewatch/commit/b19acb8cd80a009215917f529dc3acf585e09f50))
+* resolve eslint errors and add proper type annotations ([0e83bc0](https://github.com/sashamilenkovic/bundlewatch/commit/0e83bc0f0283bd4432f95e85792342dd5ae97658))
+* resolve eslint errors and add proper type annotations ([639bc57](https://github.com/sashamilenkovic/bundlewatch/commit/639bc57d75a04a96c63e12d3e4e6b20868b9425e))
+
 ## [2.2.2](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.1...v2.2.2) (2025-11-28)
 
 
