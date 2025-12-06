@@ -10,6 +10,9 @@ export interface Bundle {
   type: 'js' | 'css' | 'asset' | 'html' | 'other';
   path?: string;
 
+  /** Human-readable name derived from entry point or chunk name */
+  friendlyName?: string;
+
   /** Module IDs included in this bundle (for detailed analysis) */
   modules?: string[];
 }

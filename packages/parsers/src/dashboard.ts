@@ -62,10 +62,10 @@ export function generateTreemapData(metrics: BuildMetrics): TreemapData {
   }
 
   // Fallback: actual output chunks (bundles/assets)
-  // This shows hashed filenames like C-pWVb_6.js
+  // Use friendlyName if available, otherwise clean up the filename
   const children = metrics.bundles.map(
     (bundle): TreemapNode => ({
-      name: bundle.name.split('/').pop() || bundle.name,
+      name: bundle.friendlyName || bundle.name.split('/').pop() || bundle.name,
       value: bundle.size,
       gzip: bundle.gzipSize,
       brotli: bundle.brotliSize,
@@ -77,6 +77,27 @@ export function generateTreemapData(metrics: BuildMetrics): TreemapData {
     name: 'Output Chunks',
     children,
   };
+}
+
+/**
+ * Generate output chunks data with friendly names for display
+ */
+export function generateOutputChunksData(metrics: BuildMetrics): Array<{
+  name: string;
+  friendlyName: string;
+  size: number;
+  gzipSize: number;
+  brotliSize: number;
+  type: string;
+}> {
+  return metrics.bundles.map(bundle => ({
+    name: bundle.name.split('/').pop() || bundle.name,
+    friendlyName: bundle.friendlyName || bundle.name.split('/').pop() || bundle.name,
+    size: bundle.size,
+    gzipSize: bundle.gzipSize,
+    brotliSize: bundle.brotliSize,
+    type: bundle.type,
+  }));
 }
 
 /**
@@ -121,6 +142,7 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
   const treemapData = generateTreemapData(metrics);
   const dependencyData = metrics.detailedDependencies || [];
   const sourceFileData = metrics.sourceFiles || [];
+  const outputChunksData = generateOutputChunksData(metrics);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -361,43 +383,39 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
   <h2>Bundle Treemap</h2>
   <div id="treemap" class="treemap"></div>
 
-  ${treemapData.children && treemapData.children.length > 0 ? `
+  ${outputChunksData.length > 0 ? `
   <h2>Output Chunks</h2>
   <div class="dependency-table">
     <table id="modules-table">
       <colgroup>
-        <col style="width: 30%;">
-        <col style="width: 14%;">
-        <col style="width: 14%;">
-        <col style="width: 14%;">
-        <col style="width: 14%;">
+        <col style="width: 25%;">
+        <col style="width: 25%;">
+        <col style="width: 12%;">
+        <col style="width: 12%;">
+        <col style="width: 12%;">
         <col style="width: 14%;">
       </colgroup>
       <thead>
         <tr>
-          <th style="cursor: pointer;" onclick="sortModulesTable(0)">Name ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(1)">Size ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(2)">Gzipped ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(3)">Brotli ↕</th>
-          <th></th>
-          <th></th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(0)">Chunk ↕</th>
+          <th>File</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(2)">Size ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(3)">Gzipped ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(4)">Brotli ↕</th>
+          <th>Type</th>
         </tr>
       </thead>
       <tbody>
-        ${treemapData.children.map((child: any) => `
+        ${outputChunksData.map((chunk: any) => `
           <tr>
             <td>
-              ${child.type === 'app'
-                ? '<span class="badge badge-app">APP</span> '
-                : '<span class="badge badge-npm">NPM</span> '
-              }
-              <strong>${child.name}</strong>
+              <strong>${chunk.friendlyName}</strong>
             </td>
-            <td>${formatBytes(child.value)}</td>
-            <td>${child.gzip ? formatBytes(child.gzip) : 'N/A'}</td>
-            <td>${child.brotli ? formatBytes(child.brotli) : 'N/A'}</td>
-            <td></td>
-            <td></td>
+            <td style="color: var(--text-muted); font-size: 0.85em;">${chunk.name}</td>
+            <td>${formatBytes(chunk.size)}</td>
+            <td>${chunk.gzipSize ? formatBytes(chunk.gzipSize) : 'N/A'}</td>
+            <td>${chunk.brotliSize ? formatBytes(chunk.brotliSize) : 'N/A'}</td>
+            <td><span class="badge badge-${chunk.type === 'js' ? 'app' : 'npm'}">${chunk.type.toUpperCase()}</span></td>
           </tr>
         `).join('')}
       </tbody>

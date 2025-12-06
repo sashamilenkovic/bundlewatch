@@ -23,6 +23,7 @@ export {
 export {
   generateEnhancedDashboard,
   generateTreemapData,
+  generateOutputChunksData,
   formatBytes,
 } from './dashboard.js';
 

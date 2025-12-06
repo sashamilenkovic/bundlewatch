@@ -251,6 +251,9 @@ async function processChunk(
         brotliSize: Math.round(size * 0.3 * 0.85),
       };
 
+  // Extract friendly name from chunk metadata
+  const friendlyName = extractFriendlyChunkName(chunk, fileName);
+
   // Extract module info
   const moduleIds = chunk.modules ? Object.keys(chunk.modules) : [];
   const modules: ModuleMetrics[] = [];
@@ -335,6 +338,7 @@ async function processChunk(
       brotliSize,
       type: getFileType(fileName),
       path: fileName,
+      friendlyName,
       modules: moduleIds,
     },
     modules,
@@ -652,6 +656,201 @@ function generateOptimizations(
 }
 
 // ===== UTILITY FUNCTIONS =====
+
+/**
+ * Extract a human-readable name from chunk metadata
+ * Uses chunk.name, facadeModuleId, or falls back to cleaning up the filename
+ */
+function extractFriendlyChunkName(chunk: OutputChunk, fileName: string): string {
+  // 1. If chunk has a meaningful name (not just a hash), use it
+  if (chunk.name && !isHashOnlyName(chunk.name)) {
+    return formatChunkName(chunk.name);
+  }
+
+  // 2. If chunk has a facadeModuleId (entry point), extract name from it
+  if (chunk.facadeModuleId) {
+    const friendlyFromFacade = extractNameFromPath(chunk.facadeModuleId);
+    if (friendlyFromFacade) {
+      return friendlyFromFacade;
+    }
+  }
+
+  // 3. Try to infer from the modules in the chunk
+  const moduleIds = chunk.modules ? Object.keys(chunk.modules) : [];
+  if (moduleIds.length > 0) {
+    // Find the most significant module (largest or entry-like)
+    const significantModule = findSignificantModule(moduleIds);
+    if (significantModule) {
+      return significantModule;
+    }
+  }
+
+  // 4. Check if it's a known framework chunk pattern
+  const frameworkName = identifyFrameworkChunk(moduleIds);
+  if (frameworkName) {
+    return frameworkName;
+  }
+
+  // 5. Fall back to cleaning up the filename
+  return cleanFileName(fileName);
+}
+
+/**
+ * Check if a name is just a hash (no semantic meaning)
+ */
+function isHashOnlyName(name: string): boolean {
+  // Hash-only names are typically 8+ chars of alphanumeric
+  return /^[a-zA-Z0-9_-]{6,}$/.test(name) && !/[aeiou]{2,}/i.test(name);
+}
+
+/**
+ * Format a chunk name for display
+ */
+function formatChunkName(name: string): string {
+  // Remove common prefixes/suffixes
+  let formatted = name
+    .replace(/^_/, '')
+    .replace(/\.chunk$/, '')
+    .replace(/\.module$/, '');
+
+  // Convert kebab-case or snake_case to readable format
+  if (formatted.includes('-') || formatted.includes('_')) {
+    formatted = formatted.replace(/[-_]/g, ' ');
+  }
+
+  return formatted;
+}
+
+/**
+ * Extract a meaningful name from a file path
+ */
+function extractNameFromPath(filePath: string): string | null {
+  // Normalize path separators
+  const normalized = filePath.replace(/\\/g, '/');
+
+  // Remove query strings (Vue SFC markers like ?vue&type=script)
+  const pathWithoutQuery = normalized.split('?')[0];
+
+  // Get the file name
+  const parts = pathWithoutQuery.split('/');
+  const fileName = parts[parts.length - 1];
+
+  // Remove extension
+  const nameWithoutExt = fileName.replace(/\.(vue|tsx?|jsx?|svelte|astro|mjs|cjs)$/, '');
+
+  // Check if it's from a meaningful directory
+  const meaningfulDirs = ['pages', 'views', 'components', 'layouts', 'composables', 'stores', 'plugins'];
+  for (let i = parts.length - 2; i >= 0; i--) {
+    if (meaningfulDirs.includes(parts[i])) {
+      // Return "dir/name" format (e.g., "pages/index", "components/Header")
+      return `${parts[i]}/${nameWithoutExt}`;
+    }
+  }
+
+  // For entry files, just return the name
+  if (['index', 'main', 'app', 'entry', 'client', 'server'].includes(nameWithoutExt.toLowerCase())) {
+    return `entry (${nameWithoutExt})`;
+  }
+
+  return nameWithoutExt || null;
+}
+
+/**
+ * Find the most significant module in a chunk
+ */
+function findSignificantModule(moduleIds: string[]): string | null {
+  // Priority: entry files > pages > components > others
+  const priorities = [
+    { pattern: /\/(entry|main|app|index)\.(ts|js|mjs)$/, prefix: 'entry' },
+    { pattern: /\/pages\//, prefix: 'page' },
+    { pattern: /\/views\//, prefix: 'view' },
+    { pattern: /\/components\//, prefix: 'component' },
+    { pattern: /\/layouts\//, prefix: 'layout' },
+  ];
+
+  for (const { pattern, prefix } of priorities) {
+    const match = moduleIds.find(id => pattern.test(id));
+    if (match) {
+      const name = extractNameFromPath(match);
+      if (name) {
+        return name.startsWith(prefix) ? name : name;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Identify chunks that are primarily framework code
+ */
+function identifyFrameworkChunk(moduleIds: string[]): string | null {
+  const frameworkPatterns: Array<{ pattern: RegExp; name: string }> = [
+    { pattern: /vue-router/, name: 'vue-router' },
+    { pattern: /@vue\/runtime-core/, name: 'vue-runtime' },
+    { pattern: /@vue\/reactivity/, name: 'vue-reactivity' },
+    { pattern: /nuxt/, name: 'nuxt-runtime' },
+    { pattern: /react-dom/, name: 'react-dom' },
+    { pattern: /react\//, name: 'react' },
+    { pattern: /@emotion/, name: 'emotion' },
+    { pattern: /styled-components/, name: 'styled-components' },
+  ];
+
+  // Count framework occurrences
+  const counts = new Map<string, number>();
+
+  for (const id of moduleIds) {
+    for (const { pattern, name } of frameworkPatterns) {
+      if (pattern.test(id)) {
+        counts.set(name, (counts.get(name) || 0) + 1);
+      }
+    }
+  }
+
+  // If a framework dominates, use its name
+  if (counts.size > 0) {
+    const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    const [topFramework, topCount] = sorted[0];
+
+    // If this framework makes up >50% of recognized modules, use it
+    const totalRecognized = [...counts.values()].reduce((a, b) => a + b, 0);
+    if (topCount / totalRecognized > 0.5) {
+      return topFramework;
+    }
+
+    // Otherwise list top 2
+    if (sorted.length > 1) {
+      return `${sorted[0][0]}+${sorted[1][0]}`;
+    }
+    return topFramework;
+  }
+
+  return null;
+}
+
+/**
+ * Clean up a filename for display
+ */
+function cleanFileName(fileName: string): string {
+  // Remove directory prefix (e.g., "_nuxt/")
+  let name = fileName.split('/').pop() || fileName;
+
+  // Remove hash from filename (e.g., "C-pWVb_6.js" -> "entry.js")
+  // Patterns: name.HASH.ext, name-HASH.ext, HASH.ext
+  const hashPattern = /^([a-zA-Z0-9_-]*?)[-.]?([A-Za-z0-9_-]{6,})(\.[a-z]+)$/;
+  const match = name.match(hashPattern);
+
+  if (match) {
+    const [, prefix, , ext] = match;
+    if (prefix && !isHashOnlyName(prefix)) {
+      return prefix + ext;
+    }
+    // If no meaningful prefix, it's likely an entry chunk
+    return `chunk${ext}`;
+  }
+
+  return name;
+}
 
 function calculateDepth(
   modules: Map<string, ModuleInfo>,

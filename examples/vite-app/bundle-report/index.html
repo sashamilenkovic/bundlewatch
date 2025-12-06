@@ -199,7 +199,7 @@
       <div>
         <h1>Bundle Watch</h1>
         <p style="color: var(--text-muted); font-size: 11px;">
-          main / 7771646 / 12/4/2025, 5:44:09 PM
+          main / b19acb8 / 12/6/2025, 1:21:20 PM
         </p>
       </div>
       <div class="header-controls">
@@ -242,47 +242,45 @@
   <div class="dependency-table">
     <table id="modules-table">
       <colgroup>
-        <col style="width: 30%;">
-        <col style="width: 14%;">
-        <col style="width: 14%;">
-        <col style="width: 14%;">
-        <col style="width: 14%;">
+        <col style="width: 25%;">
+        <col style="width: 25%;">
+        <col style="width: 12%;">
+        <col style="width: 12%;">
+        <col style="width: 12%;">
         <col style="width: 14%;">
       </colgroup>
       <thead>
         <tr>
-          <th style="cursor: pointer;" onclick="sortModulesTable(0)">Name ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(1)">Size ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(2)">Gzipped ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(3)">Brotli ↕</th>
-          <th></th>
-          <th></th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(0)">Chunk ↕</th>
+          <th>File</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(2)">Size ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(3)">Gzipped ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(4)">Brotli ↕</th>
+          <th>Type</th>
         </tr>
       </thead>
       <tbody>
         
           <tr>
             <td>
-              <span class="badge badge-npm">NPM</span> 
               <strong>index-BmeGit54.css</strong>
             </td>
+            <td style="color: var(--text-muted); font-size: 0.85em;">index-BmeGit54.css</td>
             <td>1.18 KB</td>
             <td>364.00 B</td>
             <td>309.00 B</td>
-            <td></td>
-            <td></td>
+            <td><span class="badge badge-npm">CSS</span></td>
           </tr>
         
           <tr>
             <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>index-DfaLYpSh.js</strong>
+              <strong>index</strong>
             </td>
+            <td style="color: var(--text-muted); font-size: 0.85em;">index-DfaLYpSh.js</td>
             <td>189.04 KB</td>
             <td>59.37 KB</td>
             <td>51.06 KB</td>
-            <td></td>
-            <td></td>
+            <td><span class="badge badge-app">JS</span></td>
           </tr>
         
       </tbody>
@@ -556,7 +554,7 @@
       btn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
     }
 
-    const data = {"name":"Output Chunks","children":[{"name":"index-BmeGit54.css","value":1212,"gzip":364,"brotli":309,"type":"css"},{"name":"index-DfaLYpSh.js","value":193572,"gzip":60795,"brotli":52284,"type":"js"}]};
+    const data = {"name":"Dependencies","children":[{"name":"react-dom","value":184761,"gzip":58012,"brotli":49887,"type":"npm"},{"name":"react","value":6297,"gzip":1977,"brotli":1700,"type":"npm"},{"name":"scheduler","value":3515,"gzip":1104,"brotli":949,"type":"npm"},{"name":"your-app","value":211,"gzip":66,"brotli":57,"type":"app"}]};
 
     const width = document.getElementById('treemap').clientWidth;
     const height = 350;
@@ -658,7 +656,7 @@
 
     // Copy all data as markdown
     function copyAll() {
-      const metrics = {"branch":"main","commit":"77716460c5d41938aed42d36ca43e93b745a31e8","timestamp":"2025-12-04T22:44:09.505Z","totalSize":194784,"totalGzipSize":61159,"totalBrotliSize":52593,"chunkCount":2};
+      const metrics = {"branch":"main","commit":"b19acb8cd80a009215917f529dc3acf585e09f50","timestamp":"2025-12-06T18:21:20.152Z","totalSize":194784,"totalGzipSize":61159,"totalBrotliSize":52593,"chunkCount":2};
 
       const modules = data.children || [];
       const deps = [{"name":"react-dom","totalSize":184761,"gzipSize":58012,"brotliSize":49887,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":94.85430014785608},{"name":"react","totalSize":6297,"gzipSize":1977,"brotliSize":1700,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":3.232811729916215},{"name":"scheduler","totalSize":3515,"gzipSize":1104,"brotliSize":949,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":1.8045630031214062},{"name":"your-app","totalSize":211,"gzipSize":66,"brotliSize":57,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":0.10832511910629211}];
