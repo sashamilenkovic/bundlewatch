@@ -6,7 +6,9 @@ export default function About() {
         <p style={{ marginBottom: '1rem' }}>
           Bundle Watch tracks your build metrics over time, helping you:
         </p>
-        <ul style={{ listStyle: 'disc', paddingLeft: '2rem', marginBottom: '2rem', color: '#374151' }}>
+        <ul
+          style={{ listStyle: 'disc', paddingLeft: '2rem', marginBottom: '2rem', color: '#374151' }}
+        >
           <li>Monitor bundle sizes</li>
           <li>Track performance trends</li>
           <li>Detect regressions early</li>
@@ -19,4 +21,3 @@ export default function About() {
     </main>
   );
 }
-

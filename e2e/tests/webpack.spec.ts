@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { access } from 'fs/promises';
-import { join } from 'path';
+import { exec } from 'node:child_process';
+import { access } from 'node:fs/promises';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { expect, test } from '@playwright/test';
 
 const execAsync = promisify(exec);
 
@@ -13,7 +13,7 @@ test.describe('Webpack Plugin', () => {
     // Clean build
     try {
       await execAsync('rm -rf dist', { cwd: WEBPACK_APP_DIR });
-    } catch (e) {
+    } catch (_e) {
       // Ignore if dist doesn't exist
     }
   });
@@ -27,14 +27,14 @@ test.describe('Webpack Plugin', () => {
     // Check build succeeded
     expect(stdout).toContain('webpack');
     expect(stdout).toContain('compiled');
-    
+
     // Check that bundle watch ran
     expect(stdout).toContain('Bundle Watch');
   });
 
   test('should generate dist directory', async () => {
     const distPath = join(WEBPACK_APP_DIR, 'dist');
-    
+
     // Check dist directory exists
     await expect(access(distPath)).resolves.not.toThrow();
   });
@@ -71,11 +71,11 @@ test.describe('Webpack Plugin', () => {
     // Extract sizes to verify Brotli < Gzip
     const gzipMatch = stdout.match(/Gzipped:\s+([\d.]+)\s+KB/);
     const brotliMatch = stdout.match(/Brotli:\s+([\d.]+)\s+KB/);
-    
+
     if (gzipMatch && brotliMatch) {
       const gzipSize = parseFloat(gzipMatch[1]);
       const brotliSize = parseFloat(brotliMatch[1]);
-      
+
       // Brotli should be smaller than Gzip
       expect(brotliSize).toBeLessThan(gzipSize);
     }
@@ -93,4 +93,3 @@ test.describe('Webpack Plugin', () => {
     expect(stdout).toContain('compiled');
   });
 });
-

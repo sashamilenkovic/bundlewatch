@@ -1,7 +1,7 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import { bundleWatch } from "@milencode/bundlewatch-vite-plugin";
-import { visualizer } from "rollup-plugin-visualizer";
+import { bundleWatch } from '@milencode/bundlewatch-vite-plugin';
+import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   build: {
@@ -14,14 +14,14 @@ export default defineConfig({
       printReport: true,
       generateDashboard: true, // Enable dashboard generation
       saveToGit: false, // Set to true to test git storage
-      compareAgainst: "main",
+      compareAgainst: 'main',
       failOnSizeIncrease: false,
       sizeIncreaseThreshold: 10,
       analyzeSourceMaps: true, // Enable source map analysis
     }),
     visualizer({
       open: true,
-      filename: "stats.html",
+      filename: 'stats.html',
       gzipSize: true,
       brotliSize: true,
     }),

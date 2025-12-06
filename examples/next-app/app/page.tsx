@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
 import axios from 'axios';
+import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const [time, setTime] = useState(new Date());
@@ -11,7 +11,8 @@ export default function Home() {
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
 
-    axios.get('https://api.github.com/repos/anthropics/claude-code')
+    axios
+      .get('https://api.github.com/repos/anthropics/claude-code')
       .then(res => setData(res.data.description))
       .catch(() => setData('Bundle Watch + Next.js Example'));
 
@@ -25,7 +26,9 @@ export default function Home() {
       <p style={styles.description}>{data}</p>
       <div style={styles.card}>
         <p>This Next.js app uses Bundle Watch via the Webpack plugin!</p>
-        <p>Check <code>bundle-report/index.html</code> after building.</p>
+        <p>
+          Check <code>bundle-report/index.html</code> after building.
+        </p>
       </div>
     </main>
   );

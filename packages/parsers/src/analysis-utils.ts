@@ -4,11 +4,11 @@
  */
 
 import type {
-  DependencyMetrics,
   DependencyGraph,
   DependencyGraphNode,
-  OptimizationRecommendation,
+  DependencyMetrics,
   ModuleMetrics,
+  OptimizationRecommendation,
 } from '@milencode/bundlewatch-core';
 
 /**
@@ -42,7 +42,7 @@ export function extractPackageName(modulePath: string): string {
   }
 
   // Extract meaningful path from user code
-  let cleanPath = modulePath
+  const cleanPath = modulePath
     .replace(/^[a-z]:/i, '') // Remove Windows drive letters
     .replace(/\\/g, '/') // Normalize path separators
     .replace(/^\/+/, ''); // Remove leading slashes
@@ -51,12 +51,31 @@ export function extractPackageName(modulePath: string): string {
 
   // Remove common root directories
   const removeRoots = ['home', 'users', 'projects', 'workspace', 'app', 'var', 'tmp'];
-  while (pathParts.length > 0 && removeRoots.some(root => pathParts[0].toLowerCase().includes(root))) {
+  while (
+    pathParts.length > 0 &&
+    removeRoots.some(root => pathParts[0].toLowerCase().includes(root))
+  ) {
     pathParts.shift();
   }
 
   // Look for meaningful directories
-  const meaningfulDirs = ['src', 'lib', 'components', 'pages', 'views', 'layouts', 'composables', 'utils', 'helpers', 'services', 'api', 'store', 'assets', 'styles', 'public'];
+  const meaningfulDirs = [
+    'src',
+    'lib',
+    'components',
+    'pages',
+    'views',
+    'layouts',
+    'composables',
+    'utils',
+    'helpers',
+    'services',
+    'api',
+    'store',
+    'assets',
+    'styles',
+    'public',
+  ];
 
   let packageName = 'app';
 
@@ -144,11 +163,7 @@ export function buildDependencyGraph(modules: ModuleMetrics[]): DependencyGraph 
   const circular: Array<{ chain: string[]; impact: 'warning' | 'error' }> = [];
   const seenChains = new Set<string>();
 
-  const detectCircular = (
-    moduleId: string,
-    path: string[],
-    visited: Set<string>,
-  ): void => {
+  const detectCircular = (moduleId: string, path: string[], visited: Set<string>): void => {
     if (path.includes(moduleId)) {
       const cycleStart = path.indexOf(moduleId);
       const cycle = path.slice(cycleStart);
@@ -180,10 +195,7 @@ export function buildDependencyGraph(modules: ModuleMetrics[]): DependencyGraph 
   }
 
   // Detect duplicate packages
-  const packageVersions = new Map<
-    string,
-    Map<string, { size: number; modules: string[] }>
-  >();
+  const packageVersions = new Map<string, Map<string, { size: number; modules: string[] }>>();
 
   for (const module of modules) {
     if (module.package && module.package !== 'your-app') {
@@ -277,7 +289,7 @@ export function aggregateDependencyMetrics(
 
     // Find first importer
     const firstModule = modules.find(m => m.package === dep.name);
-    if (firstModule && firstModule.importedBy && firstModule.importedBy.length > 0) {
+    if (firstModule?.importedBy && firstModule.importedBy.length > 0) {
       dep.firstImportedBy = firstModule.importedBy[0];
     }
 
@@ -366,5 +378,5 @@ function formatBytes(bytes: number): string {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+  return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
 }

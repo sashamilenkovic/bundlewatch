@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import _ from 'lodash';
-import { format, formatDistance, subDays } from 'date-fns';
-import { create } from 'zustand';
 import { useQuery } from '@tanstack/react-query';
+import { format, formatDistance, subDays } from 'date-fns';
+import _ from 'lodash';
+import { useState } from 'react';
+import { create } from 'zustand';
 
 // Zustand store for demo
 interface CounterStore {
@@ -13,15 +13,15 @@ interface CounterStore {
   decrement: () => void;
 }
 
-const useStore = create<CounterStore>((set) => ({
+const useStore = create<CounterStore>(set => ({
   count: 0,
-  increment: () => set((state) => ({ count: state.count + 1 })),
-  decrement: () => set((state) => ({ count: state.count - 1 })),
+  increment: () => set(state => ({ count: state.count + 1 })),
+  decrement: () => set(state => ({ count: state.count - 1 })),
 }));
 
 // Fake API call for react-query demo
 async function fetchStats() {
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 500));
   return {
     bundleSize: '799 KB',
     gzipSize: '240 KB',
@@ -57,9 +57,13 @@ export default function Home() {
         <section style={{ marginTop: '2rem' }}>
           <h2>Zustand Counter</h2>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <button onClick={decrement} className="button">-</button>
+            <button onClick={decrement} className="button">
+              -
+            </button>
             <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{count}</span>
-            <button onClick={increment} className="button">+</button>
+            <button onClick={increment} className="button">
+              +
+            </button>
           </div>
         </section>
 

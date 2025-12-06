@@ -1,5 +1,5 @@
-import type { NextConfig } from 'next';
 import { withBundleWatch } from '@milencode/bundlewatch-nextjs';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   // Your existing Next.js config
@@ -18,4 +18,3 @@ export default withBundleWatch(nextConfig, {
   generateDashboard: true,
   dashboardPath: './bundle-report',
 });
-

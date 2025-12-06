@@ -1,12 +1,12 @@
-import lighthouse from 'lighthouse';
-import * as chromeLauncher from 'chrome-launcher';
 import type { BuildMetrics } from '@milencode/bundlewatch-core';
+import * as chromeLauncher from 'chrome-launcher';
+import lighthouse from 'lighthouse';
 
 export interface LighthouseOptions {
   /** URL to test (defaults to http://localhost:4173 - Vite preview server) */
   url?: string;
   /** Lighthouse config overrides */
-  config?: any;
+  config?: Record<string, unknown>;
   /** Chrome flags */
   chromeFlags?: string[];
   /** Whether to launch Chrome headless */
@@ -47,9 +47,7 @@ export interface CorrelationResult {
 /**
  * Run Lighthouse audit on a URL
  */
-export async function runLighthouse(
-  options: LighthouseOptions = {}
-): Promise<LighthouseMetrics> {
+export async function runLighthouse(options: LighthouseOptions = {}): Promise<LighthouseMetrics> {
   const {
     url = 'http://localhost:4173',
     config = { extends: 'lighthouse:default' },
@@ -58,17 +56,18 @@ export async function runLighthouse(
   } = options;
 
   const chrome = await chromeLauncher.launch({
-    chromeFlags: [
-      ...chromeFlags,
-      ...(headless ? ['--headless'] : []),
-    ],
+    chromeFlags: [...chromeFlags, ...(headless ? ['--headless'] : [])],
   });
 
   try {
-    const runnerResult = await lighthouse(url, {
-      port: chrome.port,
-      output: 'json',
-    }, config);
+    const runnerResult = await lighthouse(
+      url,
+      {
+        port: chrome.port,
+        output: 'json',
+      },
+      config,
+    );
 
     if (!runnerResult?.lhr) {
       throw new Error('Lighthouse audit failed');
@@ -86,7 +85,7 @@ export async function runLighthouse(
       tbt: audits['total-blocking-time']?.numericValue ?? 0,
       cls: audits['cumulative-layout-shift']?.numericValue ?? 0,
       speedIndex: audits['speed-index']?.numericValue ?? 0,
-      tti: audits['interactive']?.numericValue ?? 0,
+      tti: audits.interactive?.numericValue ?? 0,
     };
   } finally {
     await chrome.kill();
@@ -100,7 +99,7 @@ export function correlateBundleAndPerformance(
   currentMetrics: BuildMetrics,
   baselineMetrics: BuildMetrics | undefined,
   lighthouseMetrics: LighthouseMetrics,
-  baselineLighthouseMetrics?: LighthouseMetrics
+  baselineLighthouseMetrics?: LighthouseMetrics,
 ): CorrelationResult {
   const bundleSize = currentMetrics.totalSize;
   const bundleSizeDelta = baselineMetrics
@@ -120,7 +119,7 @@ export function correlateBundleAndPerformance(
   const insights = generateCorrelationInsights(
     bundleSizeDelta,
     lighthouseMetrics,
-    lighthouseMetricsDelta
+    lighthouseMetricsDelta,
   );
 
   return {
@@ -138,58 +137,56 @@ export function correlateBundleAndPerformance(
 function generateCorrelationInsights(
   bundleSizeDelta: number,
   metrics: LighthouseMetrics,
-  delta?: Partial<LighthouseMetrics>
+  delta?: Partial<LighthouseMetrics>,
 ): string[] {
   const insights: string[] = [];
 
   // Bundle size increased but performance dropped
   if (bundleSizeDelta > 5 && delta && delta.performance && delta.performance < -5) {
     insights.push(
-      `⚠️  Bundle size increased by ${bundleSizeDelta.toFixed(1)}% and Performance score dropped ${Math.abs(delta.performance)} points`
+      `⚠️  Bundle size increased by ${bundleSizeDelta.toFixed(1)}% and Performance score dropped ${Math.abs(delta.performance)} points`,
     );
   }
 
   // Bundle size increased but performance stayed the same or improved
   if (bundleSizeDelta > 5 && delta && delta.performance && delta.performance >= 0) {
     insights.push(
-      `✅ Bundle size increased by ${bundleSizeDelta.toFixed(1)}% but Performance score maintained at ${metrics.performance}`
+      `✅ Bundle size increased by ${bundleSizeDelta.toFixed(1)}% but Performance score maintained at ${metrics.performance}`,
     );
   }
 
   // LCP issues
   if (metrics.lcp > 2500) {
     insights.push(
-      `🐌 Largest Contentful Paint is ${(metrics.lcp / 1000).toFixed(2)}s (target: <2.5s). Consider code splitting or lazy loading.`
+      `🐌 Largest Contentful Paint is ${(metrics.lcp / 1000).toFixed(2)}s (target: <2.5s). Consider code splitting or lazy loading.`,
     );
   }
 
   // TBT issues
   if (metrics.tbt > 200) {
     insights.push(
-      `⏱️  Total Blocking Time is ${metrics.tbt.toFixed(0)}ms (target: <200ms). Large bundles may be blocking the main thread.`
+      `⏱️  Total Blocking Time is ${metrics.tbt.toFixed(0)}ms (target: <200ms). Large bundles may be blocking the main thread.`,
     );
   }
 
   // CLS issues
   if (metrics.cls > 0.1) {
     insights.push(
-      `📐 Cumulative Layout Shift is ${metrics.cls.toFixed(3)} (target: <0.1). This is typically not bundle-size related.`
+      `📐 Cumulative Layout Shift is ${metrics.cls.toFixed(3)} (target: <0.1). This is typically not bundle-size related.`,
     );
   }
 
   // Performance score warnings
   if (metrics.performance < 50) {
     insights.push(
-      `🔴 Performance score is ${metrics.performance}/100. Bundle optimization should be a high priority.`
+      `🔴 Performance score is ${metrics.performance}/100. Bundle optimization should be a high priority.`,
     );
   } else if (metrics.performance < 90) {
     insights.push(
-      `🟡 Performance score is ${metrics.performance}/100. There's room for improvement.`
+      `🟡 Performance score is ${metrics.performance}/100. There's room for improvement.`,
     );
   } else {
-    insights.push(
-      `🟢 Excellent performance score: ${metrics.performance}/100!`
-    );
+    insights.push(`🟢 Excellent performance score: ${metrics.performance}/100!`);
   }
 
   return insights;
@@ -200,10 +197,10 @@ function generateCorrelationInsights(
  */
 export function formatLighthouseReport(
   metrics: LighthouseMetrics,
-  delta?: Partial<LighthouseMetrics>
+  delta?: Partial<LighthouseMetrics>,
 ): string {
   const lines: string[] = [];
-  
+
   lines.push('');
   lines.push('🔦 Lighthouse Performance Metrics');
   lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -221,12 +218,15 @@ export function formatLighthouseReport(
   lines.push(`SEO:             ${metrics.seo}/100`);
   lines.push('');
   lines.push('Core Web Vitals:');
-  lines.push(`  LCP:  ${(metrics.lcp / 1000).toFixed(2)}s${formatDelta(delta?.lcp ? delta.lcp / 1000 : undefined, 's')}`);
-  lines.push(`  FCP:  ${(metrics.fcp / 1000).toFixed(2)}s${formatDelta(delta?.fcp ? delta.fcp / 1000 : undefined, 's')}`);
+  lines.push(
+    `  LCP:  ${(metrics.lcp / 1000).toFixed(2)}s${formatDelta(delta?.lcp ? delta.lcp / 1000 : undefined, 's')}`,
+  );
+  lines.push(
+    `  FCP:  ${(metrics.fcp / 1000).toFixed(2)}s${formatDelta(delta?.fcp ? delta.fcp / 1000 : undefined, 's')}`,
+  );
   lines.push(`  TBT:  ${metrics.tbt.toFixed(0)}ms${formatDelta(delta?.tbt, 'ms')}`);
   lines.push(`  CLS:  ${metrics.cls.toFixed(3)}${formatDelta(delta?.cls)}`);
   lines.push('');
 
   return lines.join('\n');
 }
-

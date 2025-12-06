@@ -358,4 +358,3 @@ export interface AnalyzeResult {
   errors: string[];
   warnings: string[];
 }
-

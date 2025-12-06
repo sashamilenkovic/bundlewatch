@@ -2,9 +2,9 @@
  * Tests for Vite bundle parser
  */
 
-import { describe, it, expect } from 'vitest';
-import { createAnalyzerState, collectModuleInfo, analyzeBundle } from '../src/vite';
 import type { OutputBundle, OutputChunk } from 'rollup';
+import { describe, expect, it } from 'vitest';
+import { analyzeBundle, collectModuleInfo, createAnalyzerState } from '../src/vite';
 
 describe('Vite Parser', () => {
   describe('analyzeBundle', () => {
@@ -81,7 +81,9 @@ describe('Vite Parser', () => {
 
       // Verify React modules are detected
       const reactModule = metrics.modules!.find(m => m.id.includes('node_modules/react/index.js'));
-      const reactDomModule = metrics.modules!.find(m => m.id.includes('node_modules/react-dom/client.js'));
+      const reactDomModule = metrics.modules!.find(m =>
+        m.id.includes('node_modules/react-dom/client.js'),
+      );
 
       expect(reactModule).toBeDefined();
       expect(reactDomModule).toBeDefined();

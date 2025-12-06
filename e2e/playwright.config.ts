@@ -7,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 1, // Single worker to avoid shared directory conflicts
   reporter: 'html',
-  
+
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -22,4 +22,3 @@ export default defineConfig({
 
   timeout: 60000, // 60s timeout for build tests
 });
-

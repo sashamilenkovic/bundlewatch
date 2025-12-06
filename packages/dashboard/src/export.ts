@@ -2,10 +2,10 @@
  * Static HTML export functionality
  */
 
-import { writeFile, mkdir } from 'fs/promises';
-import { resolve, join } from 'path';
-import { generateEnhancedDashboard } from '@milencode/bundlewatch-parsers';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
 import type { BuildMetrics } from '@milencode/bundlewatch-core';
+import { generateEnhancedDashboard } from '@milencode/bundlewatch-parsers';
 
 export interface ExportOptions {
   /**
@@ -39,12 +39,7 @@ export interface ExportOptions {
  * Export dashboard as static HTML
  */
 export async function exportStatic(options: ExportOptions): Promise<string> {
-  const {
-    output,
-    metrics,
-    historical = [],
-    baseline,
-  } = options;
+  const { output, metrics, historical: _historical = [], baseline } = options;
 
   // Generate HTML
   const html = generateEnhancedDashboard(metrics, baseline);
@@ -80,7 +75,7 @@ export async function exportComparison(options: {
   // Use the most recent as current
   const current = builds[builds.length - 1].metrics;
   const baseline = builds[0].metrics;
-  const historical = builds.map((b) => b.metrics);
+  const historical = builds.map(b => b.metrics);
 
   return exportStatic({
     output,
@@ -89,4 +84,3 @@ export async function exportComparison(options: {
     baseline,
   });
 }
-

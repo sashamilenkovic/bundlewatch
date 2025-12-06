@@ -33,13 +33,11 @@
  * ```
  */
 
-// Main API
-export { withBundleWatch, default } from './wrapper.js';
-
-// Types
-export type { BundleWatchNextOptions, BundlerType, ResolvedBundleWatchOptions } from './types.js';
-
 // Utilities (for advanced usage)
 export { detectBundler, isCI, resolveBundler } from './detect.js';
+export { analyzeTurbopackBuild, setupTurbopackAnalysis } from './turbopack-mode.js';
+// Types
+export type { BundlerType, BundleWatchNextOptions, ResolvedBundleWatchOptions } from './types.js';
 export { injectWebpackPlugin } from './webpack-mode.js';
-export { setupTurbopackAnalysis, analyzeTurbopackBuild } from './turbopack-mode.js';
+// Main API
+export { default, withBundleWatch } from './wrapper.js';

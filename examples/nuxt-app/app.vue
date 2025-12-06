@@ -11,23 +11,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { format } from 'date-fns';
 import axios from 'axios';
+import { format } from 'date-fns';
+import { onMounted, ref } from 'vue';
 
 const time = ref(new Date());
 const data = ref('Loading...');
 
-const formattedTime = computed(() => format(time.value, 'PPpp'));
+const _formattedTime = computed(() => format(time.value, 'PPpp'));
 
 onMounted(() => {
   setInterval(() => {
     time.value = new Date();
   }, 1000);
 
-  axios.get('https://api.github.com/repos/anthropics/claude-code')
-    .then(res => data.value = res.data.description)
-    .catch(() => data.value = 'Bundle Watch + Nuxt Example');
+  axios
+    .get('https://api.github.com/repos/anthropics/claude-code')
+    .then(res => (data.value = res.data.description))
+    .catch(() => (data.value = 'Bundle Watch + Nuxt Example'));
 });
 </script>
 

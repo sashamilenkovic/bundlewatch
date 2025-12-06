@@ -3,10 +3,10 @@
  * Maps minified bundle code back to original source files
  */
 
-import type { SourceFileMetrics } from "@milencode/bundlewatch-core";
-import type { RawSourceMap } from "source-map";
+import type { SourceFileMetrics } from '@milencode/bundlewatch-core';
+import type { RawSourceMap } from 'source-map';
 
-import { SourceMapConsumer } from "source-map";
+import { SourceMapConsumer } from 'source-map';
 
 /**
  * Parse a source map and attribute bundle size to original source files
@@ -18,20 +18,14 @@ export async function parseSourceMap(
   sourceMap: RawSourceMap | string,
   bundleCode: string,
   bundleSize: number,
-  chunkName: string
+  chunkName: string,
 ): Promise<SourceFileMetrics[]> {
-  const mapObject =
-    typeof sourceMap === "string" ? JSON.parse(sourceMap) : sourceMap;
+  const mapObject = typeof sourceMap === 'string' ? JSON.parse(sourceMap) : sourceMap;
 
   const consumer = await new SourceMapConsumer(mapObject);
 
   try {
-    return analyzeSourceMapContributions(
-      consumer,
-      bundleCode,
-      bundleSize,
-      chunkName
-    );
+    return analyzeSourceMapContributions(consumer, bundleCode, bundleSize, chunkName);
   } finally {
     consumer.destroy();
   }
@@ -44,7 +38,7 @@ function analyzeSourceMapContributions(
   consumer: SourceMapConsumer,
   bundleCode: string,
   bundleSize: number,
-  chunkName: string
+  chunkName: string,
 ): SourceFileMetrics[] {
   const sourceContributions = new Map<
     string,
@@ -56,7 +50,7 @@ function analyzeSourceMapContributions(
   >();
 
   // Get all unique sources from the source map
-  // @ts-ignore - sources is a getter property
+  // @ts-expect-error - sources is a getter property
   const sources: string[] = consumer.sources || [];
 
   // Initialize tracking for each source
@@ -72,7 +66,7 @@ function analyzeSourceMapContributions(
 
   // Parse the bundle code to analyze mappings
   // We'll sample the bundle to estimate contributions
-  const lines = bundleCode.split("\n");
+  const lines = bundleCode.split('\n');
 
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
     const line = lines[lineIndex];
@@ -128,10 +122,12 @@ function analyzeSourceMapContributions(
  */
 function extractPackageFromSource(source: string): string {
   // Handle node_modules paths
-  if (source.includes("node_modules")) {
+  if (source.includes('node_modules')) {
     // Handle pnpm paths: node_modules/.pnpm/react@18.0.0/node_modules/react/index.js
-    if (source.includes(".pnpm")) {
-      const pnpmMatch = source.match(/\.pnpm[/\\][^/\\]+[/\\]node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+    if (source.includes('.pnpm')) {
+      const pnpmMatch = source.match(
+        /\.pnpm[/\\][^/\\]+[/\\]node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/,
+      );
       if (pnpmMatch) {
         return pnpmMatch[1].replace(/\\/g, '/');
       }
@@ -144,23 +140,25 @@ function extractPackageFromSource(source: string): string {
       // Skip cache directories like .vite, .cache, .pnpm
       if (pkgName.startsWith('.')) {
         // Try to find the real package after the cache dir
-        const cacheMatch = source.match(/node_modules[/\\]\.[^/\\]+[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
+        const cacheMatch = source.match(
+          /node_modules[/\\]\.[^/\\]+[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/,
+        );
         if (cacheMatch) {
           return cacheMatch[1].replace(/\\/g, '/');
         }
       }
       return pkgName;
     }
-    return "unknown";
+    return 'unknown';
   }
 
   // Handle webpack internal modules
-  if (source.startsWith("webpack/")) {
-    return "webpack-runtime";
+  if (source.startsWith('webpack/')) {
+    return 'webpack-runtime';
   }
 
   // Everything else is your app
-  return "your-app";
+  return 'your-app';
 }
 
 /**
@@ -168,14 +166,14 @@ function extractPackageFromSource(source: string): string {
  */
 function cleanSourcePath(source: string): string {
   // Remove webpack prefixes
-  let cleaned = source.replace(/^webpack:\/\/\//, "");
+  let cleaned = source.replace(/^webpack:\/\/\//, '');
 
   // Remove absolute paths, keep relative
-  cleaned = cleaned.replace(/^.*\/node_modules\//, "node_modules/");
-  cleaned = cleaned.replace(/^.*\/src\//, "src/");
+  cleaned = cleaned.replace(/^.*\/node_modules\//, 'node_modules/');
+  cleaned = cleaned.replace(/^.*\/src\//, 'src/');
 
   // Remove query strings
-  cleaned = cleaned.split("?")[0];
+  cleaned = cleaned.split('?')[0];
 
   return cleaned;
 }
@@ -186,17 +184,15 @@ function cleanSourcePath(source: string): string {
  */
 export async function parseSourceMapWithContent(
   sourceMap: RawSourceMap | string,
-  chunkName: string
+  chunkName: string,
 ): Promise<SourceFileMetrics[]> {
-  const mapObject =
-    typeof sourceMap === "string" ? JSON.parse(sourceMap) : sourceMap;
+  const mapObject = typeof sourceMap === 'string' ? JSON.parse(sourceMap) : sourceMap;
 
   const consumer = await new SourceMapConsumer(mapObject);
 
   try {
     const results: SourceFileMetrics[] = [];
 
-    // @ts-ignore - sources is a getter property
     const sources: string[] = consumer.sources || [];
 
     for (const source of sources) {
@@ -206,7 +202,7 @@ export async function parseSourceMapWithContent(
       if (!content) continue;
 
       const size = Buffer.from(content).length;
-      const lines = content.split("\n").length;
+      const lines = content.split('\n').length;
 
       results.push({
         path: cleanSourcePath(source),
@@ -227,9 +223,7 @@ export async function parseSourceMapWithContent(
 /**
  * Merge source file metrics from multiple chunks
  */
-export function mergeSourceFileMetrics(
-  metricsArrays: SourceFileMetrics[][]
-): SourceFileMetrics[] {
+export function mergeSourceFileMetrics(metricsArrays: SourceFileMetrics[][]): SourceFileMetrics[] {
   const merged = new Map<string, SourceFileMetrics>();
 
   for (const metrics of metricsArrays) {

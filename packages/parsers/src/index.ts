@@ -3,44 +3,38 @@
  * Parse existing analyzer tool outputs instead of re-analyzing
  */
 
-export { parseWebpackStats, type WebpackStats } from './webpack.js';
-
 export {
-  createAnalyzerState,
-  collectModuleInfo,
-  analyzeBundle,
-  type DetailedAnalysisOptions,
-  type AnalyzerState,
-  type ModuleInfo,
-} from './vite.js';
-
+  aggregateDependencyMetrics,
+  buildDependencyGraph,
+  extractPackageName,
+  generateOptimizationRecommendations,
+  getModuleType,
+} from './analysis-utils.js';
 export {
+  compressBoth,
+  compressBrotli,
+  compressGzip,
+} from './compression.js';
+export {
+  formatBytes,
+  generateEnhancedDashboard,
+  generateOutputChunksData,
+  generateTreemapData,
+} from './dashboard.js';
+export {
+  mergeSourceFileMetrics,
   parseSourceMap,
   parseSourceMapWithContent,
-  mergeSourceFileMetrics,
 } from './source-map-parser.js';
-
 export {
-  generateEnhancedDashboard,
-  generateTreemapData,
-  generateOutputChunksData,
-  formatBytes,
-} from './dashboard.js';
-
-export {
-  compressGzip,
-  compressBrotli,
-  compressBoth,
-} from './compression.js';
-
-export {
-  extractPackageName,
-  getModuleType,
-  buildDependencyGraph,
-  aggregateDependencyMetrics,
-  generateOptimizationRecommendations,
-} from './analysis-utils.js';
+  type AnalyzerState,
+  analyzeBundle,
+  collectModuleInfo,
+  createAnalyzerState,
+  type DetailedAnalysisOptions,
+  type ModuleInfo,
+} from './vite.js';
+export { parseWebpackStats, type WebpackStats } from './webpack.js';
 
 // Future parsers:
 // export { parseRollupVisualizer } from './rollup.js';
-

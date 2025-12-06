@@ -2,7 +2,7 @@
  * Tests for analyzer functions
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { compareMetrics } from '../src/analyzer';
 import type { BuildMetrics } from '../src/types';
 
@@ -75,9 +75,7 @@ describe('compareMetrics', () => {
 
   it('should detect added bundles', () => {
     const baseline = createMockMetrics({
-      bundles: [
-        { name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' },
-      ],
+      bundles: [{ name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' }],
     });
     const current = createMockMetrics({
       bundles: [
@@ -104,9 +102,7 @@ describe('compareMetrics', () => {
       totalSize: 1500,
     });
     const current = createMockMetrics({
-      bundles: [
-        { name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' },
-      ],
+      bundles: [{ name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' }],
       totalSize: 1000,
     });
 
@@ -120,14 +116,10 @@ describe('compareMetrics', () => {
 
   it('should detect changed bundles', () => {
     const baseline = createMockMetrics({
-      bundles: [
-        { name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' },
-      ],
+      bundles: [{ name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' }],
     });
     const current = createMockMetrics({
-      bundles: [
-        { name: 'index.js', size: 1200, gzipSize: 600, brotliSize: 480, type: 'js' },
-      ],
+      bundles: [{ name: 'index.js', size: 1200, gzipSize: 600, brotliSize: 480, type: 'js' }],
       totalSize: 1200,
     });
 
@@ -141,14 +133,10 @@ describe('compareMetrics', () => {
 
   it('should mark bundles as unchanged when difference is tiny', () => {
     const baseline = createMockMetrics({
-      bundles: [
-        { name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' },
-      ],
+      bundles: [{ name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' }],
     });
     const current = createMockMetrics({
-      bundles: [
-        { name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' },
-      ],
+      bundles: [{ name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' }],
     });
 
     const comparison = compareMetrics(current, baseline, 'main');
@@ -177,7 +165,7 @@ describe('compareMetrics', () => {
 
     // Large bundle changed by 500, small by 10
     expect(Math.abs(comparison.changes.byBundle[0].diff)).toBeGreaterThan(
-      Math.abs(comparison.changes.byBundle[1].diff)
+      Math.abs(comparison.changes.byBundle[1].diff),
     );
   });
 
@@ -201,9 +189,7 @@ describe('compareMetrics', () => {
 
   it('should report new bundles in insights', () => {
     const baseline = createMockMetrics({
-      bundles: [
-        { name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' },
-      ],
+      bundles: [{ name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' }],
     });
     const current = createMockMetrics({
       bundles: [
@@ -228,9 +214,7 @@ describe('compareMetrics', () => {
       totalSize: 1500,
     });
     const current = createMockMetrics({
-      bundles: [
-        { name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' },
-      ],
+      bundles: [{ name: 'index.js', size: 1000, gzipSize: 500, brotliSize: 400, type: 'js' }],
       totalSize: 1000,
     });
 
@@ -259,4 +243,3 @@ describe('compareMetrics', () => {
     expect(comparison.currentCommit).toBe('current456');
   });
 });
-

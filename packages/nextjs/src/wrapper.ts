@@ -6,10 +6,10 @@
  * and configures the appropriate analysis method.
  */
 
-import type { BundleWatchNextOptions, ResolvedBundleWatchOptions } from './types.js';
-import { resolveBundler, isCI } from './detect.js';
-import { injectWebpackPlugin } from './webpack-mode.js';
+import { isCI, resolveBundler } from './detect.js';
 import { setupTurbopackAnalysis } from './turbopack-mode.js';
+import type { BundleWatchNextOptions, ResolvedBundleWatchOptions } from './types.js';
+import { injectWebpackPlugin } from './webpack-mode.js';
 
 /**
  * Base type for Next.js config
@@ -68,7 +68,7 @@ function resolveOptions(options: BundleWatchNextOptions): ResolvedBundleWatchOpt
  */
 export function withBundleWatch<T extends NextConfigBase>(
   nextConfig: T = {} as T,
-  options: BundleWatchNextOptions = {}
+  options: BundleWatchNextOptions = {},
 ): T {
   const resolvedOptions = resolveOptions(options);
 

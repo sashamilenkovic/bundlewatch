@@ -199,7 +199,7 @@
       <div>
         <h1>Bundle Watch</h1>
         <p style="color: var(--text-muted); font-size: 11px;">
-          main / b19acb8 / 12/6/2025, 1:21:39 PM
+          main / 12ae8a8 / 12/4/2025, 7:21:10 PM
         </p>
       </div>
       <div class="header-controls">
@@ -212,15 +212,15 @@
   <div class="stats">
     <div class="stat-card">
       <span class="stat-label">Total</span>
-      <span class="stat-value">313.41 KB</span>
+      <span class="stat-value">313.26 KB</span>
     </div>
     <div class="stat-card">
       <span class="stat-label">Gzip</span>
-      <span class="stat-value">94.02 KB</span>
+      <span class="stat-value">93.98 KB</span>
     </div>
     <div class="stat-card">
       <span class="stat-label">Brotli</span>
-      <span class="stat-value">79.92 KB</span>
+      <span class="stat-value">79.88 KB</span>
     </div>
     <div class="stat-card">
       <span class="stat-label">Chunks</span>
@@ -242,45 +242,47 @@
   <div class="dependency-table">
     <table id="modules-table">
       <colgroup>
-        <col style="width: 25%;">
-        <col style="width: 25%;">
-        <col style="width: 12%;">
-        <col style="width: 12%;">
-        <col style="width: 12%;">
+        <col style="width: 30%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
+        <col style="width: 14%;">
         <col style="width: 14%;">
       </colgroup>
       <thead>
         <tr>
-          <th style="cursor: pointer;" onclick="sortModulesTable(0)">Chunk ↕</th>
-          <th>File</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(2)">Size ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(3)">Gzipped ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(4)">Brotli ↕</th>
-          <th>Type</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(0)">Name ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(1)">Size ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(2)">Gzipped ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(3)">Brotli ↕</th>
+          <th></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         
           <tr>
             <td>
-              <strong>main.dfd837b3ab12f3ff900e.js</strong>
+              <span class="badge badge-npm">NPM</span> 
+              <strong>main.3a47949ba58aaeef8a45.js</strong>
             </td>
-            <td style="color: var(--text-muted); font-size: 0.85em;">main.dfd837b3ab12f3ff900e.js</td>
-            <td>313.14 KB</td>
-            <td>93.94 KB</td>
-            <td>79.85 KB</td>
-            <td><span class="badge badge-app">JS</span></td>
+            <td>312.99 KB</td>
+            <td>93.90 KB</td>
+            <td>79.81 KB</td>
+            <td></td>
+            <td></td>
           </tr>
         
           <tr>
             <td>
+              <span class="badge badge-npm">NPM</span> 
               <strong>index.html</strong>
             </td>
-            <td style="color: var(--text-muted); font-size: 0.85em;">index.html</td>
             <td>277.00 B</td>
             <td>83.00 B</td>
             <td>71.00 B</td>
-            <td><span class="badge badge-npm">HTML</span></td>
+            <td></td>
+            <td></td>
           </tr>
         
       </tbody>
@@ -320,7 +322,7 @@
             </td>
             <td>532.62 KB</td>
             <td>159.79 KB</td>
-            <td>169.9%</td>
+            <td>170.0%</td>
             <td>4</td>
             <td>No</td>
           </tr>
@@ -333,7 +335,7 @@
             </td>
             <td>531.35 KB</td>
             <td>159.40 KB</td>
-            <td>169.5%</td>
+            <td>169.6%</td>
             <td>1</td>
             <td>No</td>
           </tr>
@@ -346,7 +348,7 @@
             </td>
             <td>222.95 KB</td>
             <td>66.88 KB</td>
-            <td>71.1%</td>
+            <td>71.2%</td>
             <td>1</td>
             <td>No</td>
           </tr>
@@ -405,7 +407,7 @@
       btn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
     }
 
-    const data = {"name":"Dependencies","children":[{"name":"react-dom","value":545403,"gzip":163622,"brotli":139078,"type":"npm"},{"name":"lodash","value":544098,"gzip":163229,"brotli":138745,"type":"npm"},{"name":"src/index.tsx + 96 modules","value":228297,"gzip":68489,"brotli":58216,"type":"app"},{"name":"react","value":18589,"gzip":5577,"brotli":4741,"type":"npm"},{"name":"scheduler","value":10375,"gzip":3112,"brotli":2645,"type":"npm"},{"name":"classnames","value":1530,"gzip":459,"brotli":390,"type":"npm"}]};
+    const data = {"name":"Output Chunks","children":[{"name":"main.3a47949ba58aaeef8a45.js","value":320501,"gzip":96150,"brotli":81728,"type":"js"},{"name":"index.html","value":277,"gzip":83,"brotli":71,"type":"html"}]};
 
     const width = document.getElementById('treemap').clientWidth;
     const height = 350;
@@ -507,10 +509,10 @@
 
     // Copy all data as markdown
     function copyAll() {
-      const metrics = {"branch":"main","commit":"b19acb8cd80a009215917f529dc3acf585e09f50","timestamp":"2025-12-06T18:21:39.634Z","totalSize":320936,"totalGzipSize":96281,"totalBrotliSize":81839,"chunkCount":2};
+      const metrics = {"branch":"main","commit":"12ae8a81f8a568d66077c668ef43b5df07d5b511","timestamp":"2025-12-05T00:21:10.893Z","totalSize":320778,"totalGzipSize":96233,"totalBrotliSize":81799,"chunkCount":2};
 
       const modules = data.children || [];
-      const deps = [{"name":"react-dom","totalSize":545403,"moduleCount":4,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":163622,"brotliSize":139078,"percentOfTotal":169.9413590248523},{"name":"lodash","totalSize":544098,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":163229,"brotliSize":138745,"percentOfTotal":169.53473589749981},{"name":"src/index.tsx + 96 modules","totalSize":228297,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":68489,"brotliSize":58216,"percentOfTotal":71.1347433756263},{"name":"react","totalSize":18589,"moduleCount":4,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":5577,"brotliSize":4741,"percentOfTotal":5.792120547398858},{"name":"scheduler","totalSize":10375,"moduleCount":2,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":3112,"brotliSize":2645,"percentOfTotal":3.2327317596031606},{"name":"classnames","totalSize":1530,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":459,"brotliSize":390,"percentOfTotal":0.47673056310292394}];
+      const deps = [{"name":"react-dom","totalSize":545403,"moduleCount":4,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":163622,"brotliSize":139078,"percentOfTotal":170.02506406299685},{"name":"lodash","totalSize":544098,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":163229,"brotliSize":138745,"percentOfTotal":169.61824065241382},{"name":"src/index.tsx + 96 modules","totalSize":228298,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":68489,"brotliSize":58216,"percentOfTotal":71.17009271209372},{"name":"react","totalSize":18589,"moduleCount":4,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":5577,"brotliSize":4741,"percentOfTotal":5.794973470749241},{"name":"scheduler","totalSize":10375,"moduleCount":2,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":3112,"brotliSize":2645,"percentOfTotal":3.234324049654278},{"name":"classnames","totalSize":1530,"moduleCount":1,"chunks":[],"treeshakeable":false,"duplicate":false,"gzipSize":459,"brotliSize":390,"percentOfTotal":0.47696537792492005}];
 
       let text = `# Bundle Analysis Report
 

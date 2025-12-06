@@ -2,9 +2,9 @@
  * Tests for dashboard generation
  */
 
-import { describe, it, expect } from 'vitest';
-import { generateTreemapData, generateDependencyData } from '../src/dashboard';
 import type { BuildMetrics } from '@milencode/bundlewatch-core';
+import { describe, expect, it } from 'vitest';
+import { generateDependencyData, generateTreemapData } from '../src/dashboard';
 
 describe('Dashboard', () => {
   const mockMetrics: BuildMetrics = {
@@ -74,32 +74,40 @@ describe('Dashboard', () => {
   };
 
   describe('generateTreemapData', () => {
-    it('should return output chunks (bundles), not module aggregations', () => {
+    it('should prefer dependencies when available for meaningful names', () => {
       const result = generateTreemapData(mockMetrics);
+
+      // When detailedDependencies are available, use them for better visualization
+      expect(result.name).toBe('Dependencies');
+      expect(result.children).toHaveLength(2);
+
+      // Should show package names
+      expect(result.children[0].name).toBe('react');
+      expect(result.children[1].name).toBe('lodash');
+    });
+
+    it('should include gzip and brotli sizes from dependencies', () => {
+      const result = generateTreemapData(mockMetrics);
+
+      const react = result.children[0];
+      expect(react.value).toBe(100000);
+      expect(react.gzip).toBe(30000);
+      expect(react.brotli).toBe(0); // Not provided in mock
+      expect(react.type).toBe('npm');
+    });
+
+    it('should fall back to output chunks when no dependencies available', () => {
+      const metricsWithoutDeps: BuildMetrics = {
+        ...mockMetrics,
+        detailedDependencies: undefined,
+      };
+
+      const result = generateTreemapData(metricsWithoutDeps);
 
       expect(result.name).toBe('Output Chunks');
       expect(result.children).toHaveLength(3);
-
-      // Should show actual chunk filenames
-      expect(result.children[0].name).toBe('framework-abc123.js');
-      expect(result.children[1].name).toBe('main-def456.js');
-      expect(result.children[2].name).toBe('styles-ghi789.css');
-    });
-
-    it('should include gzip and brotli sizes for each chunk', () => {
-      const result = generateTreemapData(mockMetrics);
-
-      const framework = result.children[0];
-      expect(framework.value).toBe(200000);
-      expect(framework.gzip).toBe(60000);
-      expect(framework.brotli).toBe(51000);
-      expect(framework.type).toBe('js');
-    });
-
-    it('should extract just the filename from full path', () => {
-      const result = generateTreemapData(mockMetrics);
-
       // Should be "framework-abc123.js" not "static/chunks/framework-abc123.js"
+      expect(result.children[0].name).toBe('framework-abc123.js');
       expect(result.children[0].name).not.toContain('/');
     });
   });

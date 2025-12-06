@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { format, formatDistance } from 'date-fns';
-import { chunk, sortBy, uniq } from 'lodash';
 import axios from 'axios';
 import classNames from 'classnames';
+import { format, formatDistance } from 'date-fns';
+import { chunk, sortBy, uniq } from 'lodash';
+import { useEffect, useState } from 'react';
 
 export default function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -19,7 +19,7 @@ export default function App() {
       try {
         const response = await axios.get('https://api.github.com/repos/anthropics/claude-code');
         setData(uniq([response.data.name, response.data.description]));
-      } catch (error) {
+      } catch (_error) {
         console.log('Demo mode - API not called');
         setData(['Bundle', 'Watch', 'Example']);
       }
@@ -33,18 +33,13 @@ export default function App() {
   const chunkedData = chunk(data, 2);
   const sortedData = sortBy(data, (d: string) => d.length);
 
-  const containerClass = classNames(
-    'container',
-    { 'has-data': data.length > 0 }
-  );
+  const containerClass = classNames('container', { 'has-data': data.length > 0 });
 
   return (
     <div style={styles.container} className={containerClass}>
       <h1 style={styles.title}>📦 Bundle Watch</h1>
       <p style={styles.subtitle}>Webpack + Bundle Watch Example</p>
-      <p style={styles.description}>
-        This app is built with Webpack and analyzed by Bundle Watch!
-      </p>
+      <p style={styles.description}>This app is built with Webpack and analyzed by Bundle Watch!</p>
 
       <div style={styles.info}>
         <p>Current time: {format(currentTime, 'PPpp')}</p>
@@ -92,4 +87,3 @@ const styles = {
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
   },
 };
-

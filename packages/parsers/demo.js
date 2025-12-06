@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+
 /**
  * Demo: Parse webpack stats instead of re-analyzing files
  * Shows the speed difference!
  */
 
+import { performance } from 'node:perf_hooks';
 import { parseWebpackStats } from './dist/index.js';
-import { performance } from 'perf_hooks';
 
 // Simulated webpack stats.json (from webpack-app example)
 const mockWebpackStats = {
@@ -14,7 +15,7 @@ const mockWebpackStats = {
   assets: [
     {
       name: 'main.a2bfaaf5d7a204d3de1f.js',
-      size: 190887,  // ~186 KB
+      size: 190887, // ~186 KB
       chunks: [179],
       chunkNames: ['main'],
     },
@@ -56,13 +57,17 @@ console.log();
 
 if (metrics.warnings.length > 0) {
   console.log('⚠️  Warnings:');
-  metrics.warnings.forEach(w => console.log(`  - ${w}`));
+  for (const w of metrics.warnings) {
+    console.log(`  - ${w}`);
+  }
   console.log();
 }
 
 if (metrics.recommendations.length > 0) {
   console.log('💡 Recommendations:');
-  metrics.recommendations.forEach(r => console.log(`  - ${r}`));
+  for (const r of metrics.recommendations) {
+    console.log(`  - ${r}`);
+  }
   console.log();
 }
 
@@ -76,6 +81,5 @@ function formatBytes(bytes) {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+  return `${(bytes / k ** i).toFixed(2)} ${sizes[i]}`;
 }
-

@@ -3,15 +3,19 @@
  * Vite plugin for automatic bundle analysis
  */
 
-import type { Plugin, ResolvedConfig } from 'vite';
-import type { OutputBundle } from 'rollup';
-import { GitStorage, ComparisonEngine, ReportGenerator } from '@milencode/bundlewatch-core';
-import type { BundleWatchConfig, BuildMetrics } from '@milencode/bundlewatch-core';
-import { createAnalyzerState, collectModuleInfo, analyzeBundle } from '@milencode/bundlewatch-parsers';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import type { BundleWatchConfig, Comparison } from '@milencode/bundlewatch-core';
+import { ComparisonEngine, GitStorage, ReportGenerator } from '@milencode/bundlewatch-core';
 import type { AnalyzerState } from '@milencode/bundlewatch-parsers';
-import { generateEnhancedDashboard } from '@milencode/bundlewatch-parsers';
-import { resolve } from 'path';
-import { writeFileSync, mkdirSync } from 'fs';
+import {
+  analyzeBundle,
+  collectModuleInfo,
+  createAnalyzerState,
+  generateEnhancedDashboard,
+} from '@milencode/bundlewatch-parsers';
+import type { OutputBundle } from 'rollup';
+import type { Plugin, ResolvedConfig } from 'vite';
 
 export interface ViteBundleWatchOptions extends Partial<BundleWatchConfig> {
   /**
@@ -152,7 +156,7 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
         const reporter = new ReportGenerator();
         const analyzer = new ComparisonEngine();
 
-        let comparison;
+        let comparison: Comparison | undefined;
 
         // Load baseline for comparison (only when saveToGit is enabled, as it requires remote access)
         if (options.compareAgainst && options.saveToGit) {
@@ -164,7 +168,9 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
             console.log('\n┌─────────────────────────────────────────────────────────────┐');
             console.log('│ 📊 BundleWatch - First Run Detected                        │');
             console.log('├─────────────────────────────────────────────────────────────┤');
-            console.log(`│ No baseline found for comparison with '${options.compareAgainst}'${' '.repeat(Math.max(0, 22 - options.compareAgainst.length))}│`);
+            console.log(
+              `│ No baseline found for comparison with '${options.compareAgainst}'${' '.repeat(Math.max(0, 22 - options.compareAgainst.length))}│`,
+            );
             console.log('│                                                             │');
             console.log('│ 💡 To enable bundle size comparisons:                      │');
             console.log('│                                                             │');
@@ -222,7 +228,7 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
           if (comparison.changes.totalSize.diffPercent > threshold) {
             throw new Error(
               `Bundle size increased by ${comparison.changes.totalSize.diffPercent.toFixed(1)}% ` +
-              `(threshold: ${threshold}%). Build failed.`
+                `(threshold: ${threshold}%). Build failed.`,
             );
           }
         }
@@ -230,22 +236,18 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
         // Set environment variables for GitHub Actions
         if (isCI && process.env.GITHUB_OUTPUT) {
           console.log('Setting GitHub Actions outputs...');
-          const outputs = [
-            `total-size=${metrics.totalSize}`,
-            `gzip-size=${metrics.totalGzipSize}`,
-          ];
+          const outputs = [`total-size=${metrics.totalSize}`, `gzip-size=${metrics.totalGzipSize}`];
           if (comparison) {
             outputs.push(`size-diff=${comparison.changes.totalSize.diff}`);
             outputs.push(`size-diff-percent=${comparison.changes.totalSize.diffPercent}`);
           }
 
           // Write to GITHUB_OUTPUT file (new method)
-          const { appendFileSync } = await import('fs');
+          const { appendFileSync } = await import('node:fs');
           for (const output of outputs) {
             appendFileSync(process.env.GITHUB_OUTPUT, `${output}\n`);
           }
         }
-
       } catch (error) {
         console.error('❌ Bundle Watch error:', error);
         if (options.failOnSizeIncrease) {

@@ -2,16 +2,16 @@
  * Backfill command - analyze historical commits
  */
 
+import { exec } from 'node:child_process';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import * as clack from '@clack/prompts';
+import { getCurrentBranch, getCurrentCommit, saveMetrics } from '@milencode/bundlewatch-core';
+import chalk from 'chalk';
 import { Command } from 'commander';
 import ora from 'ora';
-import chalk from 'chalk';
-import * as clack from '@clack/prompts';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import { mkdtemp, rm } from 'fs/promises';
-import { tmpdir } from 'os';
-import { join } from 'path';
-import { saveMetrics, getCurrentCommit, getCurrentBranch } from '@milencode/bundlewatch-core';
 import { analyzeBuildOutput } from '../utils/hybrid-analyzer.js';
 
 const execAsync = promisify(exec);
@@ -46,7 +46,7 @@ async function getCommits(options: BackfillOptions, cwd: string): Promise<Commit
       // Get all tagged releases
       const { stdout } = await execAsync(
         'git tag --sort=-version:refname --format="%(refname:short)|%(creatordate:iso)|%(subject)"',
-        { cwd }
+        { cwd },
       );
 
       for (const line of stdout.trim().split('\n').filter(Boolean)) {
@@ -61,33 +61,40 @@ async function getCommits(options: BackfillOptions, cwd: string): Promise<Commit
       }
     } else {
       // Get commit range
-      let allCommits;
+      let allCommits: Array<{ hash: string; date: string; message: string }>;
 
       if (options.last) {
         // For --last N, just get the last N commits without needing a range
-        const { stdout } = await execAsync(
-          `git log -${options.last} --format="%H|%cI|%s"`,
-          { cwd }
-        );
-        allCommits = stdout.trim().split('\n').filter(Boolean).map(line => {
-          const [hash, date, message] = line.split('|');
-          return { hash, date, message };
-        }).reverse(); // Reverse to process oldest first
+        const { stdout } = await execAsync(`git log -${options.last} --format="%H|%cI|%s"`, {
+          cwd,
+        });
+        allCommits = stdout
+          .trim()
+          .split('\n')
+          .filter(Boolean)
+          .map(line => {
+            const [hash, date, message] = line.split('|');
+            return { hash, date, message };
+          })
+          .reverse(); // Reverse to process oldest first
         commits.push(...allCommits);
       } else {
         const from = options.from || 'HEAD~100';
         const to = options.to || 'HEAD';
         const range = `${from}..${to}`;
 
-        const { stdout } = await execAsync(
-          `git log ${range} --format="%H|%cI|%s" --reverse`,
-          { cwd }
-        );
-
-        allCommits = stdout.trim().split('\n').filter(Boolean).map(line => {
-          const [hash, date, message] = line.split('|');
-          return { hash, date, message };
+        const { stdout } = await execAsync(`git log ${range} --format="%H|%cI|%s" --reverse`, {
+          cwd,
         });
+
+        allCommits = stdout
+          .trim()
+          .split('\n')
+          .filter(Boolean)
+          .map(line => {
+            const [hash, date, message] = line.split('|');
+            return { hash, date, message };
+          });
 
         if (options.sample && options.sample > 0) {
           const step = Math.ceil(allCommits.length / options.sample);
@@ -117,7 +124,7 @@ async function analyzeCommit(
   commit: CommitInfo,
   buildCommand: string,
   skipInstall: boolean,
-  cwd: string
+  cwd: string,
 ): Promise<boolean> {
   const worktreePath = await mkdtemp(join(tmpdir(), 'bundlewatch-'));
 
@@ -130,7 +137,7 @@ async function analyzeCommit(
     try {
       const { stdout } = await execAsync(
         `git branch --contains ${commit.hash} --format='%(refname:short)' | head -1`,
-        { cwd }
+        { cwd },
       );
       branchName = stdout.trim() || 'main';
     } catch {
@@ -142,20 +149,20 @@ async function analyzeCommit(
       try {
         await execAsync('pnpm install --frozen-lockfile', {
           cwd: worktreePath,
-          timeout: 300000 // 5 minute timeout
+          timeout: 300000, // 5 minute timeout
         });
-      } catch (error) {
+      } catch (_error) {
         // Try without frozen lockfile
         try {
           await execAsync('pnpm install', {
             cwd: worktreePath,
-            timeout: 300000
+            timeout: 300000,
           });
         } catch {
           // If pnpm fails, try npm
           await execAsync('npm install', {
             cwd: worktreePath,
-            timeout: 300000
+            timeout: 300000,
           });
         }
       }
@@ -170,7 +177,7 @@ async function analyzeCommit(
         ...process.env,
         CI: 'false', // Prevent CI-specific behaviors
         NODE_ENV: 'production',
-      }
+      },
     });
     const buildDuration = Date.now() - buildStart;
 
@@ -180,7 +187,7 @@ async function analyzeCommit(
       commit.hash,
       branchName,
       commit.date,
-      buildDuration
+      buildDuration,
     );
 
     // Save metrics to git storage
@@ -197,7 +204,7 @@ async function analyzeCommit(
     // Clean up worktree
     try {
       await execAsync(`git worktree remove ${worktreePath} --force`, { cwd });
-    } catch (error) {
+    } catch (_error) {
       // If that fails, try removing the directory
       await rm(worktreePath, { recursive: true, force: true });
     }
@@ -226,7 +233,7 @@ async function promptForOptions(): Promise<BackfillOptions> {
     process.exit(0);
   }
 
-  let options: BackfillOptions = {};
+  const options: BackfillOptions = {};
 
   if (strategy === 'last-10') {
     options.last = 10;
@@ -367,7 +374,9 @@ async function backfill(cmdOptions: BackfillOptions) {
     } else if (options.sample) {
       console.log(chalk.dim(`  - Sampling ~${options.sample} commits`));
     } else {
-      console.log(chalk.dim(`  - Analyzing range: ${options.from || 'HEAD~100'}..${options.to || 'HEAD'}`));
+      console.log(
+        chalk.dim(`  - Analyzing range: ${options.from || 'HEAD~100'}..${options.to || 'HEAD'}`),
+      );
     }
     console.log(chalk.dim(`  - Build command: ${options.buildCommand || 'pnpm build'}`));
     console.log(chalk.dim(`  - Skip install: ${options.skipInstall ? 'yes' : 'no'}\n`));
@@ -387,12 +396,14 @@ async function backfill(cmdOptions: BackfillOptions) {
         commit,
         options.buildCommand || 'pnpm build',
         options.skipInstall || false,
-        cwd
+        cwd,
       );
 
       if (success) {
         successCount++;
-        spinner.succeed(`${progress} ${chalk.green('✓')} ${label} - ${commit.message.substring(0, 60)}`);
+        spinner.succeed(
+          `${progress} ${chalk.green('✓')} ${label} - ${commit.message.substring(0, 60)}`,
+        );
       } else {
         failureCount++;
         spinner.fail(`${progress} ${chalk.red('✗')} ${label} - Build failed`);
@@ -406,8 +417,12 @@ async function backfill(cmdOptions: BackfillOptions) {
       } else {
         await execAsync(`git checkout ${currentCommit}`, { cwd });
       }
-    } catch (error) {
-      console.warn(chalk.yellow(`\n⚠️  Could not return to original branch. You may need to checkout manually.\n`));
+    } catch (_error) {
+      console.warn(
+        chalk.yellow(
+          `\n⚠️  Could not return to original branch. You may need to checkout manually.\n`,
+        ),
+      );
     }
 
     // Summary
@@ -415,7 +430,9 @@ async function backfill(cmdOptions: BackfillOptions) {
       clack.outro(
         successCount === commits.length
           ? chalk.green(`✓ Successfully backfilled ${successCount} commits!`)
-          : chalk.yellow(`⚠️  Backfilled ${successCount}/${commits.length} commits (${failureCount} failed)`)
+          : chalk.yellow(
+              `⚠️  Backfilled ${successCount}/${commits.length} commits (${failureCount} failed)`,
+            ),
       );
     } else {
       console.log(chalk.bold('\n📈 Backfill Complete\n'));
@@ -425,7 +442,6 @@ async function backfill(cmdOptions: BackfillOptions) {
       }
       console.log();
     }
-
   } catch (error) {
     spinner.fail('Backfill failed');
     console.error(chalk.red(`\n❌ Error: ${error}\n`));
@@ -442,12 +458,18 @@ export const backfillCommand = new Command('backfill')
   .option('--branch <name>', 'Target specific branch to backfill (e.g., main, develop)')
   .option('--from <ref>', 'Start from this git ref (commit, tag, branch)', 'HEAD~100')
   .option('--to <ref>', 'Analyze up to this git ref', 'HEAD')
-  .option('--last <n>', 'Analyze only the last N commits (defaults to 10 if no options provided)', parseInt)
+  .option(
+    '--last <n>',
+    'Analyze only the last N commits (defaults to 10 if no options provided)',
+    parseInt,
+  )
   .option('--releases-only', 'Only analyze tagged releases')
   .option('--sample <n>', 'Sample approximately N commits from the range', parseInt)
   .option('--build-command <cmd>', 'Command to build the project', 'pnpm build')
   .option('--skip-install', 'Skip dependency installation (faster if deps unchanged)')
-  .addHelpText('after', `
+  .addHelpText(
+    'after',
+    `
 Examples:
   $ bundlewatch backfill                            # Smart default (last 10 commits)
   $ bundlewatch backfill -i                         # Interactive mode (recommended)
@@ -469,5 +491,6 @@ For Webpack projects, add this to your webpack config for faster backfilling:
   plugins: [
     new StatsWriterPlugin({ filename: 'stats.json' })
   ]
-`)
+`,
+  )
   .action(backfill);
