@@ -1,3 +1,10 @@
+## [2.2.4](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.3...v2.2.4) (2025-12-06)
+
+
+### Bug Fixes
+
+* **dashboard:** add human-readable chunk names to output table ([d36d68f](https://github.com/sashamilenkovic/bundlewatch/commit/d36d68f57c4e7fcd904d42804395e6047f9ce479))
+
 ## [2.2.3](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.2...v2.2.3) (2025-12-05)
 
 
