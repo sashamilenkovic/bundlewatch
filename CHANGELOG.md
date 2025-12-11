@@ -1,3 +1,10 @@
+## [2.2.5](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.4...v2.2.5) (2025-12-11)
+
+
+### Bug Fixes
+
+* improve module extraction and chunk naming for Next.js ([f91f8d6](https://github.com/sashamilenkovic/bundlewatch/commit/f91f8d633be753bb951b08955e5e4a6b5c940442))
+
 ## [2.2.4](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.3...v2.2.4) (2025-12-06)
 
 
