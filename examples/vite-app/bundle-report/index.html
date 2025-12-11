@@ -199,7 +199,7 @@
       <div>
         <h1>Bundle Watch</h1>
         <p style="color: var(--text-muted); font-size: 11px;">
-          main / 12ae8a8 / 12/4/2025, 7:21:05 PM
+          main / 4d7c394 / 12/11/2025, 6:07:33 PM
         </p>
       </div>
       <div class="header-controls">
@@ -242,47 +242,45 @@
   <div class="dependency-table">
     <table id="modules-table">
       <colgroup>
-        <col style="width: 30%;">
-        <col style="width: 14%;">
-        <col style="width: 14%;">
-        <col style="width: 14%;">
-        <col style="width: 14%;">
+        <col style="width: 25%;">
+        <col style="width: 25%;">
+        <col style="width: 12%;">
+        <col style="width: 12%;">
+        <col style="width: 12%;">
         <col style="width: 14%;">
       </colgroup>
       <thead>
         <tr>
-          <th style="cursor: pointer;" onclick="sortModulesTable(0)">Name ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(1)">Size ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(2)">Gzipped ↕</th>
-          <th style="cursor: pointer;" onclick="sortModulesTable(3)">Brotli ↕</th>
-          <th></th>
-          <th></th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(0)">Chunk ↕</th>
+          <th>File</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(2)">Size ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(3)">Gzipped ↕</th>
+          <th style="cursor: pointer;" onclick="sortModulesTable(4)">Brotli ↕</th>
+          <th>Type</th>
         </tr>
       </thead>
       <tbody>
         
           <tr>
             <td>
-              <span class="badge badge-npm">NPM</span> 
               <strong>index-BmeGit54.css</strong>
             </td>
+            <td style="color: var(--text-muted); font-size: 0.85em;">index-BmeGit54.css</td>
             <td>1.18 KB</td>
             <td>364.00 B</td>
             <td>309.00 B</td>
-            <td></td>
-            <td></td>
+            <td><span class="badge badge-npm">CSS</span></td>
           </tr>
         
           <tr>
             <td>
-              <span class="badge badge-npm">NPM</span> 
-              <strong>index-DfaLYpSh.js</strong>
+              <strong>index</strong>
             </td>
+            <td style="color: var(--text-muted); font-size: 0.85em;">index-DfaLYpSh.js</td>
             <td>189.04 KB</td>
             <td>59.37 KB</td>
             <td>51.06 KB</td>
-            <td></td>
-            <td></td>
+            <td><span class="badge badge-app">JS</span></td>
           </tr>
         
       </tbody>
@@ -556,7 +554,7 @@
       btn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
     }
 
-    const data = {"name":"Output Chunks","children":[{"name":"index-BmeGit54.css","value":1212,"gzip":364,"brotli":309,"type":"css"},{"name":"index-DfaLYpSh.js","value":193572,"gzip":60795,"brotli":52284,"type":"js"}]};
+    const data = {"name":"Dependencies","children":[{"name":"react-dom","value":184775,"gzip":58016,"brotli":49890,"type":"npm"},{"name":"react","value":6298,"gzip":1977,"brotli":1700,"type":"npm"},{"name":"scheduler","value":3515,"gzip":1104,"brotli":949,"type":"npm"},{"name":"your-app","value":197,"gzip":62,"brotli":53,"type":"app"}]};
 
     const width = document.getElementById('treemap').clientWidth;
     const height = 350;
@@ -658,39 +656,62 @@
 
     // Copy all data as markdown
     function copyAll() {
-      const metrics = {"branch":"main","commit":"12ae8a81f8a568d66077c668ef43b5df07d5b511","timestamp":"2025-12-05T00:21:05.136Z","totalSize":194784,"totalGzipSize":61159,"totalBrotliSize":52593,"chunkCount":2};
+      const metricsData = {"branch":"main","commit":"4d7c394ae829baa80db14f37b0d7366eb1e23512","timestamp":"2025-12-11T23:07:33.356Z","totalSize":194784,"totalGzipSize":61159,"totalBrotliSize":52593,"chunkCount":2};
 
       const modules = data.children || [];
       const deps = [{"name":"react-dom","totalSize":184775,"gzipSize":58016,"brotliSize":49890,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":94.86148759651716},{"name":"react","totalSize":6298,"gzipSize":1977,"brotliSize":1700,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":3.233325119106292},{"name":"scheduler","totalSize":3515,"gzipSize":1104,"brotliSize":949,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":1.8045630031214062},{"name":"your-app","totalSize":197,"gzipSize":62,"brotliSize":53,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":0.1011376704452111}];
+      const chunks = [{"name":"index-BmeGit54.css","friendlyName":"index-BmeGit54.css","size":1212,"gzipSize":364,"brotliSize":309,"type":"css"},{"name":"index-DfaLYpSh.js","friendlyName":"index","size":193572,"gzipSize":60795,"brotliSize":52284,"type":"js"}];
+      const recs = [];
 
       let text = `# Bundle Analysis Report
 
 ## Summary
-- **Branch:** ${metrics.branch}
-- **Commit:** ${metrics.commit.substring(0, 7)}
-- **Date:** ${new Date(metrics.timestamp).toLocaleString()}
-- **Total Size:** ${formatBytes(metrics.totalSize)}
-- **Gzipped:** ${formatBytes(metrics.totalGzipSize || 0)}
-- **Brotli:** ${formatBytes(metrics.totalBrotliSize || 0)}
-- **Chunks:** ${metrics.chunkCount}
+| Metric | Value |
+|--------|-------|
+| Branch | ${metricsData.branch} |
+| Commit | ${metricsData.commit.substring(0, 7)} |
+| Date | ${new Date(metricsData.timestamp).toLocaleString()} |
+| **Total Size** | **${formatBytes(metricsData.totalSize)}** |
+| Gzipped | ${formatBytes(metricsData.totalGzipSize || 0)} |
+| Brotli | ${formatBytes(metricsData.totalBrotliSize || 0)} |
+| Chunks | ${metricsData.chunkCount} |
 
-## Bundle Composition
-| Module | Type | Size | Gzipped |
-|--------|------|------|---------|
+## Top Dependencies by Size
+| Package | Size | Gzipped | % of Total |
+|---------|------|---------|------------|
 `;
 
-      modules.forEach(m => {
-        text += `| ${m.name} | ${m.type.toUpperCase()} | ${formatBytes(m.value)} | ${formatBytes(m.gzip || 0)} |\n`;
+      // Show top 15 deps sorted by size
+      deps.slice(0, 15).forEach(d => {
+        const gzip = d.gzipSize ? formatBytes(d.gzipSize) : 'N/A';
+        const pct = d.percentOfTotal?.toFixed(1) || '0.0';
+        text += `| ${d.name} | ${formatBytes(d.totalSize)} | ${gzip} | ${pct}% |\n`;
       });
 
-      if (deps.length > 0) {
+      // Add output chunks section
+      if (chunks.length > 0) {
         text += `
-## Top Dependencies
-| Package | Size | % of Total | Modules |
-|---------|------|------------|---------|
+## Output Chunks
+| Chunk | Size | Gzipped | Type |
+|-------|------|---------|------|
 `;
-        deps.forEach(d => {
-          text += `| ${d.name} | ${formatBytes(d.totalSize)} | ${d.percentOfTotal?.toFixed(1)}% | ${d.moduleCount} |\n`;
+        chunks.forEach(c => {
+          text += `| ${c.friendlyName} | ${formatBytes(c.size)} | ${formatBytes(c.gzipSize || 0)} | ${c.type.toUpperCase()} |\n`;
+        });
+      }
+
+      // Add optimization recommendations
+      if (recs && recs.length > 0) {
+        text += `
+## Recommendations
+`;
+        recs.forEach(r => {
+          const icon = r.severity === 'error' ? '🔴' : r.severity === 'warning' ? '🟡' : 'ℹ️';
+          text += `- ${icon} **${r.message}** - ${r.action}`;
+          if (r.potentialSavings) {
+            text += ` (potential savings: ${formatBytes(r.potentialSavings)})`;
+          }
+          text += `\n`;
         });
       }
 

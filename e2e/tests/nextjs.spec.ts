@@ -85,4 +85,34 @@ test.describe('Next.js Webpack Plugin', () => {
     // Next.js outputs chunk info in the route table
     expect(buildOutput).toMatch(/chunks\/.*\.js/);
   });
+
+  test('should extract module dependencies in dashboard', async () => {
+    const dashboardPath = join(NEXTJS_APP_DIR, 'bundle-report', 'index.html');
+    const content = await readFile(dashboardPath, 'utf-8');
+
+    // Check that real npm packages are detected (not just generic names)
+    expect(content).toContain('"name":"next"');
+    expect(content).toContain('"name":"react-dom"');
+    expect(content).toContain('"name":"lodash"');
+    expect(content).toContain('"name":"date-fns"');
+    expect(content).toContain('"name":"zustand"');
+
+    // Check that app code is properly identified
+    expect(content).toContain('"type":"app"');
+    expect(content).toContain('"type":"npm"');
+  });
+
+  test('should have human-readable chunk names in dashboard', async () => {
+    const dashboardPath = join(NEXTJS_APP_DIR, 'bundle-report', 'index.html');
+    const content = await readFile(dashboardPath, 'utf-8');
+
+    // Check for meaningful chunk names (not just hashes or "webpack")
+    expect(content).toContain('framework (react)');
+    expect(content).toContain('polyfills');
+    expect(content).toContain('webpack-runtime');
+    expect(content).toContain('app/layout');
+
+    // Should have app router page names
+    expect(content).toMatch(/app\/(page|_not-found\/page|about\/page|blog\/page)/);
+  });
 });

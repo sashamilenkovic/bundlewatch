@@ -204,12 +204,18 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
           const branch = await GitStorage.getCurrentBranch(workingDir).catch(() => 'unknown');
 
           // Parse webpack stats (fast - no disk I/O!)
+          // Request all the data needed for comprehensive analysis
           const webpackStats = stats.toJson({
             all: false,
             assets: true,
-            cachedAssets: true, // Include cached assets
+            cachedAssets: true,
             chunks: true,
-            modules: options.extractModules, // Extract module-level detail
+            chunkModules: options.extractModules, // Modules inside chunks (Next.js uses this)
+            modules: options.extractModules, // Top-level modules
+            nestedModules: options.extractModules, // Nested module info
+            chunkGroups: true, // Named chunk groups for friendly names
+            entrypoints: true, // Entry point names
+            reasons: options.extractModules, // Import reasons for dependency graph
             performance: true,
             timings: true,
           }) as WebpackStats;

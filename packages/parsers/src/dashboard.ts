@@ -660,7 +660,7 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
 
     // Copy all data as markdown
     function copyAll() {
-      const metrics = ${JSON.stringify({
+      const metricsData = ${JSON.stringify({
         branch: metrics.branch,
         commit: metrics.commit,
         timestamp: metrics.timestamp,
@@ -672,35 +672,58 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
 
       const modules = data.children || [];
       const deps = ${JSON.stringify(dependencyData.slice(0, 30))};
+      const chunks = ${JSON.stringify(outputChunksData.slice(0, 20))};
+      const recs = ${JSON.stringify(metrics.optimizations || [])};
 
       let text = \`# Bundle Analysis Report
 
 ## Summary
-- **Branch:** \${metrics.branch}
-- **Commit:** \${metrics.commit.substring(0, 7)}
-- **Date:** \${new Date(metrics.timestamp).toLocaleString()}
-- **Total Size:** \${formatBytes(metrics.totalSize)}
-- **Gzipped:** \${formatBytes(metrics.totalGzipSize || 0)}
-- **Brotli:** \${formatBytes(metrics.totalBrotliSize || 0)}
-- **Chunks:** \${metrics.chunkCount}
+| Metric | Value |
+|--------|-------|
+| Branch | \${metricsData.branch} |
+| Commit | \${metricsData.commit.substring(0, 7)} |
+| Date | \${new Date(metricsData.timestamp).toLocaleString()} |
+| **Total Size** | **\${formatBytes(metricsData.totalSize)}** |
+| Gzipped | \${formatBytes(metricsData.totalGzipSize || 0)} |
+| Brotli | \${formatBytes(metricsData.totalBrotliSize || 0)} |
+| Chunks | \${metricsData.chunkCount} |
 
-## Bundle Composition
-| Module | Type | Size | Gzipped |
-|--------|------|------|---------|
+## Top Dependencies by Size
+| Package | Size | Gzipped | % of Total |
+|---------|------|---------|------------|
 \`;
 
-      modules.forEach(m => {
-        text += \`| \${m.name} | \${m.type.toUpperCase()} | \${formatBytes(m.value)} | \${formatBytes(m.gzip || 0)} |\\n\`;
+      // Show top 15 deps sorted by size
+      deps.slice(0, 15).forEach(d => {
+        const gzip = d.gzipSize ? formatBytes(d.gzipSize) : 'N/A';
+        const pct = d.percentOfTotal?.toFixed(1) || '0.0';
+        text += \`| \${d.name} | \${formatBytes(d.totalSize)} | \${gzip} | \${pct}% |\\n\`;
       });
 
-      if (deps.length > 0) {
+      // Add output chunks section
+      if (chunks.length > 0) {
         text += \`
-## Top Dependencies
-| Package | Size | % of Total | Modules |
-|---------|------|------------|---------|
+## Output Chunks
+| Chunk | Size | Gzipped | Type |
+|-------|------|---------|------|
 \`;
-        deps.forEach(d => {
-          text += \`| \${d.name} | \${formatBytes(d.totalSize)} | \${d.percentOfTotal?.toFixed(1)}% | \${d.moduleCount} |\\n\`;
+        chunks.forEach(c => {
+          text += \`| \${c.friendlyName} | \${formatBytes(c.size)} | \${formatBytes(c.gzipSize || 0)} | \${c.type.toUpperCase()} |\\n\`;
+        });
+      }
+
+      // Add optimization recommendations
+      if (recs && recs.length > 0) {
+        text += \`
+## Recommendations
+\`;
+        recs.forEach(r => {
+          const icon = r.severity === 'error' ? '🔴' : r.severity === 'warning' ? '🟡' : 'ℹ️';
+          text += \`- \${icon} **\${r.message}** - \${r.action}\`;
+          if (r.potentialSavings) {
+            text += \` (potential savings: \${formatBytes(r.potentialSavings)})\`;
+          }
+          text += \`\\n\`;
         });
       }
 

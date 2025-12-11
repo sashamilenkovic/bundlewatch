@@ -13,18 +13,45 @@ import type {
 
 /**
  * Extract package name from module path
+ * Handles various webpack/bundler path formats including Next.js patterns
  */
 export function extractPackageName(modulePath: string): string {
+  // First, clean up common webpack/Next.js prefixes
+  let cleanedPath = modulePath;
+
+  // Remove Next.js layer prefixes: (app-pages-browser)/, (ssr)/, (rsc)/, etc.
+  cleanedPath = cleanedPath.replace(/^\([^)]+\)\//, '');
+
+  // Remove webpack loader prefixes (anything before the last !)
+  if (cleanedPath.includes('!')) {
+    cleanedPath = cleanedPath.split('!').pop() || cleanedPath;
+  }
+
+  // Remove leading ./ if present
+  cleanedPath = cleanedPath.replace(/^\.\//, '');
+
   // Handle node_modules paths (including pnpm structure)
-  if (modulePath.includes('node_modules')) {
+  if (cleanedPath.includes('node_modules')) {
     // pnpm uses: node_modules/.pnpm/package@version/node_modules/package
     // npm uses: node_modules/package
 
     // Try to match the last node_modules occurrence for pnpm
-    const parts = modulePath.split('node_modules/');
+    const parts = cleanedPath.split('node_modules/');
     const lastPart = parts[parts.length - 1];
 
     if (!lastPart) return 'unknown';
+
+    // Skip .pnpm internal paths and get the actual package
+    // e.g., .pnpm/@sentry+nextjs@8.0.0/node_modules/@sentry/nextjs -> @sentry/nextjs
+    if (lastPart.startsWith('.pnpm/')) {
+      // Find the next node_modules in the path
+      const pnpmParts = lastPart.split('node_modules/');
+      if (pnpmParts.length > 1) {
+        const pkgPart = pnpmParts[pnpmParts.length - 1];
+        const match = pkgPart.match(/^(@[^/]+\/[^/]+|[^/@]+)/);
+        return match ? match[1] : 'unknown';
+      }
+    }
 
     // Extract package name (handle scoped packages)
     const match = lastPart.match(/^(@[^/]+\/[^/]+|[^/@]+)/);
@@ -32,25 +59,35 @@ export function extractPackageName(modulePath: string): string {
   }
 
   // Handle webpack internal modules
-  if (modulePath.startsWith('webpack/')) {
+  if (cleanedPath.startsWith('webpack/') || cleanedPath.includes('webpack-runtime')) {
     return 'webpack-runtime';
   }
 
+  // Handle Next.js internal modules
+  if (cleanedPath.includes('next/dist/')) {
+    return 'next';
+  }
+
   // Handle virtual modules and special prefixes
-  if (modulePath.startsWith('\0') || modulePath.startsWith('virtual:')) {
+  if (cleanedPath.startsWith('\0') || cleanedPath.startsWith('virtual:')) {
     return 'bundler-virtual';
   }
 
+  // Handle data: URIs (inline modules)
+  if (cleanedPath.startsWith('data:')) {
+    return 'inline-module';
+  }
+
   // Extract meaningful path from user code
-  const cleanPath = modulePath
+  const normalizedPath = cleanedPath
     .replace(/^[a-z]:/i, '') // Remove Windows drive letters
     .replace(/\\/g, '/') // Normalize path separators
     .replace(/^\/+/, ''); // Remove leading slashes
 
-  const pathParts = cleanPath.split('/');
+  const pathParts = normalizedPath.split('/');
 
   // Remove common root directories
-  const removeRoots = ['home', 'users', 'projects', 'workspace', 'app', 'var', 'tmp'];
+  const removeRoots = ['home', 'users', 'projects', 'workspace', 'var', 'tmp'];
   while (
     pathParts.length > 0 &&
     removeRoots.some(root => pathParts[0].toLowerCase().includes(root))
@@ -58,37 +95,38 @@ export function extractPackageName(modulePath: string): string {
     pathParts.shift();
   }
 
-  // Look for meaningful directories
-  const meaningfulDirs = [
-    'src',
-    'lib',
-    'components',
-    'pages',
-    'views',
-    'layouts',
-    'composables',
-    'utils',
-    'helpers',
-    'services',
-    'api',
-    'store',
-    'assets',
-    'styles',
-    'public',
-  ];
+  // Skip project name directory (usually first meaningful directory after cleanup)
+  // This helps normalize paths like /myproject/src/components -> src/components
+  if (pathParts.length > 1 && !meaningfulDirectories.includes(pathParts[0])) {
+    // Check if the next part is a meaningful directory
+    if (meaningfulDirectories.includes(pathParts[1])) {
+      pathParts.shift();
+    }
+  }
 
+  // Look for meaningful directories
   let packageName = 'app';
 
   // If we find a meaningful directory, use it as the base
   for (let i = 0; i < pathParts.length - 1; i++) {
-    if (meaningfulDirs.includes(pathParts[i])) {
+    if (meaningfulDirectories.includes(pathParts[i])) {
       const baseName = pathParts[i];
-      const nextPart = pathParts[i + 1];
 
-      if (nextPart) {
-        // Remove file extension
-        const nameWithoutExt = nextPart.replace(/\.(vue|tsx?|jsx?|svelte|astro)$/, '');
-        packageName = `${baseName}/${nameWithoutExt}`;
+      // Build a meaningful path (up to 2 levels deep)
+      const subParts = pathParts.slice(i + 1, i + 3);
+      if (subParts.length > 0) {
+        // Remove file extension from the last part
+        const lastIdx = subParts.length - 1;
+        subParts[lastIdx] = subParts[lastIdx].replace(/\.(vue|tsx?|jsx?|svelte|astro|css|scss)$/, '');
+
+        // Filter out index files
+        const filteredParts = subParts.filter(p => p !== 'index');
+
+        if (filteredParts.length > 0) {
+          packageName = `${baseName}/${filteredParts.join('/')}`;
+        } else {
+          packageName = baseName;
+        }
       } else {
         packageName = baseName;
       }
@@ -99,12 +137,41 @@ export function extractPackageName(modulePath: string): string {
   // If no meaningful structure found, try to use filename
   if (packageName === 'app' && pathParts.length > 0) {
     const fileName = pathParts[pathParts.length - 1];
-    const nameWithoutExt = fileName.replace(/\.(vue|tsx?|jsx?|svelte|astro)$/, '');
-    packageName = nameWithoutExt || 'app';
+    const nameWithoutExt = fileName.replace(/\.(vue|tsx?|jsx?|svelte|astro|css|scss)$/, '');
+    // Don't use "index" as a package name
+    if (nameWithoutExt && nameWithoutExt !== 'index') {
+      packageName = nameWithoutExt;
+    }
   }
 
   return packageName;
 }
+
+// Directories that indicate meaningful code organization
+const meaningfulDirectories = [
+  'src',
+  'lib',
+  'app', // Next.js app router
+  'pages', // Next.js pages router
+  'components',
+  'views',
+  'layouts',
+  'composables',
+  'utils',
+  'helpers',
+  'services',
+  'api',
+  'store',
+  'stores',
+  'hooks',
+  'contexts',
+  'providers',
+  'features',
+  'modules',
+  'assets',
+  'styles',
+  'public',
+];
 
 /**
  * Determine module type from path
