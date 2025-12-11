@@ -16,6 +16,7 @@ import type {
   SourceFileMetrics,
 } from '@milencode/bundlewatch-core';
 import type { OutputAsset, OutputBundle, OutputChunk } from 'rollup';
+import { extractPackageName, getModuleType } from './analysis-utils.js';
 import { mergeSourceFileMetrics, parseSourceMapWithContent } from './source-map-parser.js';
 
 /**
@@ -864,122 +865,9 @@ function calculateDepth(
   return Math.min(...depths) + 1;
 }
 
-function extractPackageName(id: string): string {
-  // Handle node_modules packages
-  if (id.includes('node_modules')) {
-    // Handle pnpm paths: .pnpm/react@18.0.0/node_modules/react/index.js
-    // Extract the actual package name after .pnpm/package@version/node_modules/
-    if (id.includes('.pnpm')) {
-      const pnpmMatch = id.match(
-        /\.pnpm[/\\][^/\\]+[/\\]node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/,
-      );
-      if (pnpmMatch) {
-        return pnpmMatch[1].replace(/\\/g, '/');
-      }
-    }
-
-    // Handle regular node_modules paths and scoped packages
-    const match = id.match(/node_modules[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/);
-    if (match) {
-      const pkgName = match[1].replace(/\\/g, '/');
-      // Skip cache directories like .vite, .cache, etc.
-      if (pkgName.startsWith('.')) {
-        // Try to find the real package after the cache dir
-        const cacheMatch = id.match(
-          /node_modules[/\\]\.[^/\\]+[/\\](@[^/\\]+[/\\][^/\\]+|[^/\\]+)/,
-        );
-        if (cacheMatch) {
-          return cacheMatch[1].replace(/\\/g, '/');
-        }
-      }
-      return pkgName;
-    }
-    return 'unknown';
-  }
-
-  // Handle virtual modules and special prefixes
-  if (id.startsWith('\0') || id.startsWith('virtual:')) {
-    return 'bundler-virtual';
-  }
-
-  // Extract meaningful path from user code
-  // Remove common prefixes and normalize
-  const cleanPath = id
-    .replace(/^[a-z]:/i, '') // Remove Windows drive letters
-    .replace(/\\/g, '/') // Normalize path separators
-    .replace(/^\/+/, ''); // Remove leading slashes
-
-  // Try to find a meaningful top-level directory or file name
-  // Common patterns: src/components/Foo.vue, pages/index.vue, components/Header.tsx, etc.
-  const pathParts = cleanPath.split('/');
-
-  // Remove common root directories
-  const removeRoots = ['home', 'users', 'projects', 'workspace', 'app', 'var', 'tmp'];
-  while (
-    pathParts.length > 0 &&
-    removeRoots.some(root => pathParts[0].toLowerCase().includes(root))
-  ) {
-    pathParts.shift();
-  }
-
-  // Look for meaningful directories
-  const meaningfulDirs = [
-    'src',
-    'lib',
-    'components',
-    'pages',
-    'views',
-    'layouts',
-    'composables',
-    'utils',
-    'helpers',
-    'services',
-    'api',
-    'store',
-    'assets',
-    'styles',
-    'public',
-  ];
-
-  let packageName = 'app';
-
-  // If we find a meaningful directory, use it as the base
-  for (let i = 0; i < pathParts.length - 1; i++) {
-    if (meaningfulDirs.includes(pathParts[i])) {
-      // Use the meaningful dir + next level (e.g., "components/Header" or "pages/index")
-      const baseName = pathParts[i];
-      const nextPart = pathParts[i + 1];
-
-      if (nextPart) {
-        // Remove file extension
-        const nameWithoutExt = nextPart.replace(/\.(vue|tsx?|jsx?|svelte|astro)$/, '');
-        packageName = `${baseName}/${nameWithoutExt}`;
-      } else {
-        packageName = baseName;
-      }
-      break;
-    }
-  }
-
-  // If no meaningful structure found, try to use filename
-  if (packageName === 'app' && pathParts.length > 0) {
-    const fileName = pathParts[pathParts.length - 1];
-    const nameWithoutExt = fileName.replace(/\.(vue|tsx?|jsx?|svelte|astro)$/, '');
-    packageName = nameWithoutExt || 'app';
-  }
-
-  return packageName;
-}
-
 function extractVersion(id: string): string | null {
   const match = id.match(/node_modules\/(@[^/]+\/[^/]+|[^/]+)@([^/]+)/);
   return match ? match[2] : null;
-}
-
-function getModuleType(id: string): 'npm' | 'local' | 'vendor' {
-  if (id.includes('node_modules')) return 'npm';
-  if (id.startsWith('\0') || id.startsWith('virtual:')) return 'vendor';
-  return 'local';
 }
 
 function isTreeShakeable(id: string): boolean {
