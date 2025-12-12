@@ -1,3 +1,10 @@
+## [2.2.6](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.5...v2.2.6) (2025-12-12)
+
+
+### Bug Fixes
+
+* improve local vs npm package classification in dashboard ([037abdd](https://github.com/sashamilenkovic/bundlewatch/commit/037abdd960c24287062f795c98efe345493c78fd))
+
 ## [2.2.5](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.4...v2.2.5) (2025-12-11)
 
 
