@@ -8,6 +8,7 @@ import type {
   DependencyMetrics,
   SourceFileMetrics,
 } from '@milencode/bundlewatch-core';
+import { isLocalPackage } from './analysis-utils.js';
 
 interface TreemapNode {
   name: string;
@@ -43,12 +44,7 @@ export function generateTreemapData(metrics: BuildMetrics): TreemapData {
   if (metrics.detailedDependencies && metrics.detailedDependencies.length > 0) {
     const children = metrics.detailedDependencies.map((dep): TreemapNode => {
       // Determine type: app code vs npm packages
-      let type: TreemapNode['type'] = 'npm';
-      if (dep.name === 'your-app' || dep.name === 'app' || dep.name.startsWith('src/') ||
-          dep.name.startsWith('lib/') || dep.name.startsWith('components/') ||
-          dep.name.startsWith('pages/') || dep.name.startsWith('views/')) {
-        type = 'app';
-      }
+      const type: TreemapNode['type'] = isLocalPackage(dep.name) ? 'app' : 'npm';
 
       return {
         name: dep.name,
@@ -469,7 +465,7 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
           <tr>
             <td>
               ${
-                dep.name === 'your-app'
+                isLocalPackage(dep.name)
                   ? '<span class="badge badge-app">APP</span> '
                   : '<span class="badge badge-npm">NPM</span> '
               }
@@ -528,7 +524,7 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
             <tr>
               <td>
                 ${
-                  file.package === 'your-app'
+                  isLocalPackage(file.package)
                     ? '<span class="badge badge-app">APP</span> '
                     : '<span class="badge badge-npm">NPM</span> '
                 }

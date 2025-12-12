@@ -187,6 +187,59 @@ export function getModuleType(modulePath: string): 'npm' | 'local' | 'vendor' {
 }
 
 /**
+ * Check if a package name represents local/app code (not an npm package)
+ */
+export function isLocalPackage(packageName: string): boolean {
+  // Config files at root level
+  if (
+    packageName.includes('.config') ||
+    packageName.startsWith('sentry.') ||
+    packageName.endsWith('.config')
+  ) {
+    return true;
+  }
+
+  // Known local directories
+  const localPrefixes = [
+    'src/',
+    'lib/',
+    'app/',
+    'pages/',
+    'components/',
+    'views/',
+    'layouts/',
+    'composables/',
+    'utils/',
+    'helpers/',
+    'services/',
+    'api/',
+    'store/',
+    'stores/',
+    'hooks/',
+    'contexts/',
+    'providers/',
+    'features/',
+    'modules/',
+    'assets/',
+    'styles/',
+    'public/',
+  ];
+
+  for (const prefix of localPrefixes) {
+    if (packageName.startsWith(prefix)) {
+      return true;
+    }
+  }
+
+  // Special app marker
+  if (packageName === 'your-app' || packageName === 'app') {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Build dependency graph from modules
  */
 export function buildDependencyGraph(modules: ModuleMetrics[]): DependencyGraph {

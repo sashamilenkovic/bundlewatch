@@ -9,6 +9,7 @@ export {
   extractPackageName,
   generateOptimizationRecommendations,
   getModuleType,
+  isLocalPackage,
 } from './analysis-utils.js';
 export {
   compressBoth,

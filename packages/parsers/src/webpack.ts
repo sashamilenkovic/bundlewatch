@@ -181,18 +181,18 @@ function buildAssetChunkMap(stats: WebpackStats): Map<string, Array<number | str
 }
 
 /**
- * Derive a friendly name for an asset based on chunk names and file patterns
- * Prefers file patterns over chunk groups since they're more descriptive
+ * Derive a friendly name for an asset based on file patterns
+ * Uses file name patterns primarily since chunk groups can have many chunks with the same name
  */
 function deriveFriendlyName(
   assetName: string,
-  chunkIds: Array<number | string>,
-  chunkNameMap: Map<string, string>,
+  _chunkIds: Array<number | string>,
+  _chunkNameMap: Map<string, string>,
 ): string {
-  // Parse common Next.js/webpack patterns FIRST (more descriptive than chunk groups)
+  // Parse file patterns - these are more unique than chunk group names
   const fileName = assetName.split('/').pop() || assetName;
 
-  // Next.js patterns: framework-[hash].js, main-[hash].js, etc.
+  // Next.js well-known patterns: framework-[hash].js, main-[hash].js, etc.
   const nextJsPatterns: Array<[RegExp, string]> = [
     [/^framework-[a-f0-9]+\.js$/, 'framework (react)'],
     [/^main-[a-f0-9]+\.js$/, 'main'],
@@ -211,11 +211,10 @@ function deriveFriendlyName(
     }
   }
 
-  // Next.js app router path patterns
-  // e.g., app/layout-[hash].js -> app/layout
-  // e.g., app/page-[hash].js -> app/page
-  // e.g., app/blog/page-[hash].js -> app/blog/page
-  const appPathMatch = assetName.match(/app\/(.+)-[a-f0-9]+\.js$/);
+  // Next.js app router path patterns in full asset path
+  // e.g., static/chunks/app/layout-[hash].js -> app/layout
+  // e.g., static/chunks/app/blog/page-[hash].js -> app/blog/page
+  const appPathMatch = assetName.match(/app\/(.+)-[a-f0-9]+\.(js|css)$/);
   if (appPathMatch) {
     return `app/${appPathMatch[1]}`;
   }
@@ -226,60 +225,40 @@ function deriveFriendlyName(
     return `pages/${pagesPathMatch[1]}`;
   }
 
-  // Standalone app patterns (file in chunks/app/): layout-[hash].js -> app/layout
+  // Standalone layout/page/error patterns (only at start of filename, not in path)
+  // These are typically entry points: layout-[hash].js -> layout
   const standaloneAppMatch = fileName.match(/^(layout|page|error|loading|not-found)-[a-f0-9]+\.js$/);
   if (standaloneAppMatch) {
-    return `app/${standaloneAppMatch[1]}`;
-  }
-
-  // Common vendor chunks with hashes: [hex]-[hash].js likely vendor chunks
-  // Try to identify based on chunk contents from namedChunkGroups
-  const hexHashPattern = fileName.match(/^([a-f0-9]{6,10})-[a-f0-9]+\.js$/);
-  if (hexHashPattern) {
-    // Check if this maps to a meaningful chunk group name
-    for (const chunkId of chunkIds) {
-      const name = chunkNameMap.get(String(chunkId));
-      if (name && name !== 'webpack' && name !== 'main') {
-        return name;
-      }
-    }
-    // Generic vendor chunk name
-    return `vendor-${hexHashPattern[1].slice(0, 6)}`;
+    return standaloneAppMatch[1];
   }
 
   // Numeric chunk pattern: 123-[hash].js -> chunk-123
-  const numericChunk = fileName.match(/^(\d+)-[a-f0-9]+\.js$/);
+  // These are code-split chunks, the number is the chunk ID
+  const numericChunk = fileName.match(/^(\d+)-[a-f0-9]+\.(js|css)$/);
   if (numericChunk) {
-    // Check if this maps to a meaningful chunk group name
-    for (const chunkId of chunkIds) {
-      const name = chunkNameMap.get(String(chunkId));
-      if (name && name !== 'webpack' && name !== 'main') {
-        return name;
-      }
-    }
     return `chunk-${numericChunk[1]}`;
   }
 
-  // Generic hash pattern: [name]-[hash].js -> [name]
+  // Hex vendor chunks: abc123-[hash].js -> vendor-abc123
+  // These are typically vendor/node_modules code splits
+  const hexHashPattern = fileName.match(/^([a-f0-9]{6,10})-[a-f0-9]+\.(js|css)$/);
+  if (hexHashPattern) {
+    return `vendor-${hexHashPattern[1].slice(0, 6)}`;
+  }
+
+  // Generic hash pattern: [name]-[hash].ext -> [name]
+  // Handles custom named chunks
   const hashPattern = fileName.match(/^(.+)-[a-f0-9]{8,}\.([a-z]+)$/);
   if (hashPattern) {
     return hashPattern[1];
   }
 
-  // Manifest files
+  // Manifest files - keep the manifest name
   if (fileName.includes('manifest')) {
     return fileName.replace(/\.js$/, '').replace(/\.json$/, '');
   }
 
-  // Fallback: try chunk group names
-  for (const chunkId of chunkIds) {
-    const name = chunkNameMap.get(String(chunkId));
-    if (name && name !== 'webpack') {
-      return name;
-    }
-  }
-
-  // Just remove common extensions for display
+  // Fallback: just clean up the filename
   return fileName.replace(/\.[a-z]+$/, '');
 }
 
