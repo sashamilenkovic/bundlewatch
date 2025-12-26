@@ -1,3 +1,16 @@
+# [2.3.0](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.6...v2.3.0) (2025-12-26)
+
+
+### Bug Fixes
+
+* correct attribution test expectations to match actual behavior ([e723469](https://github.com/sashamilenkovic/bundlewatch/commit/e723469665cb8e260c3919fd34f7a509a8746918))
+* update React detection test to use react-router path ([5660603](https://github.com/sashamilenkovic/bundlewatch/commit/566060320f18a797698e2619d6c7e25f13fbf07a))
+
+
+### Features
+
+* add module attribution engine and improve build output ([0745d8a](https://github.com/sashamilenkovic/bundlewatch/commit/0745d8ab9d696c441602bebf941c895b5a74bb23))
+
 ## [2.2.6](https://github.com/sashamilenkovic/bundlewatch/compare/v2.2.5...v2.2.6) (2025-12-12)
 
 
