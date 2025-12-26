@@ -6,7 +6,12 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { BundleWatchConfig, Comparison } from '@milencode/bundlewatch-core';
-import { ComparisonEngine, GitStorage, ReportGenerator } from '@milencode/bundlewatch-core';
+import {
+  ComparisonEngine,
+  generateCompactSummary,
+  GitStorage,
+  ReportGenerator,
+} from '@milencode/bundlewatch-core';
 import type { AnalyzerState } from '@milencode/bundlewatch-parsers';
 import {
   analyzeBundle,
@@ -66,6 +71,12 @@ export interface ViteBundleWatchOptions extends Partial<BundleWatchConfig> {
    */
   dashboardPath?: string;
 
+  /**
+   * Print compact one-line summary instead of full report
+   * Example: "148 KB gzip | -14 KB (-8.6%) vs main | PASS"
+   * @default false
+   */
+  compactOutput?: boolean;
 }
 
 const defaultOptions: ViteBundleWatchOptions = {
@@ -77,6 +88,7 @@ const defaultOptions: ViteBundleWatchOptions = {
   sizeIncreaseThreshold: 10,
   generateDashboard: false,
   dashboardPath: './bundle-report',
+  compactOutput: false,
 };
 
 /**
@@ -107,7 +119,7 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
       // Detect SSR build for logging
       const isSSR = !!config.build?.ssr;
       const buildType = isSSR ? 'SSR/Server' : 'Client';
-      console.log(`📊 Bundle Watch: Starting ${buildType} analysis...`);
+      console.log(`[bundlewatch] Starting ${buildType} analysis...`);
 
       // Get git info
       const commit = await GitStorage.getCurrentCommit(config.root);
@@ -165,30 +177,23 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
             comparison = analyzer.compare(metrics, baseline, options.compareAgainst);
           } else {
             // First run - no baseline found
-            console.log('\n┌─────────────────────────────────────────────────────────────┐');
-            console.log('│ 📊 BundleWatch - First Run Detected                        │');
-            console.log('├─────────────────────────────────────────────────────────────┤');
-            console.log(
-              `│ No baseline found for comparison with '${options.compareAgainst}'${' '.repeat(Math.max(0, 22 - options.compareAgainst.length))}│`,
-            );
-            console.log('│                                                             │');
-            console.log('│ 💡 To enable bundle size comparisons:                      │');
-            console.log('│                                                             │');
-            console.log('│   Quick start (recommended):                                │');
-            console.log('│   $ npx bundlewatch backfill --last 10                     │');
-            console.log('│                                                             │');
-            console.log('│   Or backfill releases only:                                │');
-            console.log('│   $ npx bundlewatch backfill --releases-only               │');
-            console.log('│                                                             │');
-            console.log('│ This build will be saved and used as a baseline            │');
-            console.log('│ for future comparisons.                                     │');
-            console.log('└─────────────────────────────────────────────────────────────┘\n');
+            console.log(`\n[bundlewatch] No baseline found for '${options.compareAgainst}'.`);
+            console.log('             This build will be saved as the initial baseline.');
+            console.log('             To backfill history: npx bundlewatch backfill --last 10\n');
           }
         }
 
         // Print report to console
         if (options.printReport) {
-          console.log(reporter.generateConsoleOutput(metrics, comparison));
+          if (options.compactOutput) {
+            console.log(
+              generateCompactSummary(metrics, comparison, {
+                threshold: options.sizeIncreaseThreshold,
+              }),
+            );
+          } else {
+            console.log(reporter.generateConsoleOutput(metrics, comparison));
+          }
         }
 
         // Generate enhanced dashboard
@@ -200,26 +205,27 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
           const dashboardFilename = isSSR ? 'index-ssr.html' : 'index.html';
           const buildType = isSSR ? 'SSR/Server' : 'Client';
 
-          console.log(`📊 Generating ${buildType} dashboard at ${dashboardDir}...`);
-
           try {
             mkdirSync(dashboardDir, { recursive: true });
 
             const dashboardHTML = generateEnhancedDashboard(metrics, comparison);
-            writeFileSync(resolve(dashboardDir, dashboardFilename), dashboardHTML);
+            const dashboardPath = resolve(dashboardDir, dashboardFilename);
+            writeFileSync(dashboardPath, dashboardHTML);
 
-            console.log(`✅ ${buildType} dashboard generated: ${resolve(dashboardDir, dashboardFilename)}`);
-            console.log(`   Open with: open ${resolve(dashboardDir, dashboardFilename)}`);
+            // Print clear path to dashboard
+            console.log('');
+            console.log('─'.repeat(50));
+            console.log(`Dashboard (${buildType}):`);
+            console.log(`  file://${dashboardPath}`);
+            console.log('─'.repeat(50));
           } catch (dashboardError) {
-            console.error('Failed to generate dashboard:', dashboardError);
+            console.error('[bundlewatch] Failed to generate dashboard:', dashboardError);
           }
         }
 
         // Save to git storage
         if (options.saveToGit) {
-          console.log('💾 Saving metrics to git...');
           await storage.save(metrics);
-          console.log('✅ Metrics saved successfully');
         }
 
         // Check thresholds
@@ -249,7 +255,7 @@ export function bundleWatch(userOptions: ViteBundleWatchOptions = {}): Plugin {
           }
         }
       } catch (error) {
-        console.error('❌ Bundle Watch error:', error);
+        console.error('[bundlewatch] Error:', error);
         if (options.failOnSizeIncrease) {
           throw error;
         }

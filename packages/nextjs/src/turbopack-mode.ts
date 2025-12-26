@@ -35,7 +35,7 @@ export async function analyzeTurbopackBuild(
   const statsPath = resolve(workingDir, STATS_PATH);
 
   if (!existsSync(statsPath)) {
-    console.warn('\n📊 BundleWatch: Turbopack stats not found at', statsPath);
+    console.warn('\n[bundlewatch] Turbopack stats not found at', statsPath);
     console.warn('   Ensure TURBOPACK_STATS=1 environment variable is set before build.\n');
     console.warn('   Example: TURBOPACK_STATS=1 next build\n');
     return;
@@ -96,16 +96,20 @@ export async function analyzeTurbopackBuild(
       mkdirSync(dashboardDir, { recursive: true });
       const dashboardHTML = generateEnhancedDashboard(metrics, comparison);
       writeFileSync(join(dashboardDir, 'index.html'), dashboardHTML);
-      console.log(`📊 Dashboard saved to ${dashboardDir}/index.html`);
+      console.log('');
+      console.log('─'.repeat(50));
+      console.log('Dashboard:');
+      console.log(`  file://${join(dashboardDir, 'index.html')}`);
+      console.log('─'.repeat(50));
     }
 
     // Save to git
     if (options.saveToGit) {
       try {
         await storage.save(metrics);
-        console.log('📊 Metrics saved to bundlewatch-data branch');
+        console.log('[bundlewatch] Metrics saved to bundlewatch-data branch');
       } catch (error) {
-        console.error('📊 Failed to save metrics:', error);
+        console.error('[bundlewatch] Failed to save metrics:', error);
       }
     }
 
@@ -114,14 +118,14 @@ export async function analyzeTurbopackBuild(
       const increase = comparison.changes.totalSize.diffPercent;
       if (increase > options.sizeIncreaseThreshold) {
         console.error(
-          `\n❌ Bundle size increased by ${increase.toFixed(1)}% ` +
+          `\n[bundlewatch] Build failed: Bundle size increased by ${increase.toFixed(1)}% ` +
             `(threshold: ${options.sizeIncreaseThreshold}%)\n`,
         );
         process.exitCode = 1;
       }
     }
   } catch (error) {
-    console.error('📊 BundleWatch: Error analyzing Turbopack build:', error);
+    console.error('[bundlewatch] Error analyzing Turbopack build:', error);
   }
 }
 
@@ -153,5 +157,5 @@ export function setupTurbopackAnalysis(options: ResolvedBundleWatchOptions): voi
     runAnalysis().catch(console.error);
   });
 
-  console.log('📊 BundleWatch: Turbopack mode enabled (analysis will run after build)');
+  console.log('[bundlewatch] Turbopack mode enabled (analysis will run after build)');
 }

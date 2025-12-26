@@ -114,6 +114,24 @@
     .tooltip-size {
       color: var(--text-muted);
     }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+    }
     .dependency-table {
       width: calc(100% - 2rem);
       margin: 0 1rem;
@@ -194,12 +212,13 @@
   </style>
 </head>
 <body>
+  <div id="toast" class="toast">Copied to clipboard</div>
   <div class="header">
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div>
         <h1>Bundle Watch</h1>
         <p style="color: var(--text-muted); font-size: 11px;">
-          main / 9c88d39 / 12/11/2025, 11:16:20 PM
+          main / 955f9d6 / 12/26/2025, 3:20:27 PM
         </p>
       </div>
       <div class="header-controls">
@@ -319,7 +338,7 @@
               
             </td>
             <td>180.44 KB</td>
-            <td>56.66 KB</td>
+            <td>56.65 KB</td>
             <td>94.9%</td>
             <td>4</td>
             <td>Unknown</td>
@@ -357,8 +376,8 @@
               <strong>your-app</strong>
               
             </td>
-            <td>197.00 B</td>
-            <td>62.00 B</td>
+            <td>206.00 B</td>
+            <td>65.00 B</td>
             <td>0.1%</td>
             <td>2</td>
             <td>Unknown</td>
@@ -486,7 +505,7 @@
                 <span class="badge badge-app">APP</span> 
                 src/App.tsx
               </td>
-              <td>347.00 B</td>
+              <td>364.00 B</td>
               <td>18</td>
               <td>your-app</td>
               <td></td>
@@ -498,7 +517,7 @@
                 <span class="badge badge-app">APP</span> 
                 src/main.tsx
               </td>
-              <td>234.00 B</td>
+              <td>244.00 B</td>
               <td>11</td>
               <td>your-app</td>
               <td></td>
@@ -554,7 +573,7 @@
       btn.textContent = document.body.classList.contains('light') ? 'Dark' : 'Light';
     }
 
-    const data = {"name":"Dependencies","children":[{"name":"react-dom","value":184775,"gzip":58016,"brotli":49890,"type":"npm"},{"name":"react","value":6298,"gzip":1977,"brotli":1700,"type":"npm"},{"name":"scheduler","value":3515,"gzip":1104,"brotli":949,"type":"npm"},{"name":"your-app","value":197,"gzip":62,"brotli":53,"type":"app"}]};
+    const data = {"name":"Dependencies","children":[{"name":"react-dom","value":184766,"gzip":58013,"brotli":49888,"type":"npm"},{"name":"react","value":6297,"gzip":1977,"brotli":1700,"type":"npm"},{"name":"scheduler","value":3515,"gzip":1104,"brotli":949,"type":"npm"},{"name":"your-app","value":206,"gzip":65,"brotli":56,"type":"app"}]};
 
     const width = document.getElementById('treemap').clientWidth;
     const height = 350;
@@ -611,6 +630,7 @@
           <div class="tooltip-size">Size: ${formatBytes(d.data.value)}</div>
           <div class="tooltip-size">Gzip: ${formatBytes(d.data.gzip || 0)}</div>
           <div class="tooltip-size">Brotli: ${formatBytes(d.data.brotli || 0)}</div>
+          <div class="tooltip-size" style="margin-top: 4px; font-style: italic;">Click to copy name</div>
         `);
 
       // Smart positioning to keep tooltip in viewport
@@ -644,7 +664,32 @@
     })
     .on('mouseout', () => {
       tooltip.style('opacity', 0);
+    })
+    .on('click', (event, d) => {
+      // Copy the module name to clipboard
+      const text = d.data.name;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied: ' + text);
+      }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Copied: ' + text);
+      });
     });
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
 
     function formatBytes(bytes) {
       if (bytes === 0) return '0 B';
@@ -656,10 +701,10 @@
 
     // Copy all data as markdown
     function copyAll() {
-      const metricsData = {"branch":"main","commit":"9c88d39ea092a96fb679e073b4806e31ade9e372","timestamp":"2025-12-12T04:16:20.947Z","totalSize":194784,"totalGzipSize":61159,"totalBrotliSize":52593,"chunkCount":2};
+      const metricsData = {"branch":"main","commit":"955f9d6fc837577f30d19c7adb134b1456274307","timestamp":"2025-12-26T20:20:27.306Z","totalSize":194784,"totalGzipSize":61159,"totalBrotliSize":52593,"chunkCount":2};
 
       const modules = data.children || [];
-      const deps = [{"name":"react-dom","totalSize":184775,"gzipSize":58016,"brotliSize":49890,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":94.86148759651716},{"name":"react","totalSize":6298,"gzipSize":1977,"brotliSize":1700,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":3.233325119106292},{"name":"scheduler","totalSize":3515,"gzipSize":1104,"brotliSize":949,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":1.8045630031214062},{"name":"your-app","totalSize":197,"gzipSize":62,"brotliSize":53,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":0.1011376704452111}];
+      const deps = [{"name":"react-dom","totalSize":184766,"gzipSize":58013,"brotliSize":49888,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":94.85686709380647},{"name":"react","totalSize":6297,"gzipSize":1977,"brotliSize":1700,"moduleCount":4,"chunks":[],"duplicate":false,"percentOfTotal":3.232811729916215},{"name":"scheduler","totalSize":3515,"gzipSize":1104,"brotliSize":949,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":1.8045630031214062},{"name":"your-app","totalSize":206,"gzipSize":65,"brotliSize":56,"moduleCount":2,"chunks":[],"duplicate":false,"percentOfTotal":0.10575817315590602}];
       const chunks = [{"name":"index-BmeGit54.css","friendlyName":"index-BmeGit54.css","size":1212,"gzipSize":364,"brotliSize":309,"type":"css"},{"name":"index-DfaLYpSh.js","friendlyName":"index","size":193572,"gzipSize":60795,"brotliSize":52284,"type":"js"}];
       const recs = [];
 

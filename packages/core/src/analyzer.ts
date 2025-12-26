@@ -107,9 +107,9 @@ function generateSummary(totalSize: SizeChange, _gzipSize: SizeChange, target: s
   const sizeStr = formatSize(absDiff);
   const percentStr = absPercent.toFixed(1);
   const direction = diff > 0 ? 'larger' : 'smaller';
-  const emoji = diff > 0 ? '📈' : '📉';
+  const indicator = diff > 0 ? '^' : 'v';
 
-  return `${emoji} Bundle is ${sizeStr} (${percentStr}%) ${direction} than ${target}`;
+  return `${indicator} Bundle is ${sizeStr} (${percentStr}%) ${direction} than ${target}`;
 }
 
 /**
@@ -120,10 +120,10 @@ function generateInsights(changes: BundleChange[], totalSize: SizeChange): strin
 
   // Overall size change
   if (totalSize.diffPercent > 10) {
-    insights.push(`⚠️ Total bundle size increased by ${totalSize.diffPercent.toFixed(1)}%`);
+    insights.push(`WARN: Total bundle size increased by ${totalSize.diffPercent.toFixed(1)}%`);
   } else if (totalSize.diffPercent < -10) {
     insights.push(
-      `✅ Great job! Bundle size reduced by ${Math.abs(totalSize.diffPercent).toFixed(1)}%`,
+      `OK: Bundle size reduced by ${Math.abs(totalSize.diffPercent).toFixed(1)}%`,
     );
   }
 
@@ -131,7 +131,7 @@ function generateInsights(changes: BundleChange[], totalSize: SizeChange): strin
   const largestIncrease = changes.find(c => c.status === 'changed' && c.diff > 0);
   if (largestIncrease && largestIncrease.diff > 50 * 1024) {
     insights.push(
-      `📦 ${largestIncrease.name} grew by ${formatSize(largestIncrease.diff)} (${largestIncrease.diffPercent.toFixed(1)}%)`,
+      `${largestIncrease.name} grew by ${formatSize(largestIncrease.diff)} (${largestIncrease.diffPercent.toFixed(1)}%)`,
     );
   }
 
@@ -139,7 +139,7 @@ function generateInsights(changes: BundleChange[], totalSize: SizeChange): strin
   const newBundles = changes.filter(c => c.status === 'added');
   if (newBundles.length > 0) {
     const totalNew = newBundles.reduce((sum, b) => sum + b.diff, 0);
-    insights.push(`➕ ${newBundles.length} new bundle(s) added (${formatSize(totalNew)})`);
+    insights.push(`${newBundles.length} new bundle(s) added (${formatSize(totalNew)})`);
   }
 
   // Removed bundles
@@ -147,7 +147,7 @@ function generateInsights(changes: BundleChange[], totalSize: SizeChange): strin
   if (removedBundles.length > 0) {
     const totalRemoved = Math.abs(removedBundles.reduce((sum, b) => sum + b.diff, 0));
     insights.push(
-      `➖ ${removedBundles.length} bundle(s) removed (${formatSize(totalRemoved)} saved)`,
+      `${removedBundles.length} bundle(s) removed (${formatSize(totalRemoved)} saved)`,
     );
   }
 

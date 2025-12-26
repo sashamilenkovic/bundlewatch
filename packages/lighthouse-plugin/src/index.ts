@@ -144,49 +144,49 @@ function generateCorrelationInsights(
   // Bundle size increased but performance dropped
   if (bundleSizeDelta > 5 && delta && delta.performance && delta.performance < -5) {
     insights.push(
-      `⚠️  Bundle size increased by ${bundleSizeDelta.toFixed(1)}% and Performance score dropped ${Math.abs(delta.performance)} points`,
+      `WARN: Bundle size increased by ${bundleSizeDelta.toFixed(1)}% and Performance score dropped ${Math.abs(delta.performance)} points`,
     );
   }
 
   // Bundle size increased but performance stayed the same or improved
   if (bundleSizeDelta > 5 && delta && delta.performance && delta.performance >= 0) {
     insights.push(
-      `✅ Bundle size increased by ${bundleSizeDelta.toFixed(1)}% but Performance score maintained at ${metrics.performance}`,
+      `OK: Bundle size increased by ${bundleSizeDelta.toFixed(1)}% but Performance score maintained at ${metrics.performance}`,
     );
   }
 
   // LCP issues
   if (metrics.lcp > 2500) {
     insights.push(
-      `🐌 Largest Contentful Paint is ${(metrics.lcp / 1000).toFixed(2)}s (target: <2.5s). Consider code splitting or lazy loading.`,
+      `Slow LCP: ${(metrics.lcp / 1000).toFixed(2)}s (target: <2.5s). Consider code splitting or lazy loading.`,
     );
   }
 
   // TBT issues
   if (metrics.tbt > 200) {
     insights.push(
-      `⏱️  Total Blocking Time is ${metrics.tbt.toFixed(0)}ms (target: <200ms). Large bundles may be blocking the main thread.`,
+      `High TBT: ${metrics.tbt.toFixed(0)}ms (target: <200ms). Large bundles may be blocking the main thread.`,
     );
   }
 
   // CLS issues
   if (metrics.cls > 0.1) {
     insights.push(
-      `📐 Cumulative Layout Shift is ${metrics.cls.toFixed(3)} (target: <0.1). This is typically not bundle-size related.`,
+      `High CLS: ${metrics.cls.toFixed(3)} (target: <0.1). This is typically not bundle-size related.`,
     );
   }
 
   // Performance score warnings
   if (metrics.performance < 50) {
     insights.push(
-      `🔴 Performance score is ${metrics.performance}/100. Bundle optimization should be a high priority.`,
+      `CRITICAL: Performance score is ${metrics.performance}/100. Bundle optimization should be a high priority.`,
     );
   } else if (metrics.performance < 90) {
     insights.push(
-      `🟡 Performance score is ${metrics.performance}/100. There's room for improvement.`,
+      `WARN: Performance score is ${metrics.performance}/100. There's room for improvement.`,
     );
   } else {
-    insights.push(`🟢 Excellent performance score: ${metrics.performance}/100!`);
+    insights.push(`OK: Excellent performance score: ${metrics.performance}/100`);
   }
 
   return insights;

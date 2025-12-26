@@ -96,8 +96,8 @@ describe('reporter functions', () => {
         },
       ],
     },
-    summary: '📉 Bundle is 14.65 KB (6.1%) smaller than main',
-    recommendations: ['✅ Great job! Bundle size reduced by 6.1%'],
+    summary: 'v Bundle is 14.65 KB (6.1%) smaller than main',
+    recommendations: ['OK: Bundle size reduced by 6.1%'],
   };
 
   describe('generateBadge', () => {
@@ -128,7 +128,7 @@ describe('reporter functions', () => {
     it('should generate complete README section', () => {
       const markdown = generateReadmeSection(mockMetrics);
 
-      expect(markdown).toContain('## 📊 Bundle Watch');
+      expect(markdown).toContain('## Bundle Watch');
       expect(markdown).toContain('**Latest Build:**');
       expect(markdown).toContain('abc1234');
       expect(markdown).toContain('main');
@@ -146,9 +146,9 @@ describe('reporter functions', () => {
     it('should include comparison when provided', () => {
       const markdown = generateReadmeSection(mockMetrics, mockComparison);
 
-      expect(markdown).toContain('### 📈 Comparison vs main');
+      expect(markdown).toContain('### Comparison vs main');
       expect(markdown).toContain('smaller than main');
-      expect(markdown).toContain('### 💡 Insights');
+      expect(markdown).toContain('### Insights');
     });
 
     it('should format sizes correctly', () => {
@@ -163,7 +163,7 @@ describe('reporter functions', () => {
     it('should generate PR comment with summary', () => {
       const comment = generatePRComment(mockMetrics, mockComparison);
 
-      expect(comment).toContain('## 🤖 Bundle Watch Report');
+      expect(comment).toContain('## Bundle Watch Report');
       expect(comment).toContain('smaller than main');
     });
 
@@ -176,16 +176,16 @@ describe('reporter functions', () => {
       expect(comment).toContain('| Build Time |');
     });
 
-    it('should use correct emoji for changes', () => {
+    it('should use correct symbol for changes', () => {
       const comment = generatePRComment(mockMetrics, mockComparison);
 
-      expect(comment).toContain('🔽'); // Size decreased
+      expect(comment).toContain('v'); // Size decreased
     });
 
     it('should include bundle changes', () => {
       const comment = generatePRComment(mockMetrics, mockComparison);
 
-      expect(comment).toContain('### 📦 Bundle Changes');
+      expect(comment).toContain('### Bundle Changes');
       expect(comment).toContain('assets/index.js');
       expect(comment).toContain('assets/style.css');
     });
@@ -193,7 +193,7 @@ describe('reporter functions', () => {
     it('should include insights', () => {
       const comment = generatePRComment(mockMetrics, mockComparison);
 
-      expect(comment).toContain('### 💡 Insights');
+      expect(comment).toContain('### Insights');
       expect(comment).toContain('Great job');
     });
   });
@@ -202,7 +202,7 @@ describe('reporter functions', () => {
     it('should generate formatted console output', () => {
       const output = generateConsoleOutput(mockMetrics);
 
-      expect(output).toContain('📊 Bundle Watch Report');
+      expect(output).toContain('Bundle Watch Report');
       expect(output).toContain('═'.repeat(50));
       expect(output).toContain('Total Size:');
       expect(output).toContain('Gzipped:');
@@ -221,8 +221,9 @@ describe('reporter functions', () => {
     it('should include comparison when provided', () => {
       const output = generateConsoleOutput(mockMetrics, mockComparison);
 
-      expect(output).toContain('Comparison vs main:');
+      // Comparison is now shown first (before metrics)
       expect(output).toContain('smaller than main');
+      expect(output).toContain('Insights:');
     });
 
     it('should display warnings if present', () => {
@@ -232,7 +233,7 @@ describe('reporter functions', () => {
       };
       const output = generateConsoleOutput(metricsWithWarnings);
 
-      expect(output).toContain('⚠️  Warnings:');
+      expect(output).toContain('Warnings:');
       expect(output).toContain('Large bundle detected');
     });
 
@@ -243,7 +244,7 @@ describe('reporter functions', () => {
       };
       const output = generateConsoleOutput(metricsWithRecs);
 
-      expect(output).toContain('💡 Recommendations:');
+      expect(output).toContain('Recommendations:');
       expect(output).toContain('Consider code splitting');
     });
 
@@ -271,7 +272,7 @@ describe('reporter functions', () => {
       };
       const output = generateConsoleOutput(metricsWithDeps);
 
-      expect(output).toContain('📦 Dependencies:');
+      expect(output).toContain('Dependencies:');
       expect(output).toContain('react');
       expect(output).toContain('lodash');
     });

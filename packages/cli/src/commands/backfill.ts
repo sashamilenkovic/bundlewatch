@@ -198,7 +198,7 @@ async function analyzeCommit(
 
     return true;
   } catch (error) {
-    console.error(chalk.yellow(`  ⚠️  Failed: ${error instanceof Error ? error.message : error}`));
+    console.error(chalk.yellow(`  Failed: ${error instanceof Error ? error.message : error}`));
     return false;
   } finally {
     // Clean up worktree
@@ -215,7 +215,7 @@ async function analyzeCommit(
  * Interactive mode - prompt user for options
  */
 async function promptForOptions(): Promise<BackfillOptions> {
-  clack.intro(chalk.bold('📊 BundleWatch Backfill'));
+  clack.intro(chalk.bold('BundleWatch Backfill'));
 
   const strategy = await clack.select({
     message: 'How much history do you want to backfill?',
@@ -334,7 +334,7 @@ async function backfill(cmdOptions: BackfillOptions) {
     // Validate we're in a git repo
     await execAsync('git rev-parse --git-dir', { cwd });
 
-    console.log(chalk.bold('\n📊 BundleWatch Backfill\n'));
+    console.log(chalk.bold('\nBundleWatch Backfill\n'));
 
     // Get current branch to return to it later
     const currentBranch = await getCurrentBranch(cwd);
@@ -360,7 +360,7 @@ async function backfill(cmdOptions: BackfillOptions) {
     spinner.succeed(`Found ${chalk.bold(commits.length)} commits to analyze`);
 
     if (commits.length === 0) {
-      console.log(chalk.yellow('\n⚠️  No commits found. Adjust your range or filters.\n'));
+      console.log(chalk.yellow('\nNo commits found. Adjust your range or filters.\n'));
       return;
     }
 
@@ -402,11 +402,11 @@ async function backfill(cmdOptions: BackfillOptions) {
       if (success) {
         successCount++;
         spinner.succeed(
-          `${progress} ${chalk.green('✓')} ${label} - ${commit.message.substring(0, 60)}`,
+          `${progress} ${chalk.green('OK')} ${label} - ${commit.message.substring(0, 60)}`,
         );
       } else {
         failureCount++;
-        spinner.fail(`${progress} ${chalk.red('✗')} ${label} - Build failed`);
+        spinner.fail(`${progress} FAIL ${label} - Build failed`);
       }
     }
 
@@ -420,7 +420,7 @@ async function backfill(cmdOptions: BackfillOptions) {
     } catch (_error) {
       console.warn(
         chalk.yellow(
-          `\n⚠️  Could not return to original branch. You may need to checkout manually.\n`,
+          `\nCould not return to original branch. You may need to checkout manually.\n`,
         ),
       );
     }
@@ -429,22 +429,22 @@ async function backfill(cmdOptions: BackfillOptions) {
     if (options.interactive) {
       clack.outro(
         successCount === commits.length
-          ? chalk.green(`✓ Successfully backfilled ${successCount} commits!`)
+          ? chalk.green(`Successfully backfilled ${successCount} commits!`)
           : chalk.yellow(
-              `⚠️  Backfilled ${successCount}/${commits.length} commits (${failureCount} failed)`,
+              `Backfilled ${successCount}/${commits.length} commits (${failureCount} failed)`,
             ),
       );
     } else {
-      console.log(chalk.bold('\n📈 Backfill Complete\n'));
-      console.log(`  ${chalk.green('✓')} Successful: ${successCount}`);
+      console.log(chalk.bold('\nBackfill Complete\n'));
+      console.log(`  ${chalk.green('OK')} Successful: ${successCount}`);
       if (failureCount > 0) {
-        console.log(`  ${chalk.red('✗')} Failed: ${failureCount}`);
+        console.log(`  ${chalk.red('FAIL')} Failed: ${failureCount}`);
       }
       console.log();
     }
   } catch (error) {
     spinner.fail('Backfill failed');
-    console.error(chalk.red(`\n❌ Error: ${error}\n`));
+    console.error(chalk.red(`\nError: ${error}\n`));
     process.exit(1);
   }
 }

@@ -266,6 +266,24 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
     .tooltip-size {
       color: var(--text-muted);
     }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .toast.show {
+      opacity: 1;
+    }
     .dependency-table {
       width: calc(100% - 2rem);
       margin: 0 1rem;
@@ -346,6 +364,7 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
   </style>
 </head>
 <body>
+  <div id="toast" class="toast">Copied to clipboard</div>
   <div class="header">
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
       <div>
@@ -611,6 +630,7 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
           <div class="tooltip-size">Size: \${formatBytes(d.data.value)}</div>
           <div class="tooltip-size">Gzip: \${formatBytes(d.data.gzip || 0)}</div>
           <div class="tooltip-size">Brotli: \${formatBytes(d.data.brotli || 0)}</div>
+          <div class="tooltip-size" style="margin-top: 4px; font-style: italic;">Click to copy name</div>
         \`);
 
       // Smart positioning to keep tooltip in viewport
@@ -644,7 +664,32 @@ export function generateEnhancedDashboard(metrics: BuildMetrics, _comparison?: u
     })
     .on('mouseout', () => {
       tooltip.style('opacity', 0);
+    })
+    .on('click', (event, d) => {
+      // Copy the module name to clipboard
+      const text = d.data.name;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied: ' + text);
+      }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Copied: ' + text);
+      });
     });
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
 
     function formatBytes(bytes) {
       if (bytes === 0) return '0 B';

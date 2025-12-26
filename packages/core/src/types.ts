@@ -358,3 +358,22 @@ export interface AnalyzeResult {
   errors: string[];
   warnings: string[];
 }
+
+/**
+ * Compact summary for quick terminal feedback
+ * Example: "148 KB gzip | -14 KB (-8.6%) vs main | PASS"
+ */
+export interface CompactSummary {
+  /** Gzipped size in bytes */
+  gzipSize: number;
+  /** Human-readable gzip size */
+  gzipFormatted: string;
+  /** Size difference in bytes (if comparison available) */
+  diff?: number;
+  /** Percentage difference */
+  diffPercent?: number;
+  /** Baseline branch/target */
+  baseline?: string;
+  /** Overall status */
+  status: 'pass' | 'warn' | 'fail' | 'ok';
+}

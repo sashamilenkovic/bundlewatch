@@ -9,6 +9,7 @@ import {
   type BundleWatchConfig,
   type Comparison,
   compareMetrics,
+  generateCompactSummary,
   GitStorage,
   ReportGenerator,
 } from '@milencode/bundlewatch-core';
@@ -99,6 +100,13 @@ export interface WebpackBundleWatchOptions extends Partial<BundleWatchConfig> {
    * @default './bundle-report'
    */
   dashboardPath?: string;
+
+  /**
+   * Print compact one-line summary instead of full report
+   * Example: "148 KB gzip | -14 KB (-8.6%) vs main | PASS"
+   * @default false
+   */
+  compactOutput?: boolean;
 }
 
 const defaultOptions: WebpackBundleWatchOptions = {
@@ -110,6 +118,7 @@ const defaultOptions: WebpackBundleWatchOptions = {
   compareAgainst: 'main',
   failOnSizeIncrease: false,
   sizeIncreaseThreshold: 10,
+  compactOutput: false,
   extractModules: true,
   buildDependencyGraph: true,
   generateRecommendations: true,
@@ -171,7 +180,7 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
 
       if (options.apply === 'build' && (isDevMode || isWatching)) {
         if (options.verbose) {
-          console.log('📊 Bundle Watch: Skipping (dev/watch mode)');
+          console.log('[bundlewatch] Skipping (dev/watch mode)');
         }
         return;
       }
@@ -179,7 +188,7 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
       // Skip if in test environment and not explicitly enabled
       if (isTestEnvironment() && options.enabled !== true) {
         if (options.verbose) {
-          console.log('📊 Bundle Watch: Skipping (test environment detected)');
+          console.log('[bundlewatch] Skipping (test environment detected)');
         }
         return;
       }
@@ -189,8 +198,8 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
       // Track build start time
       compiler.hooks.compile.tap(pluginName, () => {
         _buildStartTime = Date.now();
-        if (options.verbose || options.printReport) {
-          console.log('📊 Bundle Watch: Starting analysis...');
+        if (options.verbose) {
+          console.log('[bundlewatch] Starting analysis...');
         }
       });
 
@@ -245,65 +254,56 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
               comparison = compareMetrics(metrics, baseline, options.compareAgainst);
             } else {
               // First run - no baseline found
-              console.log('\n┌─────────────────────────────────────────────────────────────┐');
-              console.log('│ 📊 BundleWatch - First Run Detected                        │');
-              console.log('├─────────────────────────────────────────────────────────────┤');
-              console.log(
-                `│ No baseline found for comparison with '${options.compareAgainst}'${' '.repeat(Math.max(0, 22 - options.compareAgainst.length))}│`,
-              );
-              console.log('│                                                             │');
-              console.log('│ 💡 To enable bundle size comparisons:                      │');
-              console.log('│                                                             │');
-              console.log('│   Quick start (recommended):                                │');
-              console.log('│   $ npx bundlewatch backfill --last 10                     │');
-              console.log('│                                                             │');
-              console.log('│   Or backfill releases only:                                │');
-              console.log('│   $ npx bundlewatch backfill --releases-only               │');
-              console.log('│                                                             │');
-              console.log('│ This build will be saved and used as a baseline            │');
-              console.log('│ for future comparisons.                                     │');
-              console.log('└─────────────────────────────────────────────────────────────┘\n');
+              console.log(`\n[bundlewatch] No baseline found for '${options.compareAgainst}'.`);
+              console.log('             This build will be saved as the initial baseline.');
+              console.log('             To backfill history: npx bundlewatch backfill --last 10\n');
             }
           }
 
           // Print report
           if (options.printReport) {
-            console.log(reporter.generateConsoleOutput(metrics, comparison));
+            if (options.compactOutput) {
+              console.log(
+                generateCompactSummary(metrics, comparison, {
+                  threshold: options.sizeIncreaseThreshold,
+                }),
+              );
+            } else {
+              console.log(reporter.generateConsoleOutput(metrics, comparison));
+            }
           }
 
           // Generate enhanced dashboard
           if (options.generateDashboard) {
             const dashboardDir = resolve(workingDir, options.dashboardPath || './bundle-report');
-            console.log(`📊 Generating enhanced dashboard at ${dashboardDir}...`);
 
             try {
               mkdirSync(dashboardDir, { recursive: true });
 
               const dashboardHTML = generateEnhancedDashboard(metrics, comparison);
-              writeFileSync(resolve(dashboardDir, 'index.html'), dashboardHTML);
+              const dashboardPath = resolve(dashboardDir, 'index.html');
+              writeFileSync(dashboardPath, dashboardHTML);
 
-              console.log(`✅ Dashboard generated: ${resolve(dashboardDir, 'index.html')}`);
-              console.log(`   Open with: open ${resolve(dashboardDir, 'index.html')}`);
+              // Print clear path to dashboard
+              console.log('');
+              console.log('─'.repeat(50));
+              console.log('Dashboard:');
+              console.log(`  file://${dashboardPath}`);
+              console.log('─'.repeat(50));
             } catch (dashboardError) {
-              console.error('Failed to generate dashboard:', dashboardError);
+              console.error('[bundlewatch] Failed to generate dashboard:', dashboardError);
             }
           }
 
           // Save to git storage
           if (saveToGit) {
             try {
-              if (options.verbose) {
-                console.log('💾 Saving metrics to git...');
-              }
               await storage.save(metrics);
-              if (options.verbose) {
-                console.log('✅ Metrics saved successfully');
-              }
             } catch (gitError) {
               // Graceful handling - git issues shouldn't break builds
               if (options.verbose) {
                 console.warn(
-                  '⚠️ Bundle Watch: Could not save to git:',
+                  '[bundlewatch] Could not save to git:',
                   gitError instanceof Error ? gitError.message : gitError,
                 );
               }
@@ -325,11 +325,11 @@ export function bundleWatchPlugin(userOptions: WebpackBundleWatchOptions = {}) {
           // Only log errors if verbose, or if it's a threshold failure
           if (options.failOnSizeIncrease) {
             // This is an intentional failure - always show
-            console.error('❌ Bundle Watch:', error instanceof Error ? error.message : error);
+            console.error('[bundlewatch] Build failed:', error instanceof Error ? error.message : error);
             throw error;
           } else if (options.verbose) {
             // Only show in verbose mode to avoid scary logs
-            console.warn('⚠️ Bundle Watch error:', error instanceof Error ? error.message : error);
+            console.warn('[bundlewatch] Warning:', error instanceof Error ? error.message : error);
           }
           // Silently continue - bundlewatch issues shouldn't break builds
         }

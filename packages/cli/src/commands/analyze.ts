@@ -9,6 +9,7 @@ import {
   type BuildMetrics,
   type Comparison,
   compareMetrics,
+  generateCompactSummary,
   GitStorage,
   getCurrentBranch,
   getCurrentCommit,
@@ -34,6 +35,7 @@ interface AnalyzeOptions {
   sizeIncreaseThreshold?: string;
   realCompression?: boolean;
   extractModules?: boolean;
+  summary?: boolean;
 }
 
 type BundlerType = 'turbopack' | 'webpack' | 'vite' | 'unknown';
@@ -207,7 +209,7 @@ async function analyze(cmdOptions: AnalyzeOptions) {
   const spinner = ora();
   const projectRoot = resolve(cmdOptions.dir || process.cwd());
 
-  console.log(chalk.bold('\n📊 BundleWatch Analyze\n'));
+  console.log(chalk.bold('\nBundleWatch Analyze\n'));
 
   try {
     // Detect and analyze build
@@ -252,7 +254,12 @@ async function analyze(cmdOptions: AnalyzeOptions) {
     }
 
     // Print report
-    console.log(`\n${reporter.generateConsoleOutput(result.metrics, comparison)}`);
+    if (cmdOptions.summary) {
+      const threshold = parseFloat(cmdOptions.sizeIncreaseThreshold || '10');
+      console.log(generateCompactSummary(result.metrics, comparison, { threshold }));
+    } else {
+      console.log(`\n${reporter.generateConsoleOutput(result.metrics, comparison)}`);
+    }
 
     // Generate dashboard
     if (cmdOptions.generateDashboard) {
@@ -285,7 +292,7 @@ async function analyze(cmdOptions: AnalyzeOptions) {
       if (increase > threshold) {
         console.error(
           chalk.red(
-            `\n❌ Bundle size increased by ${increase.toFixed(1)}% ` +
+            `\nFAIL: Bundle size increased by ${increase.toFixed(1)}% ` +
               `(threshold: ${threshold}%)\n`,
           ),
         );
@@ -293,19 +300,19 @@ async function analyze(cmdOptions: AnalyzeOptions) {
       } else if (increase > 0) {
         console.log(
           chalk.yellow(
-            `\n⚠️  Bundle size increased by ${increase.toFixed(1)}% ` +
+            `\nWARN: Bundle size increased by ${increase.toFixed(1)}% ` +
               `(within ${threshold}% threshold)\n`,
           ),
         );
       } else {
-        console.log(chalk.green(`\n✅ Bundle size is ${Math.abs(increase).toFixed(1)}% smaller\n`));
+        console.log(chalk.green(`\nPASS: Bundle size is ${Math.abs(increase).toFixed(1)}% smaller\n`));
       }
     }
 
     console.log(); // Final newline
   } catch (error) {
     spinner.fail('Analysis failed');
-    console.error(chalk.red(`\n❌ Error: ${error}\n`));
+    console.error(chalk.red(`\nError: ${error}\n`));
     process.exit(1);
   }
 }
@@ -324,6 +331,7 @@ export const analyzeCommand = new Command('analyze')
   .option('--size-increase-threshold <percent>', 'Size increase threshold percentage', '10')
   .option('--real-compression', 'Calculate real gzip/brotli sizes (slower but accurate)')
   .option('--extract-modules', 'Extract module-level metrics')
+  .option('-s, --summary', 'Print compact one-line summary instead of full report')
   .addHelpText(
     'after',
     `

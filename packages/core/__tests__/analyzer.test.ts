@@ -58,7 +58,7 @@ describe('compareMetrics', () => {
     expect(comparison.changes.totalSize.diff).toBe(500);
     expect(comparison.changes.totalSize.diffPercent).toBe(50);
     expect(comparison.summary).toContain('larger');
-    expect(comparison.summary).toContain('📈');
+    expect(comparison.summary).toContain('^');
   });
 
   it('should detect size decrease', () => {

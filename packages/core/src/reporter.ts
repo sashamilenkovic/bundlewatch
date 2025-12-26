@@ -3,7 +3,7 @@
  * Using functional composition instead of classes
  */
 
-import type { BuildMetrics, BundleChange, Comparison } from './types.js';
+import type { BuildMetrics, BundleChange, Comparison, CompactSummary } from './types.js';
 
 /**
  * Format bytes to human-readable size
@@ -37,13 +37,13 @@ function getBadgeColor(bytes: number): string {
 }
 
 /**
- * Get emoji for bundle change
+ * Get symbol for bundle change (no emojis)
  */
-function getChangeEmoji(change: BundleChange): string {
-  if (change.status === 'added') return '➕';
-  if (change.status === 'removed') return '➖';
-  if (Math.abs(change.diffPercent) < 1) return '➡️';
-  return change.diff > 0 ? '🔼' : '🔽';
+function getChangeSymbol(change: BundleChange): string {
+  if (change.status === 'added') return '+';
+  if (change.status === 'removed') return '-';
+  if (Math.abs(change.diffPercent) < 1) return '=';
+  return change.diff > 0 ? '^' : 'v';
 }
 
 /**
@@ -62,19 +62,89 @@ function formatChange(change: BundleChange): string {
 }
 
 /**
- * Get status label
+ * Get status label (no emojis)
  */
 function getStatusLabel(status: BundleChange['status']): string {
   switch (status) {
     case 'added':
-      return '🆕 Added';
+      return 'Added';
     case 'removed':
-      return '🗑️ Removed';
+      return 'Removed';
     case 'changed':
-      return '📝 Changed';
+      return 'Changed';
     case 'unchanged':
-      return '✓ Unchanged';
+      return 'Unchanged';
   }
+}
+
+/**
+ * Generate compact one-line summary for quick terminal feedback
+ * Example: "148 KB gzip | -14 KB (-8.6%) vs main | PASS"
+ */
+export function generateCompactSummary(
+  metrics: BuildMetrics,
+  comparison?: Comparison,
+  options?: { threshold?: number },
+): string {
+  const gzip = formatSize(metrics.totalGzipSize);
+
+  if (!comparison) {
+    return `${gzip} gzip | no baseline | OK`;
+  }
+
+  const { diff, diffPercent } = comparison.changes.totalGzipSize;
+  const sign = diff > 0 ? '+' : '';
+  const threshold = options?.threshold ?? 10;
+
+  let status: string;
+  if (diff <= 0) {
+    status = 'PASS';
+  } else if (diffPercent <= threshold) {
+    status = 'WARN';
+  } else {
+    status = 'FAIL';
+  }
+
+  return `${gzip} gzip | ${sign}${formatSize(Math.abs(diff))} (${sign}${diffPercent.toFixed(1)}%) vs ${comparison.target} | ${status}`;
+}
+
+/**
+ * Generate compact summary as structured data (for JSON output)
+ */
+export function generateCompactJson(
+  metrics: BuildMetrics,
+  comparison?: Comparison,
+  options?: { threshold?: number },
+): CompactSummary {
+  const threshold = options?.threshold ?? 10;
+
+  if (!comparison) {
+    return {
+      gzipSize: metrics.totalGzipSize,
+      gzipFormatted: formatSize(metrics.totalGzipSize),
+      status: 'ok',
+    };
+  }
+
+  const { diff, diffPercent } = comparison.changes.totalGzipSize;
+
+  let status: CompactSummary['status'];
+  if (diff <= 0) {
+    status = 'pass';
+  } else if (diffPercent <= threshold) {
+    status = 'warn';
+  } else {
+    status = 'fail';
+  }
+
+  return {
+    gzipSize: metrics.totalGzipSize,
+    gzipFormatted: formatSize(metrics.totalGzipSize),
+    diff,
+    diffPercent,
+    baseline: comparison.target,
+    status,
+  };
 }
 
 /**
@@ -95,7 +165,7 @@ export function generateBadge(metrics: BuildMetrics): string {
 export function generateReadmeSection(metrics: BuildMetrics, comparison?: Comparison): string {
   const lines: string[] = [];
 
-  lines.push('## 📊 Bundle Watch\n');
+  lines.push('## Bundle Watch\n');
   lines.push(generateBadge(metrics));
   lines.push('');
   lines.push(
@@ -118,7 +188,7 @@ export function generateReadmeSection(metrics: BuildMetrics, comparison?: Compar
 
   // Comparison section
   if (comparison) {
-    lines.push(`### 📈 Comparison vs ${comparison.target}\n`);
+    lines.push(`### Comparison vs ${comparison.target}\n`);
     lines.push(comparison.summary);
     lines.push('');
 
@@ -132,17 +202,17 @@ export function generateReadmeSection(metrics: BuildMetrics, comparison?: Compar
         .slice(0, 5);
 
       for (const change of topChanges) {
-        const emoji = getChangeEmoji(change);
+        const symbol = getChangeSymbol(change);
         const changeStr = formatChange(change);
         lines.push(
-          `| ${change.name} | ${formatSize(change.current || 0)} | ${formatSize(change.previous || 0)} | ${emoji} ${changeStr} |`,
+          `| ${change.name} | ${formatSize(change.current || 0)} | ${formatSize(change.previous || 0)} | ${symbol} ${changeStr} |`,
         );
       }
       lines.push('');
     }
 
     if (comparison.recommendations.length > 0) {
-      lines.push('### 💡 Insights\n');
+      lines.push('### Insights\n');
       for (const rec of comparison.recommendations) {
         lines.push(`- ${rec}`);
       }
@@ -159,7 +229,7 @@ export function generateReadmeSection(metrics: BuildMetrics, comparison?: Compar
 export function generatePRComment(metrics: BuildMetrics, comparison: Comparison): string {
   const lines: string[] = [];
 
-  lines.push('## 🤖 Bundle Watch Report\n');
+  lines.push('## Bundle Watch Report\n');
   lines.push(`### ${comparison.summary}\n`);
 
   // Summary table
@@ -167,9 +237,9 @@ export function generatePRComment(metrics: BuildMetrics, comparison: Comparison)
   lines.push('|--------|---------|----------|--------|');
 
   const formatChangeCell = (change: number, percent: number) => {
-    const emoji = change > 0 ? '🔼' : change < 0 ? '🔽' : '➡️';
+    const symbol = change > 0 ? '^' : change < 0 ? 'v' : '=';
     const sign = change > 0 ? '+' : '';
-    return `${emoji} ${sign}${formatSize(Math.abs(change))} (${sign}${percent.toFixed(1)}%)`;
+    return `${symbol} ${sign}${formatSize(Math.abs(change))} (${sign}${percent.toFixed(1)}%)`;
   };
 
   lines.push(
@@ -189,22 +259,22 @@ export function generatePRComment(metrics: BuildMetrics, comparison: Comparison)
     .slice(0, 10);
 
   if (significantChanges.length > 0) {
-    lines.push('### 📦 Bundle Changes\n');
+    lines.push('### Bundle Changes\n');
     lines.push('| Bundle | Status | Change |');
     lines.push('|--------|--------|--------|');
 
     for (const change of significantChanges) {
-      const emoji = getChangeEmoji(change);
+      const symbol = getChangeSymbol(change);
       const changeStr = formatChange(change);
       const status = getStatusLabel(change.status);
-      lines.push(`| ${change.name} | ${status} | ${emoji} ${changeStr} |`);
+      lines.push(`| ${change.name} | ${status} | ${symbol} ${changeStr} |`);
     }
     lines.push('');
   }
 
   // Insights
   if (comparison.recommendations.length > 0) {
-    lines.push('### 💡 Insights\n');
+    lines.push('### Insights\n');
     for (const rec of comparison.recommendations) {
       lines.push(`${rec}\n`);
     }
@@ -215,14 +285,32 @@ export function generatePRComment(metrics: BuildMetrics, comparison: Comparison)
 
 /**
  * Generate console output
+ * Order: Comparison first (the "did I make it worse?" answer), then details
  */
 export function generateConsoleOutput(metrics: BuildMetrics, comparison?: Comparison): string {
   const lines: string[] = [];
 
-  lines.push('\n📊 Bundle Watch Report\n');
+  lines.push('\nBundle Watch Report\n');
   lines.push('═'.repeat(50));
-  lines.push('');
 
+  // COMPARISON FIRST - Answer "did I make it worse?" immediately
+  if (comparison) {
+    lines.push('');
+    lines.push(comparison.summary);
+    lines.push('');
+
+    if (comparison.recommendations.length > 0) {
+      lines.push('Insights:');
+      for (const rec of comparison.recommendations) {
+        lines.push(`  ${rec}`);
+      }
+      lines.push('');
+    }
+    lines.push('─'.repeat(50));
+  }
+
+  // Current build metrics
+  lines.push('');
   lines.push(`Total Size:    ${formatSize(metrics.totalSize)}`);
   lines.push(`Gzipped:       ${formatSize(metrics.totalGzipSize)}`);
   lines.push(`Brotli:        ${formatSize(metrics.totalBrotliSize)}`);
@@ -241,7 +329,7 @@ export function generateConsoleOutput(metrics: BuildMetrics, comparison?: Compar
 
   // Dependency breakdown (if available)
   if (metrics.dependencies && metrics.dependencies.length > 0) {
-    lines.push('📦 Dependencies:');
+    lines.push('Dependencies:');
     const topDeps = metrics.dependencies.slice(0, 5);
     for (const dep of topDeps) {
       const percent = ((dep.size / metrics.totalSize) * 100).toFixed(1);
@@ -253,26 +341,9 @@ export function generateConsoleOutput(metrics: BuildMetrics, comparison?: Compar
     lines.push('');
   }
 
-  // Comparison
-  if (comparison) {
-    lines.push('─'.repeat(50));
-    lines.push(`Comparison vs ${comparison.target}:`);
-    lines.push('');
-    lines.push(comparison.summary);
-    lines.push('');
-
-    if (comparison.recommendations.length > 0) {
-      lines.push('💡 Insights:');
-      for (const rec of comparison.recommendations) {
-        lines.push(`  ${rec}`);
-      }
-      lines.push('');
-    }
-  }
-
   // Warnings
   if (metrics.warnings.length > 0) {
-    lines.push('⚠️  Warnings:');
+    lines.push('Warnings:');
     for (const warning of metrics.warnings) {
       lines.push(`  ${warning}`);
     }
@@ -281,7 +352,7 @@ export function generateConsoleOutput(metrics: BuildMetrics, comparison?: Compar
 
   // Recommendations
   if (metrics.recommendations.length > 0) {
-    lines.push('💡 Recommendations:');
+    lines.push('Recommendations:');
     for (const rec of metrics.recommendations) {
       lines.push(`  ${rec}`);
     }
@@ -312,5 +383,21 @@ export class ReportGenerator {
 
   generateConsoleOutput(metrics: BuildMetrics, comparison?: Comparison): string {
     return generateConsoleOutput(metrics, comparison);
+  }
+
+  generateCompactSummary(
+    metrics: BuildMetrics,
+    comparison?: Comparison,
+    options?: { threshold?: number },
+  ): string {
+    return generateCompactSummary(metrics, comparison, options);
+  }
+
+  generateCompactJson(
+    metrics: BuildMetrics,
+    comparison?: Comparison,
+    options?: { threshold?: number },
+  ): CompactSummary {
+    return generateCompactJson(metrics, comparison, options);
   }
 }

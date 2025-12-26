@@ -280,7 +280,7 @@ export async function analyzeBuildOutput(
 ): Promise<BuildMetrics> {
   const strategy = await detectStrategy(projectRoot);
 
-  console.log(`  📊 Strategy: ${strategy.reason}`);
+  console.log(`  Strategy: ${strategy.reason}`);
 
   switch (strategy.type) {
     case 'webpack-stats':
