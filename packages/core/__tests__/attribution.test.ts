@@ -460,4 +460,100 @@ describe('Attribution System', () => {
       });
     });
   });
+
+  describe('Additional branch coverage', () => {
+    describe('NPM extractor edge cases', () => {
+      it('should return unknown for packages starting with underscore', () => {
+        const result = attributeModule('node_modules/_internal/index.js');
+        expect(result.type).toBe('unknown');
+      });
+
+      it('should return unknown for packages starting with dot', () => {
+        const result = attributeModule('node_modules/.cache/index.js');
+        expect(result.type).toBe('unknown');
+      });
+
+      it('should handle paths containing .pnpm without node_modules', () => {
+        expect(isNpmPath('.pnpm/some-package/index.js')).toBe(true);
+      });
+    });
+
+    describe('Framework name extraction edge cases', () => {
+      it('should detect react-dom as framework', () => {
+        const result = attributeModule('node_modules/react-dom/client/index.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('react');
+        expect(result.name).toBe('react-dom');
+      });
+
+      it('should detect vue compiler', () => {
+        const result = attributeModule('node_modules/@vue/compiler-sfc/dist/compiler-sfc.esm-browser.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('vue');
+        expect(result.name).toBe('vue/compiler');
+      });
+
+      it('should keep base react as npm package', () => {
+        const result = attributeModule('node_modules/react/index.js');
+        expect(result.type).toBe('npm');
+        expect(result.name).toBe('react');
+      });
+
+      it('should keep base vue as npm package', () => {
+        const result = attributeModule('node_modules/vue/dist/vue.runtime.esm.js');
+        expect(result.type).toBe('npm');
+        expect(result.name).toBe('vue');
+      });
+
+      it('should keep base svelte as npm package', () => {
+        const result = attributeModule('node_modules/svelte/internal/index.js');
+        expect(result.type).toBe('npm');
+        expect(result.name).toBe('svelte');
+      });
+    });
+
+    describe('Local code edge cases', () => {
+      it('should handle mod index files', () => {
+        const result = attributeModule('src/utils/mod.ts');
+        expect(result.type).toBe('local');
+        expect(result.name).toBe('src/utils');
+      });
+
+      it('should handle paths with no known source directory', () => {
+        const result = attributeModule('./helpers/format.ts');
+        expect(result.type).toBe('local');
+      });
+
+      it('should handle deeply nested paths with maxLocalDepth', () => {
+        const result = attributeModule('src/a/b/c/d/e/f.ts', { maxLocalDepth: 4 });
+        expect(result.name).toBe('src/a/b/c');
+      });
+
+      it('should handle paths with Windows backslashes', () => {
+        const result = attributeModule('src\\components\\Button.tsx');
+        expect(result.type).toBe('local');
+      });
+    });
+
+    describe('Workspace edge cases', () => {
+      it('should handle Windows paths in workspaces', () => {
+        const result = attributeModule('packages\\core\\src\\index.ts');
+        expect(result.type).toBe('workspace');
+        expect(result.name).toBe('core');
+      });
+    });
+
+    describe('Unknown fallback edge cases', () => {
+      it('should handle empty path segments in fallback', () => {
+        const result = attributeModule('some//weird//path.js');
+        expect(result.type).toBe('unknown');
+        expect(result.name).not.toBe('');
+      });
+
+      it('should handle path with only extension', () => {
+        const result = attributeModule('.js');
+        expect(result.type).toBe('unknown');
+      });
+    });
+  });
 });

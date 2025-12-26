@@ -107,13 +107,14 @@ export const DEFAULT_LOCAL_DIRECTORIES = [
 
 /**
  * Patterns for framework detection
+ * These match framework internals, not base packages (react, vue stay as 'npm')
  */
 export const FRAMEWORK_PATTERNS: Record<Exclude<FrameworkType, null>, RegExp[]> = {
   nuxt: [/nuxt\/dist\//, /@nuxt\//, /\.nuxt\//, /nuxt3?\//, /#build\//],
-  vue: [/@vue\/runtime/, /@vue\/reactivity/, /vue-router/, /pinia/, /^vue$/],
+  vue: [/@vue\/runtime/, /@vue\/reactivity/, /@vue\/compiler/, /vue-router/, /pinia/],
   next: [/next\/dist\//, /\(app-pages-browser\)/, /\(ssr\)/, /next-server/],
-  react: [/^react$/, /^react-dom$/, /@react\//, /react-router/],
-  svelte: [/^svelte$/, /@sveltejs\//, /svelte-kit/],
+  react: [/react-router/, /react-dom\//, /@react\//],
+  svelte: [/@sveltejs\//, /svelte-kit/],
   angular: [/@angular\//, /zone\.js/],
 };
 
