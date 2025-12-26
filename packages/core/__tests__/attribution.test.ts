@@ -47,6 +47,38 @@ describe('Attribution System', () => {
         );
         expect(result.version).toBe('4.17.21');
       });
+
+      it('should handle webpack loader prefixes', () => {
+        const result = attributeModule('babel-loader!node_modules/react/index.js');
+        expect(result.type).toBe('npm');
+        expect(result.name).toBe('react');
+      });
+
+      it('should handle virtual modules', () => {
+        const result = attributeModule('\0virtual:some-module');
+        expect(result.type).toBe('npm');
+        expect(result.name).toBe('bundler-virtual');
+      });
+
+      it('should handle virtual: prefix', () => {
+        const result = attributeModule('virtual:some-module');
+        expect(result.type).toBe('npm');
+        expect(result.name).toBe('bundler-virtual');
+      });
+
+      it('should handle webpack runtime', () => {
+        const result = attributeModule('webpack/runtime/define-property-getters');
+        expect(result.type).toBe('npm');
+        expect(result.name).toBe('webpack-runtime');
+      });
+
+      it('should skip version extraction when disabled', () => {
+        const result = attributeModule(
+          'node_modules/.pnpm/lodash@4.17.21/node_modules/lodash/index.js',
+          { extractVersions: false }
+        );
+        expect(result.version).toBeUndefined();
+      });
     });
 
     describe('Framework detection', () => {
@@ -64,11 +96,46 @@ describe('Attribution System', () => {
         expect(result.name).toBe('nuxt/build');
       });
 
-      it('should detect Next.js internals', () => {
+      it('should detect @nuxt scoped packages', () => {
+        const result = attributeModule('node_modules/@nuxt/kit/dist/index.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('nuxt');
+        expect(result.name).toBe('nuxt/dist');
+      });
+
+      it('should detect Next.js client', () => {
         const result = attributeModule('node_modules/next/dist/client/router.js');
         expect(result.type).toBe('framework');
         expect(result.framework).toBe('next');
         expect(result.name).toBe('next/client');
+      });
+
+      it('should detect Next.js server', () => {
+        const result = attributeModule('node_modules/next/dist/server/index.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('next');
+        expect(result.name).toBe('next/server');
+      });
+
+      it('should detect Next.js app-router', () => {
+        const result = attributeModule('(app-pages-browser)/page.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('next');
+        expect(result.name).toBe('next/app-router');
+      });
+
+      it('should detect Next.js ssr', () => {
+        const result = attributeModule('(ssr)/component.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('next');
+        expect(result.name).toBe('next/ssr');
+      });
+
+      it('should detect Next.js dist fallback', () => {
+        const result = attributeModule('node_modules/next/dist/shared/lib/index.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('next');
+        expect(result.name).toBe('next/shared');
       });
 
       it('should detect Vue runtime', () => {
@@ -78,22 +145,60 @@ describe('Attribution System', () => {
         expect(result.name).toBe('vue/runtime-core');
       });
 
+      it('should detect Vue reactivity', () => {
+        const result = attributeModule('node_modules/@vue/reactivity/dist/index.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('vue');
+        expect(result.name).toBe('vue/reactivity');
+      });
+
+      it('should detect Vue compiler', () => {
+        const result = attributeModule('node_modules/@vue/compiler-sfc/dist/index.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('vue');
+        expect(result.name).toBe('vue/compiler');
+      });
+
+      it('should detect vue-router', () => {
+        const result = attributeModule('node_modules/vue-router/dist/index.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('vue');
+        expect(result.name).toBe('vue-router');
+      });
+
+      it('should detect pinia', () => {
+        const result = attributeModule('node_modules/pinia/dist/index.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('vue');
+        expect(result.name).toBe('pinia');
+      });
+
       it('should detect React router', () => {
         const result = attributeModule('node_modules/react-router/dist/index.js');
         expect(result.type).toBe('framework');
         expect(result.framework).toBe('react');
+        expect(result.name).toBe('react-router');
       });
 
-      it('should detect Svelte', () => {
+      it('should detect Svelte kit', () => {
         const result = attributeModule('node_modules/@sveltejs/kit/src/runtime/client.js');
         expect(result.type).toBe('framework');
         expect(result.framework).toBe('svelte');
+        expect(result.name).toBe('sveltekit');
       });
 
-      it('should detect Angular', () => {
+      it('should detect Angular core', () => {
         const result = attributeModule('node_modules/@angular/core/index.js');
         expect(result.type).toBe('framework');
         expect(result.framework).toBe('angular');
+        expect(result.name).toBe('angular/core');
+      });
+
+      it('should detect Angular router', () => {
+        const result = attributeModule('node_modules/@angular/router/index.js');
+        expect(result.type).toBe('framework');
+        expect(result.framework).toBe('angular');
+        expect(result.name).toBe('angular/router');
       });
 
       it('should skip framework detection when disabled', () => {
@@ -159,6 +264,43 @@ describe('Attribution System', () => {
         const result = attributeModule('./components/Header.tsx');
         expect(result.type).toBe('local');
       });
+
+      it('should handle parent relative paths', () => {
+        const result = attributeModule('../shared/utils.ts');
+        expect(result.type).toBe('local');
+      });
+
+      it('should handle absolute paths', () => {
+        const result = attributeModule('/home/user/project/src/App.tsx');
+        expect(result.type).toBe('local');
+      });
+
+      it('should categorize api files', () => {
+        const result = attributeModule('src/api/users.ts');
+        expect(result.category).toBe('api');
+      });
+
+      it('should categorize lib files', () => {
+        const result = attributeModule('lib/helpers/format.ts');
+        expect(result.category).toBe('util');
+      });
+
+      it('should categorize config files', () => {
+        const result = attributeModule('src/config/settings.ts');
+        expect(result.category).toBe('config');
+      });
+
+      it('should categorize type files', () => {
+        const result = attributeModule('src/types/user.ts');
+        expect(result.category).toBe('type');
+      });
+
+      it('should use custom directories', () => {
+        const result = attributeModule('custom-src/components/Button.tsx', {
+          customDirectories: ['custom-src'],
+        });
+        expect(result.type).toBe('local');
+      });
     });
 
     describe('Workspace packages', () => {
@@ -178,6 +320,18 @@ describe('Attribution System', () => {
         const result = attributeModule('libs/ui/src/Button.tsx');
         expect(result.type).toBe('workspace');
         expect(result.name).toBe('ui');
+      });
+
+      it('should detect modules directory', () => {
+        const result = attributeModule('modules/auth/src/login.ts');
+        expect(result.type).toBe('workspace');
+        expect(result.name).toBe('auth');
+      });
+
+      it('should detect scoped workspace packages', () => {
+        const result = attributeModule('@myorg/shared/utils.ts');
+        expect(result.type).toBe('workspace');
+        expect(result.name).toBe('@myorg/shared');
       });
     });
 
