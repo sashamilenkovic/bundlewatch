@@ -70,7 +70,7 @@ describe('compareMetrics', () => {
     expect(comparison.changes.totalSize.diff).toBe(-200);
     expect(comparison.changes.totalSize.diffPercent).toBe(-20);
     expect(comparison.summary).toContain('smaller');
-    expect(comparison.summary).toContain('📉');
+    expect(comparison.summary).toContain('v'); // down arrow indicator
   });
 
   it('should detect added bundles', () => {
@@ -184,7 +184,7 @@ describe('compareMetrics', () => {
 
     const comparison = compareMetrics(current, baseline, 'main');
 
-    expect(comparison.recommendations.some(r => r.includes('Great job'))).toBe(true);
+    expect(comparison.recommendations.some(r => r.includes('Bundle size reduced'))).toBe(true);
   });
 
   it('should report new bundles in insights', () => {

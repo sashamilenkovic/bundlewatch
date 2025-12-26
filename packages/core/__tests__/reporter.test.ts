@@ -194,7 +194,7 @@ describe('reporter functions', () => {
       const comment = generatePRComment(mockMetrics, mockComparison);
 
       expect(comment).toContain('### Insights');
-      expect(comment).toContain('Great job');
+      expect(comment).toContain('Bundle size reduced');
     });
   });
 
@@ -333,8 +333,8 @@ describe('reporter functions', () => {
       };
       const comment = generatePRComment(mockMetrics, comparisonWithAdded);
 
-      expect(comment).toContain('🆕 Added');
-      expect(comment).toContain('➕');
+      expect(comment).toContain('Added');
+      expect(comment).toContain('+');
       expect(comment).toContain('(new)');
     });
 
@@ -357,8 +357,8 @@ describe('reporter functions', () => {
       };
       const comment = generatePRComment(mockMetrics, comparisonWithRemoved);
 
-      expect(comment).toContain('🗑️ Removed');
-      expect(comment).toContain('➖');
+      expect(comment).toContain('Removed');
+      expect(comment).toContain('-');
       expect(comment).toContain('(removed)');
     });
 
@@ -428,7 +428,7 @@ describe('reporter functions', () => {
       };
       const comment = generatePRComment(mockMetrics, comparisonWithIncrease);
 
-      expect(comment).toContain('🔼');
+      expect(comment).toContain('^'); // up arrow indicator
     });
 
     it('should handle different badge colors', () => {
@@ -476,7 +476,7 @@ describe('reporter functions', () => {
       expect(readme).not.toContain('unchanged.js');
     });
 
-    it('should handle zero change with ➡️ emoji in PR comment', () => {
+    it('should handle zero change with = indicator in PR comment', () => {
       const comparisonWithZero: Comparison = {
         ...mockComparison,
         changes: {
@@ -491,10 +491,10 @@ describe('reporter functions', () => {
       };
       const comment = generatePRComment(mockMetrics, comparisonWithZero);
 
-      expect(comment).toContain('➡️');
+      expect(comment).toContain('='); // unchanged indicator
     });
 
-    it('should show ➡️ emoji for minimal changes in README', () => {
+    it('should show = indicator for minimal changes in README', () => {
       const comparisonWithMinimal: Comparison = {
         ...mockComparison,
         changes: {
@@ -513,9 +513,9 @@ describe('reporter functions', () => {
       };
       const readme = generateReadmeSection(mockMetrics, comparisonWithMinimal);
 
-      // README shows minimal changes with ➡️ emoji
+      // README shows minimal changes with = indicator
       expect(readme).toContain('minimal.js');
-      expect(readme).toContain('➡️');
+      expect(readme).toContain('='); // unchanged/minimal indicator
     });
   });
 });
