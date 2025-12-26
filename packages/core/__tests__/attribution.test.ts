@@ -78,8 +78,8 @@ describe('Attribution System', () => {
         expect(result.name).toBe('vue/runtime-core');
       });
 
-      it('should detect React', () => {
-        const result = attributeModule('node_modules/react-dom/client.js');
+      it('should detect React router', () => {
+        const result = attributeModule('node_modules/react-router/dist/index.js');
         expect(result.type).toBe('framework');
         expect(result.framework).toBe('react');
       });
